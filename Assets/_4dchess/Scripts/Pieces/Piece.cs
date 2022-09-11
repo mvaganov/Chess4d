@@ -5,25 +5,11 @@ using UnityEngine;
 public class Piece : TiledGameObject {
 	public Team team;
 	public Board board;
-	public virtual List<Coord> Moves(Coord[] directions, int maxSpaces) {
-		List<Coord> result = new List<Coord>();
-		Coord here = board.GetCoord(GetTile());
-		Coord cursor;
-		for (int d = 0; d < maxSpaces; d++) {
-			Coord dir = directions[d];
-			if (dir == Coord.zero) {
-				result.Add(here);
-				continue;
-			}
-			cursor = here;
-			for (int i = 0; i < maxSpaces; ++i) {
-				cursor += dir;
-			}
-		}
-		return null;
-	}
-	public virtual List<Coord> Captures() {
-		return null;
+	private MoveLogic moveLogic;
+
+	protected override void Start() {
+		base.Start();
+		moveLogic = GetComponent<MoveLogic>();
 	}
 
 	public virtual void MoveTo(Coord coord) {
@@ -64,5 +50,9 @@ public class Piece : TiledGameObject {
 			}
 			yield return new WaitForSeconds(frameRateDelay);
 		}
+	}
+	public IEnumerable<Coord> GetMoves() {
+		if (moveLogic == null) { return null; }
+		return moveLogic.GetMoves();
 	}
 }

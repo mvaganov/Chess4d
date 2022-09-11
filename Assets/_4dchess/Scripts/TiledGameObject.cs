@@ -49,7 +49,7 @@ public class TiledGameObject : MonoBehaviour {
 		}
 	}
 
-	private void Start() {
+	protected virtual void Start() {
 		originalColor = Material.color;
 	}
 }

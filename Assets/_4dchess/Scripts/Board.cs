@@ -11,6 +11,9 @@ public class Board : MonoBehaviour {
 	private Transform _transform;
 	private int TileIndex(Coord coord) { return coord.row * BoardSize.col + coord.col; }
 	private Coord TileCoord(int index) { return new Coord(index % BoardSize.col, index / BoardSize.col); }
+	public bool IsValid(Coord coord) {
+		return coord.x >= 0 && coord.x < BoardSize.x && coord.y >= 0 && coord.y < BoardSize.y;
+	}
 	public Material MaterialOf(Coord tile) {
 		int materialIndex = (tile.row + tile.col) % TileMaterials.Length;
 		return TileMaterials[materialIndex];

@@ -10,7 +10,7 @@ public class Team : MonoBehaviour {
 	public List<Piece> Pieces = new List<Piece>();
 	public Vector3 PieceRotation = Vector3.zero;
 	public float speed = 10;
-
+	public Coord pawnDirection = new Coord(0, 1);
 	public void Generate() {
 		if (game == null) {
 			game = FindObjectOfType<Game>();

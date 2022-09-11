@@ -18,7 +18,9 @@ using UnityEngine;
 	public Coord(int col, int row) {
 		vec2i = new Vector2Int(col, row);
 	}
-
+	public Coord(Vector2Int v) {
+		vec2i = v;
+	}
 	public bool Iterate(Coord limit) {
 		++col;
 		if (col >= limit.col) {
@@ -28,16 +30,16 @@ using UnityEngine;
 		return row < limit.row;
 	}
 
-	public static bool operator==(Coord a, Coord b) {
-		return a.col == b.col && a.row == b.row;
-	}
-	public static bool operator !=(Coord a, Coord b) {
-		return a.col != b.col || a.row != b.row;
-	}
-	public static Coord operator +(Coord a, Coord b) {
-		return new Coord(a.x + b.x, a.y + b.y);
-	}
-	public static Coord operator -(Coord a, Coord b) {
-		return new Coord(a.x - b.x, a.y - b.y);
+	public static bool operator==(Coord a, Coord b) => a.vec2i == b.vec2i;
+	public static bool operator !=(Coord a, Coord b) =>a.vec2i != b.vec2i;
+	public static Coord operator +(Coord a, Coord b) => new Coord(a.vec2i + b.vec2i);
+	public static Coord operator -(Coord a, Coord b) => new Coord(a.vec2i - b.vec2i);
+	public static Coord operator *(Coord a, float scalar) =>
+		new Coord((int)(a.vec2i.x * scalar), (int)(a.vec2i.y * scalar));
+	public override int GetHashCode() => vec2i.GetHashCode();
+	public override bool Equals(object obj) {
+		if (obj == null) { return false; }
+		if (obj is Coord c) { return this == c; }
+		return false;
 	}
 }
