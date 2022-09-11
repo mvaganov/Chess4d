@@ -46,7 +46,11 @@ public class MoveLogic : MonoBehaviour {
 		}
 		return result;
 	}
-	public virtual IEnumerable<Coord> GetMoves() {
+	public virtual List<Coord> GetMoves() {
 		return null;
+	}
+	public virtual void DoMove(Coord coord) {
+		piece.SetTile(coord);
+		piece.MoveToTile();
 	}
 }

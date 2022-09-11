@@ -2,11 +2,12 @@ using System.Collections.Generic;
 
 public class Pawn : MoveLogic {
 	public bool hasMoved = false;
-	public void DoMove(Coord coord) {
-		piece.MoveTo(coord);
+	public override void DoMove(Coord coord) {
+		base.DoMove(coord);
 		hasMoved = true;
 	}
-	public override IEnumerable<Coord> GetMoves() {
+	// TODO en passant, piece upgrade
+	public override List<Coord> GetMoves() {
 		List<Coord> moves = new List<Coord>();
 		Coord dir = team.pawnDirection;
 		List<Coord> forwardMove = Moves(new Coord[] { dir }, 1, MoveCalculation.OnlyMoves);
@@ -16,8 +17,7 @@ public class Pawn : MoveLogic {
 				moves.AddRange(Moves(new Coord[] { dir * 2 }, 1, MoveCalculation.OnlyMoves));
 			}
 		}
-		moves.AddRange(Moves(new Coord[] { dir + new Coord(0, -1) }, 1, MoveCalculation.OnlyCaptures));
-		moves.AddRange(Moves(new Coord[] { dir + new Coord(0, 1) }, 1, MoveCalculation.OnlyCaptures));
+		moves.AddRange(Moves(new Coord[] { dir + new Coord(-1, 0), dir + new Coord(1, 0) }, 1, MoveCalculation.OnlyCaptures));
 		return moves;
 	}
 }

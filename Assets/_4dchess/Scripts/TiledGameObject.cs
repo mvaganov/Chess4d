@@ -4,6 +4,7 @@ using UnityEngine;
 public class TiledGameObject : MonoBehaviour {
 	private Color originalColor;
 	private Gradient ColorCycling;
+	private int colorCyclePriority;
 	public Material Material {
 		get => GetComponentInChildren<Renderer>().material;
 		set => GetComponentInChildren<Renderer>().material = value;
@@ -19,15 +20,18 @@ public class TiledGameObject : MonoBehaviour {
 		ColorCycling = null;
 	}
 
-	public void ColorCycle(Gradient colors) {
+	public void ColorCycle(Gradient colors, int priority) {
 		bool alreadyCycling = ColorCycling != null;
-		ColorCycling = colors;
-		if (alreadyCycling) { return; }
+		if (!alreadyCycling || priority > colorCyclePriority) {
+			ColorCycling = colors;
+			colorCyclePriority = priority;
+		}
+		if (alreadyCycling || colors == null) { return; }
 		StartCoroutine(ColorCycleCoroutine());
 	}
 
 	private IEnumerator ColorCycleCoroutine() {
-		const float colorFrameRateDelay = 60f / 1000;
+		//const float colorFrameRateDelay = 60f / 1000;
 		long then = System.Environment.TickCount;
 		float t = 0;
 		while(ColorCycling != null) {
@@ -45,8 +49,16 @@ public class TiledGameObject : MonoBehaviour {
 				c = Color.Lerp(originalColor, c, a);
 			}
 			Color = c;
-			yield return new WaitForSeconds(colorFrameRateDelay);
+			yield return null;// new WaitForSeconds(colorFrameRateDelay);
 		}
+	}
+
+	public Coord GetCoord() {
+		Tile tile = GetComponentInParent<Tile>();
+		if (tile == null) { return Coord.zero; }
+		Board board = tile.GetComponentInParent<Board>();
+		if (board == null) { return Coord.zero; }
+		return board.GetCoord(tile);
 	}
 
 	protected virtual void Start() {

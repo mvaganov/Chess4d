@@ -13,8 +13,12 @@ public class Piece : TiledGameObject {
 	}
 
 	public virtual void MoveTo(Coord coord) {
-		SetTile(coord);
-		MoveToTile();
+		if (moveLogic != null) {
+			moveLogic.DoMove(coord);
+		} else {
+			SetTile(coord);
+			MoveToTile();
+		}
 	}
 
 	public void SetTile(Coord coord) {
@@ -51,7 +55,7 @@ public class Piece : TiledGameObject {
 			yield return new WaitForSeconds(frameRateDelay);
 		}
 	}
-	public IEnumerable<Coord> GetMoves() {
+	public List<Coord> GetMoves() {
 		if (moveLogic == null) { return null; }
 		return moveLogic.GetMoves();
 	}

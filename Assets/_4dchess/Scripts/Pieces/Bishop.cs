@@ -1,5 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class Bishop : MonoBehaviour { }
+public class Bishop : MoveLogic {
+	public override List<Coord> GetMoves() {
+		return Moves(new Coord[] {
+			new Coord(+1,+1),
+			new Coord(-1,+1),
+			new Coord(+1,-1),
+			new Coord(-1,-1),
+		}, 8, MoveCalculation.MovesAndCaptures);
+	}
+}
