@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class Game : MonoBehaviour {
+public class ChessGame : MonoBehaviour {
 	[System.Serializable]
 	public struct PieceCode {
 		public string name;
@@ -85,5 +85,10 @@ public class Game : MonoBehaviour {
 			things.RemoveAt(i);
 		}
 		things.Clear();
+	}
+
+	public static bool IsMoveCapture(Piece piece, Coord move, out Piece capturedPiece) {
+		capturedPiece = piece.board.GetPiece(move);
+		return capturedPiece != null && capturedPiece.team != piece.team;
 	}
 }

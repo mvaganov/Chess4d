@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Team : MonoBehaviour {
-	public Game game;
+	public ChessGame game;
 	public Material material;
 	[TextArea(1,8), ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public string layout = "rnbkqbnr\npppppppp";
@@ -11,11 +11,14 @@ public class Team : MonoBehaviour {
 	public Vector3 PieceRotation = Vector3.zero;
 	public float speed = 10;
 	public Coord pawnDirection = new Coord(0, 1);
+	public bool IsAlliedWith(Team team) {
+		return team == this;
+	}
 	public void Generate() {
 		if (game == null) {
-			game = FindObjectOfType<Game>();
+			game = FindObjectOfType<ChessGame>();
 		}
-		Game.DestroyListOfThingsBackwards(Pieces);
+		ChessGame.DestroyListOfThingsBackwards(Pieces);
 		Coord coord = start;
 		for(int i = 0; i < layout.Length; ++i) {
 			string code = layout.Substring(i, 1);
@@ -34,12 +37,12 @@ public class Team : MonoBehaviour {
 	}
 
 	public void MovePiecesToTile() {
-		Pieces.ForEach(p => p.MoveToTile());
+		Pieces.ForEach(p => p.MoveToLocalCenter());
 	}
 
 	public Piece CreatePiece(Piece prefab, Coord coord, Board board) {
 		if (prefab == null) { return null; }
-		GameObject pieceObject = Game.CreateObject(prefab.gameObject);
+		GameObject pieceObject = ChessGame.CreateObject(prefab.gameObject);
 		Piece piece = pieceObject.GetComponent<Piece>();
 		Pieces.Add(piece);
 		string name = this.name + " " + prefab.name + " " + Pieces.Count;

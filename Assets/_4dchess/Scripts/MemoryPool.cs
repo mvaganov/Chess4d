@@ -20,7 +20,7 @@ using UnityEngine;
 			thing.gameObject.SetActive(true);
 			return thing;
 		}
-		thing = Game.CreateObject(prefab.gameObject).GetComponent<T>();
+		thing = ChessGame.CreateObject(prefab.gameObject).GetComponent<T>();
 		if (unallocatedLocation != null) {
 			thing.transform.SetParent(null);
 		}

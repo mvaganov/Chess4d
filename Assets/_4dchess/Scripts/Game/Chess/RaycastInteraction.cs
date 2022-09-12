@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,19 +10,31 @@ public class RaycastInteraction : MonoBehaviour {
 	TiledGameObject selected;
 	public TileVisualization moves;
 	public TileVisualization selection;
+	public TileVisualization moveArrows;
 
 	void Start() {
 		if (cam == null) { cam = Camera.main; }
+		if (moves == null) { Debug.LogWarning($"missing value for {nameof(moves)}"); }
+		if (selection == null) { Debug.LogWarning($"missing value for {nameof(selection)}"); }
+		if (moveArrows == null) { Debug.LogWarning($"missing value for {nameof(moveArrows)}"); }
 	}
 
 	void Update() {
 		if (Input.GetMouseButtonUp(0)) {
-			Coord coord = currentHovered.GetCoord();
-			if (selected != null && selected is Piece p) {
-				if (coord != p.GetCoord() && currentMoves.IndexOf(coord) >= 0) {
-					p.MoveTo(coord);
-				} else {
-					currentHovered = null;
+			if (currentHovered != null) {
+				Coord coord = currentHovered.GetCoord();
+				if (selected != null && selected is Piece selectedPiece) {
+					if (coord != selectedPiece.GetCoord() && currentMoves.IndexOf(coord) >= 0) {
+						if (ChessGame.IsMoveCapture(selectedPiece, coord, out Piece capturedPiece)) {
+							Transform holdingArea = selectedPiece.team.transform;
+							capturedPiece.transform.SetParent(holdingArea);
+							capturedPiece.MoveToLocalCenter(Vector3.right * (holdingArea.childCount - 1) / 2f);
+						}
+						selectedPiece.MoveTo(coord);
+						selectedPiece.board.RecalculatePieceMoves();
+					} else {
+						currentHovered = null;
+					}
 				}
 			}
 			//else {
@@ -39,8 +50,10 @@ public class RaycastInteraction : MonoBehaviour {
 				PlaceRayHitMarker(rh);
 			}
 			ColorAccentHovered(rh.collider.GetComponent<TiledGameObject>());
+			DrawArrowsOfMoversToSquare(currentHovered);
 		} else {
 			ClearHoverAccent();
+			DrawArrowsOfMoversToSquare(null);
 		}
 		//}
 	}
@@ -60,9 +73,15 @@ public class RaycastInteraction : MonoBehaviour {
 		//} else {
 		//	Debug.Log(currentMoves.Count + " moves for " + piece);
 		//}
-		moves.MarkTiles(currentMoves, piece.board, Color.red);
-		selection.MarkTiles(new Coord[] { piece.GetCoord() }, piece.board, Color.green);
+		List<TiledGameObject> marks = moves.CreateMarks(currentMoves, piece.board, Color.yellow);
+		for(int i = 0; i < currentMoves.Count; ++i) {
+			if (ChessGame.IsMoveCapture(piece, currentMoves[i], out _)) {
+				marks[i].Material.color = Color.red;
+			}
+		}
+		selection.CreateMarks(new Coord[] { piece.GetCoord() }, piece.board, Color.green);
 	}
+
 	private void ColorAccentHovered(TiledGameObject hoveredObject) {
 		if (hoveredObject == currentHovered) { return; }
 		ClearHoverAccent();
@@ -75,6 +94,25 @@ public class RaycastInteraction : MonoBehaviour {
 			currentHovered.ResetColor();
 		}
 		currentHovered = null;
+	}
+	public void DrawArrowsOfMoversToSquare(TiledGameObject target) {
+		if (moveArrows == null) { return; }
+		moveArrows.ClearTiles();
+		if (target == null) { return; }
+		Board board = target.GetBoard();
+		Coord selectedCoord = target.GetCoord();
+		if (board == null) { return; }
+		List<Piece> pieces = board.GetPiecesThatCanMove(selectedCoord);
+		List<Coord> moveSources = new List<Coord>();
+		for (int i = 0; i < pieces.Count; ++i) {
+			moveSources.Add(pieces[i].GetCoord());
+		}
+		List<TiledGameObject> arrows = moveArrows.CreateMarks(moveSources, board);
+		for (int i = 0; i < arrows.Count; ++i) {
+			if (arrows[i] is TiledArrow tiledArrow) {
+				tiledArrow.Destination = selectedCoord;
+			}
+		}
 	}
 	public void PlaceRayHitMarker(RaycastHit rh) {
 		if (rayHitMarker == null) {

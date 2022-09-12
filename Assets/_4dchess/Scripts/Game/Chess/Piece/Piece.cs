@@ -6,7 +6,7 @@ public class Piece : TiledGameObject {
 	public Team team;
 	public Board board;
 	private MoveLogic moveLogic;
-
+	private List<Coord> moves;
 	protected override void Start() {
 		base.Start();
 		moveLogic = GetComponent<MoveLogic>();
@@ -17,8 +17,9 @@ public class Piece : TiledGameObject {
 			moveLogic.DoMove(coord);
 		} else {
 			SetTile(coord);
-			MoveToTile();
+			MoveToLocalCenter(Vector3.zero);
 		}
+		moves = null;
 	}
 
 	public void SetTile(Coord coord) {
@@ -29,17 +30,19 @@ public class Piece : TiledGameObject {
 	public Tile GetTile() {
 		return transform.GetComponentInParent<Tile>();
 	}
+	public virtual void MoveToLocalCenter() => MoveToLocalCenter(Vector3.zero);
 
-	public virtual void MoveToTile() {
-		StartCoroutine(LerpToCenterCoroutine());
+	public virtual void MoveToLocalCenter(Vector3 offset) {
+		StartCoroutine(LerpToLocalCenterCoroutine(offset));
 	}
 
-	public IEnumerator LerpToCenterCoroutine() {
+	public IEnumerator LerpToLocalCenterCoroutine(Vector3 targetPosition) {
 		Transform _transform = transform;
 		const float frameRateDelay = 60f / 1000;
 		long then = System.Environment.TickCount;
-		float distance = _transform.localPosition.magnitude;
-		Vector3 dir = _transform.localPosition / distance;
+		Vector3 delta = (_transform.localPosition - targetPosition);
+		float distance = delta.magnitude;
+		Vector3 dir = delta / distance;
 		while (distance > 0) {
 			long now = System.Environment.TickCount;
 			long passed = now - then;
@@ -48,15 +51,15 @@ public class Piece : TiledGameObject {
 			float move = team.speed * deltaTime;
 			distance -= move;
 			if (distance <= 0) {
-				_transform.localPosition = Vector3.zero;
+				_transform.localPosition = targetPosition;
 			} else {
-				_transform.localPosition = dir * distance;
+				_transform.localPosition = targetPosition + dir * distance;
 			}
 			yield return new WaitForSeconds(frameRateDelay);
 		}
 	}
 	public List<Coord> GetMoves() {
 		if (moveLogic == null) { return null; }
-		return moveLogic.GetMoves();
+		return moves != null ? moves : moves = moveLogic.GetMoves(MoveCalculation.All);
 	}
 }

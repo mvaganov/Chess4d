@@ -12,15 +12,16 @@ public class TileVisualization : MonoBehaviour {
 			currentMarks.RemoveAt(i);
 		}
 	}
-	public void MarkTiles(IEnumerable<Coord> coords, Board board, Color c) {
-		MarkTiles(coords, board);
+	public List<TiledGameObject> CreateMarks(IEnumerable<Coord> coords, Board board, Color c) {
+		CreateMarks(coords, board);
 		foreach(TiledGameObject move in currentMarks) {
 			move.Material.color = c;
 		}
+		return currentMarks;
 	}
-	public void MarkTiles(IEnumerable<Coord> coords, Board board) {
+	public List<TiledGameObject> CreateMarks(IEnumerable<Coord> coords, Board board) {
 		ClearTiles();
-		if (coords == null) { return; }
+		if (coords == null) { return currentMarks; }
 		foreach (Coord coord in coords) {
 			TiledGameObject marker = markPool.Get();
 			currentMarks.Add(marker);
@@ -29,5 +30,6 @@ public class TileVisualization : MonoBehaviour {
 			t.SetParent(tile.transform);
 			t.localPosition = Vector3.zero;
 		}
+		return currentMarks;
 	}
 }

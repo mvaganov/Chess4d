@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Board : MonoBehaviour {
+	[ContextMenuItem(nameof(RecalculatePieceMoves),nameof(RecalculatePieceMoves))]
 	public Coord BoardSize = new Coord(8, 8);
 	public Vector3 tileSize = new Vector3(1,2,1);
 	public Material[] TileMaterials;
 	public List<Tile> tiles = new List<Tile>();
+	private List<List<Piece>> piecesThatCanMoveToLocation = new List<List<Piece>>();
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Tile TilePrefab;
 	private Transform _transform;
@@ -27,6 +29,47 @@ public class Board : MonoBehaviour {
 		return GetTile(coord).GetPiece();
 	}
 
+	public List<Piece> GetAllPieces() {
+		List<Piece> allPieces = new List<Piece>();
+		for(int i = 0; i < tiles.Count; ++i) {
+			Tile tile = tiles[i];
+			Piece[] pieces = tile.GetComponentsInChildren<Piece>();
+			if (pieces != null && pieces.Length > 1) {
+				throw new System.Exception("there are "+ pieces.Length+" at "+tile);
+			}
+			allPieces.AddRange(pieces);
+		}
+		return allPieces;
+	}
+
+	public void RecalculatePieceMoves() {
+		for (int i = 0; i < piecesThatCanMoveToLocation.Count; ++i) {
+			piecesThatCanMoveToLocation[i].Clear();
+		}
+		for (int i = piecesThatCanMoveToLocation.Count; i < tiles.Count; ++i) {
+			piecesThatCanMoveToLocation.Add(new List<Piece>());
+		}
+		List<Piece> allPieces = GetAllPieces();
+		//Debug.Log(string.Join("\n", allPieces.ConvertAll(p => {
+		//	List<Coord> moves = p.GetMoves();
+		//	int count = moves != null ? moves.Count : -1;
+		//	return p.name + ": " + count;
+		//})));
+		for(int i = 0; i < allPieces.Count; ++i) {
+			Piece p = allPieces[i];
+			List<Coord> moves = p.GetMoves();
+			if (moves == null) { continue; }
+			for (int m = 0; m < moves.Count; ++m) {
+				Coord coord = moves[m];
+				piecesThatCanMoveToLocation[TileIndex(coord)].Add(p);
+			}
+		}
+	}
+
+	public List<Piece> GetPiecesThatCanMove(Coord coord) {
+		int index = TileIndex(coord);
+		return piecesThatCanMoveToLocation[index];
+	}
 	public Coord GetCoord(Tile tile) {
 		int index = tiles.IndexOf(tile);
 		if (index < 0) {
@@ -38,10 +81,10 @@ public class Board : MonoBehaviour {
 	public void Generate() {
 		HaveTransform();
 		Coord coord = new Coord();
-		Game.DestroyListOfThingsBackwards(tiles);
+		ChessGame.DestroyListOfThingsBackwards(tiles);
 		do {
 			Vector3 position = CoordToLocalPosition(coord);
-			GameObject tileObject = Game.CreateObject(TilePrefab.gameObject);
+			GameObject tileObject = ChessGame.CreateObject(TilePrefab.gameObject);
 			Tile tile = tileObject.GetComponent<Tile>();
 			tiles.Add(tile);
 			string name = $"{(char)('a' + coord.x)}{coord.y + 1}";
@@ -69,11 +112,11 @@ public class Board : MonoBehaviour {
 		if (i >= tiles.Count || i < 0) { return; }
 		Tile tile = tiles[i];
 		if (tile == null) { return; }
-		Game.DestroyObject(tile.gameObject);
+		ChessGame.DestroyObject(tile.gameObject);
 		tiles.RemoveAt(i);
 	}
 	void Start() {
-
+		RecalculatePieceMoves();
 	}
 
 	void Update() {

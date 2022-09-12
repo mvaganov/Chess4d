@@ -1162,6 +1162,10 @@ namespace NonStandard {
 			if (lr) { Lines.SetColor(lr, color); }
 			return this;
 		}
+		public Wire Arc(Vector3 start, Vector3 end, Vector3 height, Color color = default, Lines.End lineEnds = default,
+			int pointCount = 24, float startSize = Lines.LINE_SIZE, float endSize = Lines.SAME_AS_START_SIZE) {
+			return Bezier(start, start+height, end+height, end, color, lineEnds, startSize, pointCount, endSize);
+		}
 		public Wire Arc(float angle, Vector3 normal, Vector3 firstPoint, Vector3 center = default, Color color = default,
 			Lines.End lineEnds = default, int pointCount = -1, float startSize = Lines.LINE_SIZE, float endSize = Lines.SAME_AS_START_SIZE) {
 			if (pointCount < 0) { pointCount = (int)(24 * angle / 180f) + 1; }

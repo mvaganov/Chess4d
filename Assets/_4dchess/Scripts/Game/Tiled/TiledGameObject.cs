@@ -53,6 +53,12 @@ public class TiledGameObject : MonoBehaviour {
 		}
 	}
 
+	public Board GetBoard() {
+		Tile tile = GetComponentInParent<Tile>();
+		if (tile == null) { return null; }
+		return tile.GetComponentInParent<Board>();
+	}
+
 	public Coord GetCoord() {
 		Tile tile = GetComponentInParent<Tile>();
 		if (tile == null) { return Coord.zero; }
