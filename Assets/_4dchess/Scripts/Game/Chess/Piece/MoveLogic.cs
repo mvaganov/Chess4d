@@ -6,24 +6,24 @@ using UnityEngine;
 public class MoveLogic : MonoBehaviour {
 	public Piece piece => GetComponent<Piece>();
 	public Team team => GetComponent<Piece>().team;
-	public virtual List<Coord> Moves(IEnumerable<Coord> directions, int maxSpaces, MoveCalculation calcType) {
+	public virtual void Moves(IEnumerable<Coord> directions, int maxSpaces,
+	List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
 		Piece p = piece;
-		return Moves(p, p.GetCoord(), directions, maxSpaces, calcType);
+		Moves(p, p.GetCoord(), directions, maxSpaces, out_moves, out_captures, out_defends);
 	}
-	public virtual List<Coord> Moves(Coord position, IEnumerable<Coord> directions, int maxSpaces, MoveCalculation calcType) {
-		return Moves(piece, position, directions, maxSpaces, calcType);
+	public virtual void Moves(Coord position, IEnumerable<Coord> directions, int maxSpaces,
+	List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
+		Moves(piece, position, directions, maxSpaces, out_moves, out_captures, out_defends);
 	}
-	public static List<Coord> Moves(Piece self, Coord position, IEnumerable<Coord> directions, int maxSpaces, MoveCalculation calcType) {
-		List<Coord> result = new List<Coord>();
+	public static void Moves(Piece self, Coord position, IEnumerable<Coord> directions, int maxSpaces,
+	List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
 		Board board = self.board;
 		Tile tile = self.GetTile();
-		if (tile == null) { return result; }
+		if (tile == null) { return; }
 		Coord cursor;
 		foreach (Coord dir in directions) {
 			if (dir == Coord.zero && maxSpaces > 0) {
-				if (calcType.HasFlag(MoveCalculation.Moves)) {
-					result.Add(position);
-				}
+				out_moves?.Add(position);
 				continue;
 			}
 			cursor = position;
@@ -32,28 +32,21 @@ public class MoveLogic : MonoBehaviour {
 				if (!board.IsValid(cursor)) {
 					break;
 				}
+				out_defends?.Add(cursor);
 				Piece other = board.GetPiece(cursor);
 				if (other != null) {
-					if (calcType.HasFlag(MoveCalculation.Captures) || calcType.HasFlag(MoveCalculation.Defense)) {
-						bool isAllies = self.team.IsAlliedWith(other.team);
-						if ((isAllies && calcType.HasFlag(MoveCalculation.Defense))
-						|| (!isAllies && calcType.HasFlag(MoveCalculation.Captures))) {
-							result.Add(cursor);
-						}
+					bool isAllies = self.team.IsAlliedWith(other.team);
+					if (!isAllies) {
+						out_captures?.Add(cursor);
 					}
 					break;
 				}
-				if (calcType.HasFlag(MoveCalculation.Moves)) {
-					result.Add(cursor);
-				}
+				out_moves?.Add(cursor);
 			}
 		}
-		return result;
 	}
 	// TODO GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defense)
-	public virtual List<Coord> GetMoves(MoveCalculation calcType) {
-		return null;
-	}
+	public virtual void GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {}
 	public virtual void DoMove(Coord coord) {
 		piece.SetTile(coord);
 		piece.MoveToLocalCenter();

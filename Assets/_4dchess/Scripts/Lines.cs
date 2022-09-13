@@ -914,13 +914,14 @@ namespace NonStandard {
 		private int _count;
 		private float _startSize, _endSize, _angle;
 		private Lines.End _lineEnds;
-		public LineRenderer lr;
+		private LineRenderer _lr;
 #if UNITY_EDITOR
 		/// <summary>
 		/// Where the code is that created this <see cref="Wire"/>. Not present in deployed builds.
 		/// </summary>
 		// ReSharper disable once NotAccessedField.Global
 		public string sourceCode;
+		public LineRenderer LineRenderer => _lr != null ? _lr : _lr = Lines.MakeLineRenderer(gameObject);
 #endif
 		public Vector3 StartPoint {
 			get {
@@ -940,8 +941,8 @@ namespace NonStandard {
 		}
 
 		public int NumCapVertices {
-			get => lr.numCapVertices;
-			set => lr.numCapVertices = value;
+			get => LineRenderer.numCapVertices;
+			set => LineRenderer.numCapVertices = value;
 		}
 
 		public void RefreshSource() {
@@ -1146,20 +1147,18 @@ namespace NonStandard {
 		public Wire Line(IList<Vector3> points, Color color = default, Lines.End lineEnds = default, float startSize = Lines.LINE_SIZE, float endSize = Lines.SAME_AS_START_SIZE) {
 			if (!IsLine(points, startSize, endSize, lineEnds)) {
 				SetLine(points, startSize, endSize, lineEnds);
-				if (!lr) { lr = Lines.MakeLineRenderer(gameObject); }
-				lr = Lines.MakeLine(lr, points, color, startSize, endSize, lineEnds);
+				_lr = Lines.MakeLine(LineRenderer, points, color, startSize, endSize, lineEnds);
 			} //else { Debug.Log("don't need to recalculate line "+name); }
-			if (lr) { Lines.SetColor(lr, color); }
+			if (_lr) { Lines.SetColor(_lr, color); }
 			return this;
 		}
 		public Wire Rod(IList<Vector3> points, Color color = default, Lines.End lineEnds = default, float startSize = Lines.LINE_SIZE, float endSize = Lines.SAME_AS_START_SIZE) {
 			if (!IsRod(points, startSize, endSize, lineEnds)) {
 				SetRod(points, startSize, endSize, lineEnds);
-				if (!lr) { lr = Lines.MakeLineRenderer(gameObject); }
-				lr = Lines.MakeLine(lr, _points, color, startSize, endSize, lineEnds);
-				lr.useWorldSpace = false;
+				_lr = Lines.MakeLine(LineRenderer, _points, color, startSize, endSize, lineEnds);
+				_lr.useWorldSpace = false;
 			} //else { Debug.Log("don't need to recalculate line "+name); }
-			if (lr) { Lines.SetColor(lr, color); }
+			if (_lr) { Lines.SetColor(_lr, color); }
 			return this;
 		}
 		public Wire Arc(Vector3 start, Vector3 end, Vector3 height, Color color = default, Lines.End lineEnds = default,
@@ -1171,13 +1170,12 @@ namespace NonStandard {
 			if (pointCount < 0) { pointCount = (int)(24 * angle / 180f) + 1; }
 			if (!IsArc(firstPoint, normal, center, angle, startSize, endSize, Lines.End.Normal, pointCount)) {
 				SetArc(firstPoint, normal, center, angle, startSize, endSize, Lines.End.Normal, pointCount);
-				if (!lr) { lr = Lines.MakeLineRenderer(gameObject); }
 				Vector3[] linePoints = null;
 				Math3d.WriteArc(ref linePoints, pointCount, normal, firstPoint, angle, center);
-				lr = Lines.MakeLine(lr, linePoints, color, startSize, endSize, lineEnds);
+				_lr = Lines.MakeLine(LineRenderer, linePoints, color, startSize, endSize, lineEnds);
 			} //else { Debug.Log("don't need to recalculate arc "+name);  }
-			if (Math3d.EQ2(angle, 360)) { lr.loop = true; }
-			Lines.SetColor(lr, color);
+			if (Math3d.EQ2(angle, 360)) { LineRenderer.loop = true; }
+			Lines.SetColor(_lr, color);
 			return this;
 		}
 		public Wire Circle(Vector3 center = default, Vector3 normal = default, Color color = default,
@@ -1221,28 +1219,27 @@ namespace NonStandard {
 				SetOrbital(start, end, sphereCenter, startSize, endSize, lineEnds, pointCount);
 				Vector3[] linePoints = null;
 				Math3d.WriteArcOnSphere(ref linePoints, pointCount, sphereCenter, start, end);
-				if (!lr) { lr = Lines.MakeLineRenderer(gameObject); }
-				lr = Lines.MakeLine(lr, linePoints, color, startSize, endSize, lineEnds);
+				_lr = Lines.MakeLine(LineRenderer, linePoints, color, startSize, endSize, lineEnds);
 			} //else { Debug.Log("don't need to recalculate orbital " + name); }
-			Lines.SetColor(lr, color);
+			Lines.SetColor(LineRenderer, color);
 			return this;
 		}
 		public Wire SpiralSphere(Color color = default, Vector3 center = default, float radius = 1, Quaternion rotation = default, float lineSize = Lines.LINE_SIZE) {
 			GameObject go = gameObject;
 			if (!IsSpiralSphere(center, radius, lineSize, rotation)) {
 				SetSpiralSphere(center, radius, lineSize, rotation);
-				lr = Lines.MakeSpiralSphere(ref go, radius, center, rotation, color, lineSize);
+				_lr = Lines.MakeSpiralSphere(ref go, radius, center, rotation, color, lineSize);
 			} //else { Debug.Log("don't need to recalculate spiral sphere " + name); }
-			Lines.SetColor(lr, color);
+			Lines.SetColor(_lr, color);
 			return this;
 		}
 		public Wire Box(Vector3 size, Vector3 center = default, Quaternion rotation = default, Color color = default, float lineSize = Lines.LINE_SIZE) {
 			GameObject go = gameObject;
 			if (!IsBox(center, size, rotation, lineSize)) {
 				SetBox(center, size, rotation, lineSize);
-				lr = Lines.MakeBox(ref go, center, size, rotation, color, lineSize);
+				_lr = Lines.MakeBox(ref go, center, size, rotation, color, lineSize);
 			} //else { Debug.Log("don't need to recalculate box " + name); }
-			Lines.SetColor(lr, color);
+			Lines.SetColor(_lr, color);
 			return this;
 		}
 		private static readonly Vector3[] DefaultQuaternionVisualizationPoints = new Vector3[] { Vector3.forward, Vector3.up };
@@ -1255,9 +1252,9 @@ namespace NonStandard {
 				SetQuaternion(an, ax, position, startPoints, orientation, lineSize);
 				Wire[] childWires = ChildWires(startPoints.Length, true);
 				Lines.MakeQuaternion(ref go, childWires, ax, an, position, color, orientation, arcPoints, lineSize, Lines.ARROW_SIZE, startPoints);
-				lr = go.GetComponent<LineRenderer>();
+				_lr = go.GetComponent<LineRenderer>();
 			} //else { Debug.Log("don't need to recalculate quaternion " + name); }
-			Lines.SetColor(lr, color);
+			Lines.SetColor(_lr, color);
 			return this;
 		}
 		private Wire[] ChildWires(int objectCount, bool createIfNoneExist) {
@@ -1301,14 +1298,13 @@ namespace NonStandard {
 				Lines.MakeCartesianPlane(center, up, right, wires, color, lineSize, extents, increment);
 				colorIsSet = true;
 				Vector3 normal = Vector3.Cross(right, up).normalized;
-				if (!lr) { lr = Lines.MakeLineRenderer(gameObject); }
 				Vector3[] points = new Vector3[] { center, center + normal * increment };
-				lr = Lines.MakeLine(lr, points, color, lineSize, lineSize, Lines.End.Arrow);
+				_lr = Lines.MakeLine(LineRenderer, points, color, lineSize, lineSize, Lines.End.Arrow);
 			} //else { Debug.Log("don't need to recalculate quaternion " + name); }
 			if (!colorIsSet) {
-				Lines.SetColor(lr, color);
+				Lines.SetColor(LineRenderer, color);
 				Wire[] wires = ChildWires(_count, true);
-				Array.ForEach(wires, w => Lines.SetColor(w.lr, color));
+				Array.ForEach(wires, w => Lines.SetColor(w.LineRenderer, color));
 			}
 			return this;
 		}
@@ -1320,13 +1316,12 @@ namespace NonStandard {
 				Wire[] wires = ChildWires(_count, true);
 				Lines.MakeRectangle(wires, origin, offset2d, halfSize, lineSize, a_color, rotation);
 				colorIsSet = true;
-				if (!lr) { lr = Lines.MakeLineRenderer(gameObject); }
-				lr.startWidth = lr.endWidth = 0;
+				LineRenderer.startWidth = LineRenderer.endWidth = 0;
 			} //else { Debug.Log("don't need to recalculate quaternion " + name); }
 			if (!colorIsSet) {
 				//SetColor(lr, a_color);
 				Wire[] wires = ChildWires(_count, true);
-				Array.ForEach(wires, w => Lines.SetColor(w.lr, a_color));
+				Array.ForEach(wires, w => Lines.SetColor(w.LineRenderer, a_color));
 			}
 			return this;
 		}

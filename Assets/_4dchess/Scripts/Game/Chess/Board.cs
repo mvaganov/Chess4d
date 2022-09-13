@@ -8,6 +8,8 @@ public class Board : MonoBehaviour {
 	public Material[] TileMaterials;
 	public List<Tile> tiles = new List<Tile>();
 	private List<List<Piece>> piecesThatCanMoveToLocation = new List<List<Piece>>();
+	private List<List<Piece>> piecesThatCanCaptureLocation = new List<List<Piece>>();
+	private List<List<Piece>> piecesThatCanDefendLocation = new List<List<Piece>>();
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Tile TilePrefab;
 	private Transform _transform;
@@ -43,32 +45,55 @@ public class Board : MonoBehaviour {
 	}
 
 	public void RecalculatePieceMoves() {
-		for (int i = 0; i < piecesThatCanMoveToLocation.Count; ++i) {
-			piecesThatCanMoveToLocation[i].Clear();
-		}
-		for (int i = piecesThatCanMoveToLocation.Count; i < tiles.Count; ++i) {
-			piecesThatCanMoveToLocation.Add(new List<Piece>());
-		}
+		EnsureClearLedger(piecesThatCanMoveToLocation);
+		EnsureClearLedger(piecesThatCanCaptureLocation);
+		EnsureClearLedger(piecesThatCanDefendLocation);
 		List<Piece> allPieces = GetAllPieces();
+		allPieces.ForEach(p => p.MarkMovesAsInvalid());
 		//Debug.Log(string.Join("\n", allPieces.ConvertAll(p => {
 		//	List<Coord> moves = p.GetMoves();
 		//	int count = moves != null ? moves.Count : -1;
 		//	return p.name + ": " + count;
 		//})));
-		for(int i = 0; i < allPieces.Count; ++i) {
+		List<Coord> moves = new List<Coord>();
+		List<Coord> captures = new List<Coord>();
+		List<Coord> defends = new List<Coord>();
+		for (int i = 0; i < allPieces.Count; ++i) {
 			Piece p = allPieces[i];
-			List<Coord> moves = p.GetMoves();
-			if (moves == null) { continue; }
-			for (int m = 0; m < moves.Count; ++m) {
-				Coord coord = moves[m];
-				piecesThatCanMoveToLocation[TileIndex(coord)].Add(p);
-			}
+			p.GetMoves(moves, captures, defends);
+			AddToList(piecesThatCanMoveToLocation, p, moves);
+			moves.Clear();
+			AddToList(piecesThatCanCaptureLocation, p, captures);
+			captures.Clear();
+			AddToList(piecesThatCanDefendLocation, p, defends);
+			defends.Clear();
 		}
 	}
 
-	public List<Piece> GetPiecesThatCanMove(Coord coord) {
+	private void EnsureClearLedger(List<List<Piece>> out_ledger) {
+		for (int i = 0; i < out_ledger.Count; ++i) {
+			out_ledger[i].Clear();
+		}
+		for (int i = out_ledger.Count; i < tiles.Count; ++i) {
+			out_ledger.Add(new List<Piece>());
+		}
+	}
+
+	private void AddToList(List<List<Piece>> out_ledger, Piece piece, List<Coord> locations) {
+		for (int m = 0; m < locations.Count; ++m) {
+			Coord coord = locations[m];
+			int tileIndex = TileIndex(coord);
+			out_ledger[tileIndex].Add(piece);
+		}
+	}
+
+	//public List<Piece> GetPiecesThatCanMove(Coord coord) {
+	//	int index = TileIndex(coord);
+	//	return piecesThatCanMoveToLocation[index];
+	//}
+	public List<Piece> GetPiecesThatCanDefend(Coord coord) {
 		int index = TileIndex(coord);
-		return piecesThatCanMoveToLocation[index];
+		return piecesThatCanDefendLocation[index];
 	}
 	public Coord GetCoord(Tile tile) {
 		int index = tiles.IndexOf(tile);
@@ -87,7 +112,7 @@ public class Board : MonoBehaviour {
 			GameObject tileObject = ChessGame.CreateObject(TilePrefab.gameObject);
 			Tile tile = tileObject.GetComponent<Tile>();
 			tiles.Add(tile);
-			string name = $"{(char)('a' + coord.x)}{coord.y + 1}";
+			string name = coord.ToString();// $"{(char)('a' + coord.x)}{coord.y + 1}";
 			tileObject.name = name;
 			Transform t = tileObject.transform;
 			t.SetParent(_transform);

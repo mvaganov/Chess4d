@@ -6,7 +6,7 @@ public class RaycastInteraction : MonoBehaviour {
 	public Transform rayHitMarker;
 	public Gradient hoveredColor;
 	private TiledGameObject currentHovered;
-	private IList<Coord> currentMoves;
+	private List<Coord> currentMoves;
 	TiledGameObject selected;
 	public TileVisualization moves;
 	public TileVisualization selection;
@@ -29,6 +29,7 @@ public class RaycastInteraction : MonoBehaviour {
 							Transform holdingArea = selectedPiece.team.transform;
 							capturedPiece.transform.SetParent(holdingArea);
 							capturedPiece.MoveToLocalCenter(Vector3.right * (holdingArea.childCount - 1) / 2f);
+							currentHovered = null;
 						}
 						selectedPiece.MoveTo(coord);
 						selectedPiece.board.RecalculatePieceMoves();
@@ -50,10 +51,10 @@ public class RaycastInteraction : MonoBehaviour {
 				PlaceRayHitMarker(rh);
 			}
 			ColorAccentHovered(rh.collider.GetComponent<TiledGameObject>());
-			DrawArrowsOfMoversToSquare(currentHovered);
+			DrawSquareDefenders(currentHovered);
 		} else {
 			ClearHoverAccent();
-			DrawArrowsOfMoversToSquare(null);
+			DrawSquareDefenders(null);
 		}
 		//}
 	}
@@ -67,18 +68,23 @@ public class RaycastInteraction : MonoBehaviour {
 		if (selected == null) { return; }
 		Piece piece = selected as Piece;
 		if (piece == null) { return; }
-		currentMoves = piece.GetMoves();
+		List<Coord> moveLocations = new List<Coord>();
+		List<Coord> captureLocations = new List<Coord>();
+		piece.GetMoves(moveLocations, captureLocations, null);
+		if (currentMoves == null) { currentMoves = new List<Coord>(); }
+		else { currentMoves.Clear(); }
+		currentMoves.AddRange(moveLocations);
+		currentMoves.AddRange(captureLocations);
+		Debug.Log("moves "+string.Join(", ", moveLocations));
 		//if (currentMoves == null) {
 		//	Debug.Log("undefined moves for " + piece);
 		//} else {
 		//	Debug.Log(currentMoves.Count + " moves for " + piece);
 		//}
-		List<TiledGameObject> marks = moves.CreateMarks(currentMoves, piece.board, Color.yellow);
-		for(int i = 0; i < currentMoves.Count; ++i) {
-			if (ChessGame.IsMoveCapture(piece, currentMoves[i], out _)) {
-				marks[i].Material.color = Color.red;
-			}
-		}
+		moves.ClearTiles();
+		moves.CreateMarks(moveLocations, piece.board, Color.yellow);
+		moves.CreateMarks(captureLocations, piece.board, Color.red);
+		selection.ClearTiles();
 		selection.CreateMarks(new Coord[] { piece.GetCoord() }, piece.board, Color.green);
 	}
 
@@ -95,19 +101,20 @@ public class RaycastInteraction : MonoBehaviour {
 		}
 		currentHovered = null;
 	}
-	public void DrawArrowsOfMoversToSquare(TiledGameObject target) {
+	public void DrawSquareDefenders(TiledGameObject target) {
 		if (moveArrows == null) { return; }
 		moveArrows.ClearTiles();
 		if (target == null) { return; }
 		Board board = target.GetBoard();
 		Coord selectedCoord = target.GetCoord();
 		if (board == null) { return; }
-		List<Piece> pieces = board.GetPiecesThatCanMove(selectedCoord);
-		List<Coord> moveSources = new List<Coord>();
+		List<Piece> pieces = board.GetPiecesThatCanDefend(selectedCoord);
+		List<Coord> defenders = new List<Coord>();
 		for (int i = 0; i < pieces.Count; ++i) {
-			moveSources.Add(pieces[i].GetCoord());
+			defenders.Add(pieces[i].GetCoord());
 		}
-		List<TiledGameObject> arrows = moveArrows.CreateMarks(moveSources, board);
+		moveArrows.ClearTiles();
+		List<TiledGameObject> arrows = moveArrows.CreateMarks(defenders, board);
 		for (int i = 0; i < arrows.Count; ++i) {
 			if (arrows[i] is TiledArrow tiledArrow) {
 				tiledArrow.Destination = selectedCoord;

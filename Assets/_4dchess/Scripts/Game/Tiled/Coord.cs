@@ -42,4 +42,7 @@ using UnityEngine;
 		if (obj is Coord c) { return this == c; }
 		return false;
 	}
+	public override string ToString() {
+		return $"{(char)('a' + col)}{row + 1}";
+	}
 }

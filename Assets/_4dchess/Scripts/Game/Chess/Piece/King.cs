@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class King : MoveLogic {
 	// TODO castle
-	public override List<Coord> GetMoves(MoveCalculation moveType) {
-		return Moves(new Coord[] {
+	private static readonly Coord[] movePattern = new Coord[] {
 			new Coord(+1, 0),
 			new Coord(-1, 0),
 			new Coord( 0,+1),
@@ -14,6 +13,8 @@ public class King : MoveLogic {
 			new Coord(-1,+1),
 			new Coord(+1,-1),
 			new Coord(-1,-1),
-		}, 1, moveType);
+	};
+	public override void GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
+		Moves(movePattern, 1, out_moves, out_captures, out_defends);
 	}
 }

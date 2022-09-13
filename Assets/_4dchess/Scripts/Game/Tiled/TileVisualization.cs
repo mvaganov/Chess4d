@@ -13,14 +13,16 @@ public class TileVisualization : MonoBehaviour {
 		}
 	}
 	public List<TiledGameObject> CreateMarks(IEnumerable<Coord> coords, Board board, Color c) {
+		int markToColor = currentMarks.Count;
 		CreateMarks(coords, board);
-		foreach(TiledGameObject move in currentMarks) {
+		for (int i = markToColor; i < currentMarks.Count; ++i) {
+			TiledGameObject move = currentMarks[i];
 			move.Material.color = c;
 		}
 		return currentMarks;
 	}
 	public List<TiledGameObject> CreateMarks(IEnumerable<Coord> coords, Board board) {
-		ClearTiles();
+		//ClearTiles();
 		if (coords == null) { return currentMarks; }
 		foreach (Coord coord in coords) {
 			TiledGameObject marker = markPool.Get();

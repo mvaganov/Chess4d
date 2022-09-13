@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 
 public class Bishop : MoveLogic {
-	public override List<Coord> GetMoves(MoveCalculation moveType) {
-		return Moves(new Coord[] {
+	private static readonly Coord[] movePattern = new Coord[] {
 			new Coord(+1,+1),
 			new Coord(-1,+1),
 			new Coord(+1,-1),
 			new Coord(-1,-1),
-		}, 8, moveType);
+	};
+	public override void GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
+		Moves(movePattern, 8, out_moves, out_captures, out_defends);
 	}
 }

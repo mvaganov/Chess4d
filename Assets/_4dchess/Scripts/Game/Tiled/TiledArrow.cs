@@ -9,19 +9,37 @@ public class TiledArrow : TiledGameObject {
 			if (Arrow == null) {
 				Arrow = NonStandard.Lines.MakeWire();
 				Arrow.transform.SetParent(transform);
+				Arrow.LineRenderer.alignment = LineAlignment.TransformZ;
+				Arrow.transform.Rotate(90, 0, 0);
 			}
 			_destinationCoord = value;
 			Transform _transform = transform;
 			Vector3 start = _transform.position;
 			Vector3 end = GetBoard().CoordToWorldPosition(_destinationCoord);
-			Vector3 delta = end - start;
-			Vector3 half = delta / 2;
-			Vector3 center = start + half;
-			Vector3 dir = delta.normalized;
-			Vector3 normal = Vector3.Cross(dir, Vector3.up).normalized;
-			//Arrow.Arrow(start + Vector3.up, destination, Color.red);
-			//Arrow.Arc(180, normal, center-start, center, Color.red, NonStandard.Lines.End.Arrow);
-			Arrow.Arc(start, end, Vector3.up, Color.red, NonStandard.Lines.End.Arrow);
+
+			Vector3 startAdjust = Vector3.up;
+			Tile tile = GetComponentInParent<Tile>();
+			Piece p = tile.GetPiece();
+			if (p != null) {
+				Collider collider = p.GetComponent<Collider>();
+				if (collider != null) {
+					start.y += collider.bounds.size.y;
+					startAdjust /= 2;
+				}
+			}
+
+			Vector3 endAdjust = Vector3.up;
+			tile = GetBoard().GetTile(_destinationCoord);
+			p = tile.GetPiece();
+			if (p != null) {
+				Collider collider = p.GetComponent<Collider>();
+				if (collider != null) {
+					end.y += collider.bounds.size.y;
+					endAdjust /= 2;
+				}
+			}
+			Arrow.Bezier(start, start + startAdjust, end + endAdjust, end, Color.red, NonStandard.Lines.End.Arrow);
+			//Arrow.Arc(start, end, Vector3.up, Color.red, NonStandard.Lines.End.Arrow);
 		}
 	}
 }

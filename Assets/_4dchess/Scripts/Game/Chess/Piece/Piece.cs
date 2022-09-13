@@ -6,7 +6,15 @@ public class Piece : TiledGameObject {
 	public Team team;
 	public Board board;
 	private MoveLogic moveLogic;
-	private List<Coord> moves;
+	[SerializeField] private List<Coord> moves;
+	[SerializeField] private List<Coord> captures;
+	[SerializeField] private List<Coord> defends;
+	private bool moveAreUpToDate;
+
+	public void MarkMovesAsInvalid() {
+		moveAreUpToDate = false;
+	}
+
 	protected override void Start() {
 		base.Start();
 		moveLogic = GetComponent<MoveLogic>();
@@ -19,7 +27,7 @@ public class Piece : TiledGameObject {
 			SetTile(coord);
 			MoveToLocalCenter(Vector3.zero);
 		}
-		moves = null;
+		moveAreUpToDate = false;
 	}
 
 	public void SetTile(Coord coord) {
@@ -58,8 +66,17 @@ public class Piece : TiledGameObject {
 			yield return new WaitForSeconds(frameRateDelay);
 		}
 	}
-	public List<Coord> GetMoves() {
-		if (moveLogic == null) { return null; }
-		return moves != null ? moves : moves = moveLogic.GetMoves(MoveCalculation.All);
+	public void GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
+		if (moveLogic == null) { return; }
+		if (!moveAreUpToDate) {
+			if (moves == null) { moves = new List<Coord>(); } else { moves.Clear(); }
+			if (captures == null) { captures = new List<Coord>(); } else { captures.Clear(); }
+			if (defends == null) { defends = new List<Coord>(); } else { defends.Clear(); }
+			moveLogic.GetMoves(moves, captures, defends);
+			moveAreUpToDate = true;
+		}
+		if (moves != null) { out_moves?.AddRange(moves); }
+		if (captures != null) { out_captures?.AddRange(captures); }
+		if (defends != null) { out_defends?.AddRange(defends); }
 	}
 }
