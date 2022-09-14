@@ -43,6 +43,6 @@ using UnityEngine;
 		return false;
 	}
 	public override string ToString() {
-		return $"{(char)('a' + col)}{row + 1}";
+		return $"{Counting.Alpha(col)}{row + 1}";
 	}
 }

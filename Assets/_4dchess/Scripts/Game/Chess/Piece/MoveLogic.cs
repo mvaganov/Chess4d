@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -45,21 +46,66 @@ public class MoveLogic : MonoBehaviour {
 			}
 		}
 	}
-	// TODO GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defense)
+
 	public virtual void GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {}
 	public virtual void DoMove(Coord coord) {
-		piece.SetTile(coord);
-		piece.MoveToLocalCenter();
+		piece.MoveInternal(coord);
 	}
-}
-[Flags]
-public enum MoveCalculation {
-	None = 0,
-	Moves = 1,
-	Captures = 2,
-	MovesOrCaptures = 3,
-	Defense = 4,
-	MovesOrDefense = 5, // not sure when this would be useful
-	CapturesOrDefense = 6,
-	All = 7
+
+	public static void LerpPath(MonoBehaviour script, Vector3[] path, float speed, bool localPosition = false) {
+		script.StartCoroutine(LerpToPath(script.transform, path, speed, localPosition));
+	}
+	public static IEnumerator LerpToPath(Transform _transform, Vector3[] path, float speed, bool localPosition = false) {
+		Vector3[] deltas = new Vector3[path.Length - 1];
+		float[] distances = new float[deltas.Length];
+		float totalDistance = 0;
+		for (int i = 0; i < deltas.Length; ++i) {
+			Vector3 delta = path[i + 1] - path[i];
+			float distance = delta.magnitude;
+			deltas[i] = delta;
+			distances[i] = distance;
+			totalDistance += distance;
+		}
+		float distanceTraveled = 0;
+		float segmentStartPoint = 0;
+		float segmentEndPoint = distances[0];
+		int index = 0;
+		long then = System.Environment.TickCount;
+		while (index < path.Length) {
+			long now = System.Environment.TickCount;
+			long passed = now - then;
+			then = now;
+			float deltaTime = passed / 1000f;
+			float move = speed * deltaTime;
+			distanceTraveled += move;
+			while(index < distances.Length && distanceTraveled > segmentEndPoint) {
+				segmentStartPoint += distances[index];
+				++index;
+				if (index < distances.Length) {
+					segmentEndPoint += distances[index];
+				} else {
+					segmentEndPoint = totalDistance;
+				}
+			}
+			float progress;
+			if (distanceTraveled < segmentEndPoint) {
+				float distanceProgress = distanceTraveled - segmentStartPoint;
+				progress = distanceProgress / distances[index];
+			} else {
+				if (localPosition) {
+					_transform.localPosition = path[path.Length - 1];
+				} else {
+					_transform.position = path[path.Length - 1];
+				}
+				yield break;
+			}
+			if (localPosition) {
+				_transform.localPosition = Vector3.Lerp(path[index], path[index + 1], progress);
+			} else {
+				_transform.position = Vector3.Lerp(path[index], path[index + 1], progress);
+			}
+			yield return null;
+		}
+	}
+
 }

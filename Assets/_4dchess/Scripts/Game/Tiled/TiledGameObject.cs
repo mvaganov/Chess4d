@@ -5,7 +5,7 @@ public class TiledGameObject : MonoBehaviour {
 	private Color originalColor;
 	private Gradient ColorCycling;
 	private int colorCyclePriority;
-	public Material Material {
+	public virtual Material Material {
 		get => GetComponentInChildren<Renderer>().material;
 		set => GetComponentInChildren<Renderer>().material = value;
 	}

@@ -37,6 +37,7 @@ public class ChessGame : MonoBehaviour {
 		for(int i = 0; i < teams.Count; ++i) {
 			teams[i].Generate();
 		}
+		EditorTool.MarkSceneDirty();
 	}
 
 	void Start() {
