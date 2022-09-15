@@ -47,7 +47,7 @@ public class TiledWire : TiledGameObject {
 				endAdjust /= 2;
 			}
 		}
-		Wire.Bezier(start, start + startAdjust, end + endAdjust, end, Color.red, destinationEnd, 1f / 16);
+		Wire.Bezier(start, start + startAdjust, end + endAdjust, end, Color.magenta, destinationEnd, 1f / 16);
 		//Arrow.Arc(start, end, Vector3.up, Color.red, NonStandard.Lines.End.Arrow);
 	}
 }

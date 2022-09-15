@@ -10,10 +10,12 @@ public class ChessGame : MonoBehaviour {
 		public string name;
 		public string code;
 		public Piece prefab;
+		public Sprite icon, altIcon;
 		public PieceCode(string name, string code, Piece prefab) {
 			this.name = name;
 			this.code = code;
 			this.prefab = prefab;
+			this.icon = altIcon = null;
 		}
 		public PieceCode(string name, string code) : this(name, code, null) { }
 	}
@@ -42,6 +44,7 @@ public class ChessGame : MonoBehaviour {
 
 	void Start() {
 		teams.ForEach(t => t.MovePiecesToTile());
+		// TODO implement icon that hovers over piece's head, always orients to ortho camera rotation, and is only visible by ortho camera
 	}
 
 

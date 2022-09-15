@@ -120,6 +120,9 @@ public class Board : MonoBehaviour {
 			tile.Material = MaterialOf(coord);
 			tile.Label.text = name;
 		} while (coord.Iterate(BoardSize));
+		if (Application.isPlaying) {
+			RecalculatePieceMoves();
+		}
 	}
 
 	public Vector3 CoordToLocalPosition(Coord coord) {

@@ -21,7 +21,8 @@ public class TileVisualization : MonoBehaviour {
 		}
 		return currentMarks;
 	}
-	public List<TiledGameObject> CreateMarks(IEnumerable<Coord> coords, Board board) {
+	public List<TiledGameObject> CreateMarks(IEnumerable<Coord> coords, Board board, 
+	System.Action<TiledGameObject> markProcessing = null) {
 		//ClearTiles();
 		if (coords == null) { return currentMarks; }
 		foreach (Coord coord in coords) {
@@ -31,6 +32,7 @@ public class TileVisualization : MonoBehaviour {
 			Transform t = marker.transform;
 			t.SetParent(tile.transform);
 			t.localPosition = Vector3.zero;
+			markProcessing?.Invoke(marker);
 		}
 		return currentMarks;
 	}
