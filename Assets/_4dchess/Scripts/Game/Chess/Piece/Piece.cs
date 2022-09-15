@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Piece : TiledGameObject {
 	public Team team;
+	public string code;
 	public Board board;
 	private MoveLogic moveLogic;
 	public float jumpHeight = 0;

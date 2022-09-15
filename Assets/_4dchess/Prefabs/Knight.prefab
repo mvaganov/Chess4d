@@ -16,6 +16,10 @@ PrefabInstance:
       value: Knight
       objectReference: {fileID: 0}
     - target: {fileID: 2539579758047041590, guid: e0eb511be04c6484a8b93af4081c598d, type: 3}
+      propertyPath: code
+      value: N
+      objectReference: {fileID: 0}
+    - target: {fileID: 2539579758047041590, guid: e0eb511be04c6484a8b93af4081c598d, type: 3}
       propertyPath: jumpHeight
       value: 1
       objectReference: {fileID: 0}

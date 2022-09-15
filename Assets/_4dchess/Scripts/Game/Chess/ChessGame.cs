@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -10,12 +11,12 @@ public class ChessGame : MonoBehaviour {
 		public string name;
 		public string code;
 		public Piece prefab;
-		public Sprite icon, altIcon;
+		public Sprite[] icons;
 		public PieceCode(string name, string code, Piece prefab) {
 			this.name = name;
 			this.code = code;
 			this.prefab = prefab;
-			this.icon = altIcon = null;
+			icons =	new Sprite[2];
 		}
 		public PieceCode(string name, string code) : this(name, code, null) { }
 	}
@@ -31,9 +32,10 @@ public class ChessGame : MonoBehaviour {
 
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Board board;
-
+	public ChessMoves chessMoves;
 	public List<Team> teams = new List<Team>();
-
+	public void OnValidate() {
+	}
 	public void Generate() {
 		board.Generate();
 		for(int i = 0; i < teams.Count; ++i) {
@@ -44,9 +46,25 @@ public class ChessGame : MonoBehaviour {
 
 	void Start() {
 		teams.ForEach(t => t.MovePiecesToTile());
+		if (chessMoves == null) { chessMoves = FindObjectOfType<ChessMoves>(); }
 		// TODO implement icon that hovers over piece's head, always orients to ortho camera rotation, and is only visible by ortho camera
 	}
 
+	public void Move(Piece p, Coord position, string notes) {
+		chessMoves.MakeMove(p, p.GetCoord(), position, null, Coord.zero, notes);
+	}
+
+	public void Capture(Piece moved, Piece captured, Coord movePosition, string notes) {
+		chessMoves.MakeMove(moved, moved.GetCoord(), movePosition, captured, captured.GetCoord(), notes);
+	}
+
+	public void UndoMove() {
+		chessMoves.UndoMove();
+	}
+
+	public void RedoMove() {
+		chessMoves.RedoMove(0);
+	}
 
 	public Piece GetPrefab(string code) {
 		if (_prefabByCode == null) {

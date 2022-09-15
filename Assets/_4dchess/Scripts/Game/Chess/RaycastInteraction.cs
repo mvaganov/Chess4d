@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class RaycastInteraction : MonoBehaviour {
+	public ChessGame game;
 	public Camera cam;
 	public Transform rayHitMarker;
 	public Gradient hoveredColor;
@@ -13,14 +14,24 @@ public class RaycastInteraction : MonoBehaviour {
 	public TileVisualization moveArrows;
 	public TileVisualization defendArrows;
 
+	private KeyCode undoMove = KeyCode.Backspace;
+	private KeyCode redoMove = KeyCode.Space;
+
 	void Start() {
 		if (cam == null) { cam = Camera.main; }
+		if (game == null) { game = FindObjectOfType<ChessGame>(); }
 		if (moves == null) { Debug.LogWarning($"missing value for {nameof(moves)}"); }
 		if (selection == null) { Debug.LogWarning($"missing value for {nameof(selection)}"); }
 		if (moveArrows == null) { Debug.LogWarning($"missing value for {nameof(moveArrows)}"); }
 	}
 
 	void Update() {
+		if (Input.GetKeyDown(undoMove)) {
+			game.UndoMove();
+		}
+		if (Input.GetKeyDown(redoMove)) {
+			game.RedoMove();
+		}
 		if (Input.GetMouseButtonUp(0)) {
 			if (currentHovered != null) {
 				// handle a click at the hovered coordinate
@@ -29,14 +40,16 @@ public class RaycastInteraction : MonoBehaviour {
 					// move selected piece if the move is valid
 					if (coord != selectedPiece.GetCoord() && currentMoves.IndexOf(coord) >= 0) {
 						if (ChessGame.IsMoveCapture(selectedPiece, coord, out Piece capturedPiece)) {
-							Transform holdingArea = selectedPiece.team.transform;
-							capturedPiece.transform.SetParent(holdingArea);
-							Vector3 holdingLocation = Vector3.right * (holdingArea.childCount - 1) / 2f;
-							capturedPiece.JumpToLocalCenter(holdingLocation, 3);
-							//capturedPiece.MoveToLocalCenter();
+							//Transform holdingArea = selectedPiece.team.transform;
+							//capturedPiece.transform.SetParent(holdingArea);
+							//Vector3 holdingLocation = Vector3.right * (holdingArea.childCount - 1) / 2f;
+							//capturedPiece.JumpToLocalCenter(holdingLocation, 3);
+							////capturedPiece.MoveToLocalCenter();
+							game.Capture(selectedPiece, capturedPiece, coord, "");
 							currentHovered = null;
+						} else {
+							game.Move(selectedPiece, coord, "");
 						}
-						selectedPiece.MoveTo(coord);
 						selectedPiece.board.RecalculatePieceMoves();
 					} else {
 						currentHovered = null;

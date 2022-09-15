@@ -42,7 +42,8 @@ using UnityEngine;
 		if (obj is Coord c) { return this == c; }
 		return false;
 	}
-	public override string ToString() {
-		return $"{Counting.Alpha(col)}{row + 1}";
-	}
+
+	public string ColumnId => Counting.Alpha(col).ToLower();
+	public string RowId => (row + 1).ToString();
+	public override string ToString() => $"{ColumnId}{RowId}";
 }

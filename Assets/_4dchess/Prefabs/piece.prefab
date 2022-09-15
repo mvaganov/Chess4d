@@ -48,6 +48,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Label: {fileID: 2539579758570260389}
+  team: {fileID: 0}
+  code: '?'
+  board: {fileID: 0}
+  jumpHeight: 0
+  moves: []
+  captures: []
+  defends: []
 --- !u!136 &849924907981879601
 CapsuleCollider:
   m_ObjectHideFlags: 0
