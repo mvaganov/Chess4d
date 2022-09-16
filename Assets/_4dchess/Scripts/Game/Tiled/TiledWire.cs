@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class TiledWire : TiledGameObject {
 	public NonStandard.Wire Wire;
-	public NonStandard.Lines.End destinationEnd = NonStandard.Lines.End.Arrow;
+	public NonStandard.LineEnd destinationEnd = NonStandard.LineEnd.Arrow;
 	public override Material Material {
 		get => Wire.LineRenderer.material;
 		set => Wire.LineRenderer.material = value;
@@ -16,7 +16,7 @@ public class TiledWire : TiledGameObject {
 	}
 	public void DrawLine(Coord value) {
 		if (Wire == null) {
-			Wire = NonStandard.Lines.MakeWire();
+			Wire = NonStandard.Wires.MakeWire();
 			Wire.transform.SetParent(transform);
 			Wire.LineRenderer.alignment = LineAlignment.TransformZ;
 			Wire.transform.Rotate(90, 0, 0);
