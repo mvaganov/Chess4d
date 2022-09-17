@@ -32,7 +32,7 @@ public class ChessGame : MonoBehaviour {
 
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Board board;
-	public ChessMoves chessMoves;
+	public Moves chessMoves;
 	public List<Team> teams = new List<Team>();
 	public void OnValidate() {
 	}
@@ -46,7 +46,7 @@ public class ChessGame : MonoBehaviour {
 
 	void Start() {
 		teams.ForEach(t => t.MovePiecesToTile());
-		if (chessMoves == null) { chessMoves = FindObjectOfType<ChessMoves>(); }
+		if (chessMoves == null) { chessMoves = FindObjectOfType<Moves>(); }
 		// TODO implement icon that hovers over piece's head, always orients to ortho camera rotation, and is only visible by ortho camera
 	}
 

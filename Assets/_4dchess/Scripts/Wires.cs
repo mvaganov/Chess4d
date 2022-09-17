@@ -14,6 +14,7 @@ namespace NonStandard {
 	/// This library isn't optimized for performance, it's built to make math less invisible, even at compiled runtime.
 	/// <see cref="Wires"/> can also create <see cref="Wire"/> objects, which have runtime optimizations to reduce
 	/// calculation and simplify (re)drawing with a more ergonomic API.
+	/// This file could use some slimming down (get rid of "unuseful" functionality).
 	/// </summary>
 	public class Wires : MonoBehaviour {
 		/// <summary>
