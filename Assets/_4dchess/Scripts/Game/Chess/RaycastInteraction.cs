@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class RaycastInteraction : MonoBehaviour {
 	public ChessGame game;
@@ -26,6 +27,9 @@ public class RaycastInteraction : MonoBehaviour {
 	}
 
 	void Update() {
+		if (EventSystem.current.currentSelectedGameObject != null) {
+			return;
+		}
 		if (Input.GetKeyDown(undoMove)) {
 			game.UndoMove();
 		}
@@ -40,11 +44,6 @@ public class RaycastInteraction : MonoBehaviour {
 					// move selected piece if the move is valid
 					if (coord != selectedPiece.GetCoord() && currentMoves.IndexOf(coord) >= 0) {
 						if (ChessGame.IsMoveCapture(selectedPiece, coord, out Piece capturedPiece)) {
-							//Transform holdingArea = selectedPiece.team.transform;
-							//capturedPiece.transform.SetParent(holdingArea);
-							//Vector3 holdingLocation = Vector3.right * (holdingArea.childCount - 1) / 2f;
-							//capturedPiece.JumpToLocalCenter(holdingLocation, 3);
-							////capturedPiece.MoveToLocalCenter();
 							game.Capture(selectedPiece, capturedPiece, coord, "");
 							currentHovered = null;
 						} else {

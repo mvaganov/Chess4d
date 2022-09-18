@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Board : MonoBehaviour {
+	public ChessGame game;
 	[ContextMenuItem(nameof(RecalculatePieceMoves),nameof(RecalculatePieceMoves))]
 	public Coord BoardSize = new Coord(8, 8);
 	public Vector3 tileSize = new Vector3(1,2,1);
@@ -145,6 +146,9 @@ public class Board : MonoBehaviour {
 	}
 	void Start() {
 		RecalculatePieceMoves();
+		if (game == null) {
+			game = GetComponentInParent<ChessGame>();
+		}
 	}
 
 	void Update() {

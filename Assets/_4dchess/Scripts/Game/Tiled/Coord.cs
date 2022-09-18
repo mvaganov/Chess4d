@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// TODO replace with pair of shorts or pair of bytes even?
 [System.Serializable] public struct Coord {
 	public Vector2Int vec2i;
 

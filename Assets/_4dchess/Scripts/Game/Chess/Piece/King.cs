@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class King : MoveLogic {
-	// TODO castle
+	// TODO king-side and queen-side castle, optionally don't even give move-into-check as an option
 	private static readonly Coord[] movePattern = new Coord[] {
 			new Coord(+1, 0),
 			new Coord(-1, 0),

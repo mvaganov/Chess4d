@@ -4,20 +4,22 @@ using UnityEngine;
 
 public class Move {
 	public Coord from, to, fromCaptured;
+	public int index;
+	public int timestamp;
 	public Piece pieceMoved;
 	public Piece pieceCaptured;
-	public int timestamp;
 	public List<Move> next;
 	public Move prev;
 	public string notes;
 
-	public Move(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured, string notes) {
+	public Move(int index, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured, string notes) {
 		this.from = from;
 		this.to = to;
 		this.fromCaptured = fromCaptured;
 		this.pieceMoved = pieceMoved;
 		this.pieceCaptured = pieceCaptured;
 		this.notes = notes;
+		this.index = index;
 		timestamp = System.Environment.TickCount;
 		next = new List<Move>();
 		prev = null;
@@ -25,17 +27,19 @@ public class Move {
 
 	public bool IsRoot => prev == null;
 
+	public int BranchIndex => prev == null ? -1 : prev.next.IndexOf(this);
+
 	public void Do() {
-		Debug.Log(this);
-		pieceMoved.MoveTo(to);
+		//Debug.Log(this);
+		pieceMoved?.DoMove(to);
 		if (pieceCaptured != null) {
 			Capture(pieceMoved, pieceCaptured, fromCaptured);
 		}
 	}
 
 	public void Undo() {
-		Debug.Log("undo " + this);
-		pieceMoved.MoveTo(from);
+		//Debug.Log("undo " + this);
+		pieceMoved?.UndoMove(from);
 		if (pieceCaptured != null) {
 			Uncapture(pieceMoved, pieceCaptured, fromCaptured);
 		}

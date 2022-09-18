@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MovesUi : MonoBehaviour {
 	[ContextMenuItem(nameof(Clear), nameof(Clear)),
@@ -9,6 +10,49 @@ public class MovesUi : MonoBehaviour {
 	public Moves chessMoves;
 	public GameObject branchUiPrefab;
 	public GameObject moveUiPrefab;
+	public GameObject Notes;
+	public TMPro.TMP_InputField notesInput;
+	[ContextMenuItem(nameof(ShowTextTrue),nameof(ShowTextTrue)),
+	ContextMenuItem(nameof(HideText), nameof(HideText)),]
+	[SerializeField] private bool _showText = true;
+	public List<GameObject> branches = new List<GameObject>();
+
+	public bool ShowText {
+		get => _showText;
+		set {
+			bool rebuild = _showText != value;
+			_showText = value;
+			if (rebuild) {
+				RebuildUi();
+			}
+		}
+	}
+	public string CurrentNotes {
+		get => chessMoves.CurrentMove.notes;
+		set {
+			chessMoves.CurrentMove.notes = value;
+			CurrentMoveUi.RefreshElement();
+		}
+	}
+	public MoveUi CurrentMoveUi {
+		get {
+			Move current = chessMoves.CurrentMove;
+			for (int i = transform.childCount - 1; i >= 0; --i) {
+				Transform child = transform.GetChild(i);
+				MoveUi moveUi = child.GetComponent<MoveUi>();
+				if (moveUi != null && moveUi.move == current) {
+					return moveUi;
+				}
+				MoveUi[] moves = child.GetComponentsInChildren<MoveUi>();
+				for (int j = 0; j < moves.Length; ++j) {
+					if (moves[j].move == current) {
+						return moves[j];
+					}
+				}
+			}
+			return null;
+		}
+	}
 	public void OnMove(Move move) {
 		RebuildUi();
 	}
@@ -17,29 +61,50 @@ public class MovesUi : MonoBehaviour {
 		RebuildUi();
 	}
 
-	public List<GameObject> branches = new List<GameObject>();
+	public void HideText() { ShowText = false; }
+	public void ShowTextTrue() { ShowText = true; }
 
 	public void RebuildUi() {
 		Clear();
 		Transform _transform = transform;
-		List<Move> moves = chessMoves.GetMoveList();
+		List<List<Move>> moves = chessMoves.GetMoveList();
+
+		MoveUi moveUi;
+		// insert start game move
+		moveUi = Instantiate(moveUiPrefab).GetComponent<MoveUi>();
+		moveUi.Move = moves[moves.Count - 1][0].prev;
+		ApplyToLayoutTransform(moveUi.transform, _transform);
+		//Debug.Log($"moves {moves.Count}: [{string.Join(", ",moves.ConvertAll(l=>l.Count.ToString()))}]");
+
 		for (int i = moves.Count-1; i >= 0; --i) {
+			List<Move> moveOptions = moves[i];
+			//Debug.Log($"{moveOptions.Count}: [{string.Join(", ", moveOptions.ConvertAll(m => m.ToString()))}]");
+			if (moveOptions.Count == 0) { continue; }
 			GameObject branch = Instantiate(branchUiPrefab);
-			MoveUi moveUi = Instantiate(moveUiPrefab).GetComponent<MoveUi>();
-			Move move = moves[i];
-			moveUi.move = move;
-			int teamIndex = game.teams.IndexOf(move.pieceMoved.team);
-			Piece piece = move.pieceMoved;
-			moveUi.icon.sprite = System.Array.Find(game.pieceCodes, code => code.code == piece.code).icons[teamIndex];
-			moveUi.label.text = move.ToString();
-			if (move == chessMoves.CurrentMove) {
-				moveUi.activeMarker.SetActive(true);
+			for (int m = 0; m < moveOptions.Count; ++m) {
+				moveUi = Instantiate(moveUiPrefab).GetComponent<MoveUi>();
+				moveUi.Move = moveOptions[m];
+				if (!_showText) {
+					moveUi.label.gameObject.SetActive(false);
+				}
+				ApplyToLayoutTransform(moveUi.transform, branch.transform);
 			}
-			moveUi.transform.SetParent(branch.transform, false);
-			branch.transform.SetParent(_transform, false);
-			moveUi.gameObject.SetActive(true);
-			branch.gameObject.SetActive(true);
+			ApplyToLayoutTransform(branch.transform, _transform);
 		}
+		RefreshLayouts();
+		notesInput?.SetTextWithoutNotify(chessMoves.CurrentMove.notes);
+	}
+
+	public void RefreshLayouts() {
+		LayoutRebuilder.ForceRebuildLayoutImmediate(transform.GetComponent<RectTransform>());
+		LayoutRebuilder.ForceRebuildLayoutImmediate(transform.parent.GetComponent<RectTransform>());
+	}
+
+
+	private void ApplyToLayoutTransform(Transform item, Transform layoutTransform) {
+		item.SetParent(layoutTransform, false);
+		item.gameObject.SetActive(true);
+		LayoutRebuilder.ForceRebuildLayoutImmediate(layoutTransform.GetComponent<RectTransform>());
 	}
 
 	public void Clear() {
@@ -48,9 +113,5 @@ public class MovesUi : MonoBehaviour {
 			if (go == branchUiPrefab || go == moveUiPrefab) { continue; }
 			ChessGame.DestroyObject(go);
 		}
-		//for(int i = branches.Count-1; i >= 0; --i) {
-		//	ChessGame.DestroyObject(branches[i]);
-		//}
-		//branches.Clear();
 	}
 }

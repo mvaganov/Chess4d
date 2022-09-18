@@ -51,10 +51,14 @@ public class MoveLogic : MonoBehaviour {
 	public virtual void DoMove(Coord coord) {
 		piece.MoveInternal(coord);
 	}
+	public virtual void UndoMove(Coord coord) {
+		piece.MoveInternal(coord);
+	}
 
 	public static void LerpPath(MonoBehaviour script, Vector3[] path, float speed, bool localPosition = false) {
 		script.StartCoroutine(LerpToPath(script.transform, path, speed, localPosition));
 	}
+
 	public static IEnumerator LerpToPath(Transform _transform, Vector3[] path, float speed, bool localPosition = false) {
 		Vector3[] deltas = new Vector3[path.Length - 1];
 		float[] distances = new float[deltas.Length];
@@ -71,7 +75,8 @@ public class MoveLogic : MonoBehaviour {
 		float segmentEndPoint = distances[0];
 		int index = 0;
 		long then = System.Environment.TickCount;
-		while (index < path.Length) {
+		Transform currentParent = _transform.parent;
+		while (index < path.Length && _transform.parent == currentParent) {
 			long now = System.Environment.TickCount;
 			long passed = now - then;
 			then = now;

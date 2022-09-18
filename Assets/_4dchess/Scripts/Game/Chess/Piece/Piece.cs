@@ -13,6 +13,7 @@ public class Piece : TiledGameObject {
 	[SerializeField] private List<Coord> captures;
 	[SerializeField] private List<Coord> defends;
 	private bool moveAreUpToDate;
+	public int moveCount = 0;
 
 	public void MarkMovesAsInvalid() {
 		moveAreUpToDate = false;
@@ -23,13 +24,25 @@ public class Piece : TiledGameObject {
 		moveLogic = GetComponent<MoveLogic>();
 	}
 
-	public virtual void MoveTo(Coord coord) {
+	// TODO can't move into check
+	public virtual void DoMove(Coord coord) {
 		if (moveLogic != null) {
 			moveLogic.DoMove(coord);
 		} else {
 			MoveInternal(coord);
 		}
 		moveAreUpToDate = false;
+		++moveCount;
+	}
+
+	public virtual void UndoMove(Coord coord) {
+		if (moveLogic != null) {
+			moveLogic.UndoMove(coord);
+		} else {
+			MoveInternal(coord);
+		}
+		moveAreUpToDate = false;
+		--moveCount;
 	}
 
 	internal void MoveInternal(Coord coord) {
@@ -49,19 +62,12 @@ public class Piece : TiledGameObject {
 	public Tile GetTile() {
 		return transform.GetComponentInParent<Tile>();
 	}
+
 	public virtual void MoveToLocalCenter() => MoveToLocalCenter(Vector3.zero);
 
 	public virtual void MoveToLocalCenter(Vector3 offset) {
-		//Vector3 center = offset;
-		//if (transform.parent != null) {
-		//	center += transform.parent.position;
-		//}
-		//Vector3[] path = new Vector3[2] { transform.position, center };
-		//MoveLogic.LerpPath(this, path, team.speed, false);
 		Vector3[] path = new Vector3[2] { transform.localPosition, offset };
 		MoveLogic.LerpPath(this, path, team.speed, true);
-
-		//StartCoroutine(LerpToLocalCenterCoroutine(offset));
 	}
 
 	public virtual void JumpToLocalCenter(Vector3 offset, float jumpHeight) {
@@ -69,33 +75,10 @@ public class Piece : TiledGameObject {
 		Vector3[] bezier = new Vector3[bezierPointCount];
 		Vector3 height = Vector3.up * jumpHeight;
 		Vector3 start = transform.localPosition;
-
 		Math3d.WriteBezier(bezier, start, start + height, offset + height, offset);
-		//Vector3[] path = new Vector3[2] { transform.position, center };
 		MoveLogic.LerpPath(this, bezier, team.speed, true);
 	}
 
-	//public IEnumerator LerpToLocalCenterCoroutine(Vector3 targetPosition) {
-	//	Transform _transform = transform;
-	//	long then = System.Environment.TickCount;
-	//	Vector3 delta = (_transform.localPosition - targetPosition);
-	//	float distance = delta.magnitude;
-	//	Vector3 dir = delta / distance;
-	//	while (distance > 0) {
-	//		long now = System.Environment.TickCount;
-	//		long passed = now - then;
-	//		then = now;
-	//		float deltaTime = passed / 1000f;
-	//		float move = team.speed * deltaTime;
-	//		distance -= move;
-	//		if (distance <= 0) {
-	//			_transform.localPosition = targetPosition;
-	//		} else {
-	//			_transform.localPosition = targetPosition + dir * distance;
-	//		}
-	//		yield return null;
-	//	}
-	//}
 	public void GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
 		if (moveLogic == null) { return; }
 		if (!moveAreUpToDate) {

@@ -12,6 +12,7 @@ public class Team : MonoBehaviour {
 	public float speed = 10;
 	public float jumpHeight = 1;
 	public Coord pawnDirection = new Coord(0, 1);
+	public int TeamIndex => game.teams.IndexOf(this);
 	public bool IsAlliedWith(Team team) {
 		return team == this;
 	}
