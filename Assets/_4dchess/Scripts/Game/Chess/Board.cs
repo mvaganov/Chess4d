@@ -25,7 +25,9 @@ public class Board : MonoBehaviour {
 	}
 
 	public Tile GetTile(Coord coord) {
-		return tiles[TileIndex(coord)];
+		int index = TileIndex(coord);
+		if (index < 0 || index >= tiles.Count) { return null; }
+		return tiles[index];
 	}
 
 	public Piece GetPiece(Coord coord) {

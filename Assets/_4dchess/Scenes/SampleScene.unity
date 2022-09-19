@@ -8445,6 +8445,7 @@ MonoBehaviour:
     icons:
     - {fileID: 21300000, guid: 3ab5c62d7e43ed84e8614c5650c5360a, type: 3}
     - {fileID: 21300000, guid: 406402efadbebd943ad31fd4cddaaacb, type: 3}
+  PawnPromotionOptions: nbrq
   board: {fileID: 589796590}
   chessMoves: {fileID: 1564371133}
   teams:

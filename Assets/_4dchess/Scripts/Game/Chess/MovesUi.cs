@@ -36,7 +36,7 @@ public class MovesUi : MonoBehaviour {
 	}
 	public MoveUi CurrentMoveUi {
 		get {
-			Move current = chessMoves.CurrentMove;
+			MoveNode current = chessMoves.CurrentMove;
 			for (int i = transform.childCount - 1; i >= 0; --i) {
 				Transform child = transform.GetChild(i);
 				MoveUi moveUi = child.GetComponent<MoveUi>();
@@ -53,11 +53,11 @@ public class MovesUi : MonoBehaviour {
 			return null;
 		}
 	}
-	public void OnMove(Move move) {
+	public void OnMove(MoveNode move) {
 		RebuildUi();
 	}
 
-	public void OnUndoMove(Move move) {
+	public void OnUndoMove(MoveNode move) {
 		RebuildUi();
 	}
 
@@ -67,7 +67,7 @@ public class MovesUi : MonoBehaviour {
 	public void RebuildUi() {
 		Clear();
 		Transform _transform = transform;
-		List<List<Move>> moves = chessMoves.GetMoveList();
+		List<List<MoveNode>> moves = chessMoves.GetMoveList();
 
 		MoveUi moveUi;
 		// insert start game move
@@ -77,7 +77,7 @@ public class MovesUi : MonoBehaviour {
 		//Debug.Log($"moves {moves.Count}: [{string.Join(", ",moves.ConvertAll(l=>l.Count.ToString()))}]");
 
 		for (int i = moves.Count-1; i >= 0; --i) {
-			List<Move> moveOptions = moves[i];
+			List<MoveNode> moveOptions = moves[i];
 			//Debug.Log($"{moveOptions.Count}: [{string.Join(", ", moveOptions.ConvertAll(m => m.ToString()))}]");
 			if (moveOptions.Count == 0) { continue; }
 			GameObject branch = Instantiate(branchUiPrefab);

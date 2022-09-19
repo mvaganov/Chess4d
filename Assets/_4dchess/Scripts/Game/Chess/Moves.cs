@@ -4,21 +4,21 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class Moves : MonoBehaviour {
-	private Move currentMove = new Move(0, null, Coord.zero, Coord.zero, null, Coord.zero, "game begins");
+	private MoveNode currentMove = new MoveNode(0, null, "game begins");
 	public MoveEventHandler onMove;
 	public MoveEventHandler onUndoMove;
 
-	public Move CurrentMove => currentMove;
+	public MoveNode CurrentMove => currentMove;
 
-	[System.Serializable] public class MoveEventHandler : UnityEvent<Move> { }
+	[System.Serializable] public class MoveEventHandler : UnityEvent<MoveNode> { }
 
-	public List<List<Move>> GetMoveList() {
-		List<List<Move>> list = new List<List<Move>>();
-		Move last = currentMove;
+	public List<List<MoveNode>> GetMoveList() {
+		List<List<MoveNode>> list = new List<List<MoveNode>>();
+		MoveNode last = currentMove;
 		while (last.next.Count > 0) {
 			last = last.next[0];
 		}
-		Move cursor = last;
+		MoveNode cursor = last;
 		do {
 			list.Add(cursor.next);
 			cursor = cursor.prev;
@@ -26,10 +26,22 @@ public class Moves : MonoBehaviour {
 		return list;
 	}
 
-	public void MakeMove(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured,
+	public void MakeMove(Piece pieceMoved, Coord from, Coord to, string notes) {
+		DoThis(new MoveNode(currentMove.index + 1, new Move(pieceMoved, from, to), notes));
+	}
+	public void MakeCapture(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured,
 	string notes) {
-		int currentIndex = currentMove.index;
-		Move move = new Move(currentIndex+1, pieceMoved, from, to, pieceCaptured, fromCaptured, notes);
+		DoThis(new MoveNode(currentMove.index + 1, new Capture(pieceMoved, from, to, pieceCaptured, fromCaptured), notes));
+	}
+
+	private void DoThis(MoveNode move) {
+		int doneAlready = currentMove.next.IndexOf(move);
+		if (doneAlready >= 0) {
+			move = currentMove.next[doneAlready];
+			Debug.Log("repeat!");
+			currentMove.next.RemoveAt(doneAlready);
+		}
+		Debug.Log("doing "+move);
 		currentMove.next.Insert(0, move);
 		move.prev = currentMove;
 		move.Do();
@@ -37,9 +49,9 @@ public class Moves : MonoBehaviour {
 		onMove?.Invoke(currentMove);
 	}
 
-	public void GoToMove(Move targetMove) {
+	public void GoToMove(MoveNode targetMove) {
 		int actualIndexToTravelTo = targetMove.index - 1;
-		Move next = null;
+		MoveNode next = null;
 		do {
 			if (currentMove.index < actualIndexToTravelTo) {
 				next = currentMove.next.Count > 0 ? currentMove.next[0] : null;
@@ -80,7 +92,7 @@ public class Moves : MonoBehaviour {
 		return true;
 	}
 
-	public List<Move> GetNextMoves() {
+	public List<MoveNode> GetNextMoves() {
 		return currentMove.next;
 	}
 

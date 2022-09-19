@@ -28,6 +28,7 @@ public class ChessGame : MonoBehaviour {
 		new PieceCode("queen", "q"),
 		new PieceCode("king", "k"),
 	};
+	public string PawnPromotionOptions = "nbrq";
 	private Dictionary<string, Piece> _prefabByCode = null;
 
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
@@ -51,11 +52,11 @@ public class ChessGame : MonoBehaviour {
 	}
 
 	public void Move(Piece p, Coord position, string notes) {
-		chessMoves.MakeMove(p, p.GetCoord(), position, null, Coord.zero, notes);
+		chessMoves.MakeMove(p, p.GetCoord(), position, notes);
 	}
 
 	public void Capture(Piece moved, Piece captured, Coord movePosition, string notes) {
-		chessMoves.MakeMove(moved, moved.GetCoord(), movePosition, captured, captured.GetCoord(), notes);
+		chessMoves.MakeCapture(moved, moved.GetCoord(), movePosition, captured, captured.GetCoord(), notes);
 	}
 
 	public void UndoMove() {

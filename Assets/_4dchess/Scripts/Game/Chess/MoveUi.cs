@@ -5,9 +5,9 @@ public class MoveUi : MonoBehaviour {
 	public GameObject activeMarker;
 	public UnityEngine.UI.Image icon;
 	public TMPro.TMP_Text label;
-	[SerializeField] public Move move;
+	[SerializeField] public MoveNode move;
 
-	public Move Move {
+	public MoveNode Move {
 		get => move;
 		set {
 			move = value;
@@ -16,7 +16,7 @@ public class MoveUi : MonoBehaviour {
 	}
 
 	public void RefreshElement() {
-		Piece piece = move.pieceMoved;
+		Piece piece = move.move != null ? move.move.pieceMoved : null;
 		if (piece != null) {
 			int teamIndex = piece.team.TeamIndex;
 			ChessGame game = piece.team.game;

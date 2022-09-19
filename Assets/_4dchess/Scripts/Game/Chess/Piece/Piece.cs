@@ -92,4 +92,8 @@ public class Piece : TiledGameObject {
 		if (captures != null) { out_captures?.AddRange(captures); }
 		if (defends != null) { out_defends?.AddRange(defends); }
 	}
+
+	public override int GetHashCode() {
+		return code.GetHashCode() ^ team.name.GetHashCode();
+	}
 }

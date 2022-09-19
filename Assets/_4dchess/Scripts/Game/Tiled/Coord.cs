@@ -5,6 +5,8 @@ using UnityEngine;
 	public Vector2Int vec2i;
 
 	public static readonly Coord zero = new Coord(0, 0);
+	public static readonly Coord left = new Coord(-1, 0);
+	public static readonly Coord right = new Coord(1, 0);
 
 	public int x {
 		get => vec2i.x;
@@ -31,12 +33,11 @@ using UnityEngine;
 		return row < limit.row;
 	}
 
-	public static bool operator==(Coord a, Coord b) => a.vec2i == b.vec2i;
+	public static bool operator ==(Coord a, Coord b) => a.vec2i == b.vec2i;
 	public static bool operator !=(Coord a, Coord b) =>a.vec2i != b.vec2i;
 	public static Coord operator +(Coord a, Coord b) => new Coord(a.vec2i + b.vec2i);
 	public static Coord operator -(Coord a, Coord b) => new Coord(a.vec2i - b.vec2i);
-	public static Coord operator *(Coord a, float scalar) =>
-		new Coord((int)(a.vec2i.x * scalar), (int)(a.vec2i.y * scalar));
+	public static Coord operator *(Coord a, float n) => new Coord((int)(a.vec2i.x * n), (int)(a.vec2i.y * n));
 	public override int GetHashCode() => vec2i.GetHashCode();
 	public override bool Equals(object obj) {
 		if (obj == null) { return false; }
