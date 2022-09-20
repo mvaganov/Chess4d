@@ -3,56 +3,81 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Flags]
+public enum MoveKind {
+	Move = 1,
+	Attack = 2,
+	MoveAttack = Move | Attack,
+	Defend = 4,
+	MoveDevend = Move | Defend,
+	AttackDefend = Attack | Defend,
+	MoveAttackDefend = Move | Attack | Defend
+}
+
 [RequireComponent(typeof(Piece))]
 public class MoveLogic : MonoBehaviour {
 	public Piece piece => GetComponent<Piece>();
 	public Team team => GetComponent<Piece>().team;
-	public virtual void Moves(IEnumerable<Coord> directions, int maxSpaces,
-	List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
+
+	public virtual void StandardMoves(IEnumerable<Coord> directions, int maxSpaces,
+	List<Move> out_moves, MoveKind moveKind) {
 		Piece p = piece;
-		Moves(p, p.GetCoord(), directions, maxSpaces, out_moves, out_captures, out_defends);
+		StandardMoves(p, p.GetCoord(), directions, maxSpaces, out_moves, moveKind);
 	}
-	public virtual void Moves(Coord position, IEnumerable<Coord> directions, int maxSpaces,
-	List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
-		Moves(piece, position, directions, maxSpaces, out_moves, out_captures, out_defends);
+
+	public virtual void StandardMoves(Coord position, IEnumerable<Coord> directions, int maxSpaces,
+	List<Move> out_moves, MoveKind moveKind) {
+		StandardMoves(piece, position, directions, maxSpaces, out_moves, moveKind);
 	}
-	public static void Moves(Piece self, Coord position, IEnumerable<Coord> directions, int maxSpaces,
-	List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
+
+	public static void StandardMoves(Piece self, Coord position, IEnumerable<Coord> directions, int maxSpaces,
+	List<Move> out_moves, MoveKind moveKind) {
 		Board board = self.board;
 		Tile tile = self.GetTile();
 		if (tile == null) { return; }
 		Coord cursor;
 		foreach (Coord dir in directions) {
+			cursor = position;
 			if (dir == Coord.zero && maxSpaces > 0) {
-				out_moves?.Add(position);
+				if (moveKind.HasFlag(MoveKind.Move)) {
+					out_moves?.Add(new Move(self, position, cursor));
+				}
 				continue;
 			}
-			cursor = position;
 			for (int i = 0; i < maxSpaces; ++i) {
 				cursor += dir;
 				if (!board.IsValid(cursor)) {
 					break;
 				}
-				out_defends?.Add(cursor);
 				Piece other = board.GetPiece(cursor);
+				Capture capture = new Capture(self, self.GetCoord(), cursor, other, cursor);
+				if (moveKind.HasFlag(MoveKind.Defend)) {
+					out_moves?.Add(capture);
+				}
 				if (other != null) {
 					bool isAllies = self.team.IsAlliedWith(other.team);
 					if (!isAllies) {
-						out_captures?.Add(cursor);
+						if (moveKind.HasFlag(MoveKind.Attack)) {
+							out_moves?.Add(capture);
+						}
 					}
 					break;
 				}
-				out_moves?.Add(cursor);
+				if (moveKind.HasFlag(MoveKind.Move)) {
+					out_moves?.Add(new Move(self, position, cursor));
+				}
 			}
 		}
 	}
 
-	public virtual void GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {}
-	public virtual void DoMove(Coord coord) {
-		piece.MoveInternal(coord);
+	public virtual void GetMoves(List<Move> out_moves, MoveKind moveKind) {}
+
+	public virtual void DoMove(Move move) {
+		piece.MoveInternal(move.to);
 	}
-	public virtual void UndoMove(Coord coord) {
-		piece.MoveInternal(coord);
+
+	public virtual void UndoMove(Move move) {
+		piece.MoveInternal(move.from);
 	}
 
 	public static void LerpPath(MonoBehaviour script, Vector3[] path, float speed, bool localPosition = false) {

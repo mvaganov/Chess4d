@@ -57,15 +57,9 @@ public class Move {
 		this.pieceMoved = pieceMoved;
 	}
 
-	public virtual void Do() {
-		//Debug.Log(this);
-		pieceMoved?.DoMove(to);
-	}
+	public virtual void Do() { pieceMoved?.DoMove(this); }
 
-	public virtual void Undo() {
-		//Debug.Log("undo " + this);
-		pieceMoved?.UndoMove(from);
-	}
+	public virtual void Undo() { pieceMoved?.UndoMove(this); }
 
 	public override string ToString() {
 		string identifier = pieceMoved.code;
@@ -86,8 +80,17 @@ public class Move {
 }
 
 public class Capture : Move {
+	// TODO rename captureCoord?
 	public Coord fromCaptured;
 	public Piece pieceCaptured;
+
+	public bool IsDefend {
+		get {
+			if (pieceCaptured == null) { return true; }
+			Team myTeam = pieceMoved.team;
+			return myTeam.IsAlliedWith(pieceCaptured.team);
+		}
+	}
 	public Capture(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured) :
 	base(pieceMoved, from, to) {
 		this.fromCaptured = fromCaptured;
@@ -137,5 +140,13 @@ public class Capture : Move {
 		} else {
 			return base.ToString();
 		}
+	}
+
+	public override bool Equals(object obj) {
+		return obj is Capture c && base.Equals(c) && c.fromCaptured == fromCaptured && c.pieceCaptured == pieceCaptured;
+	}
+
+	public override int GetHashCode() {
+		return base.GetHashCode() ^ fromCaptured.GetHashCode() ^ pieceCaptured.GetHashCode();
 	}
 }

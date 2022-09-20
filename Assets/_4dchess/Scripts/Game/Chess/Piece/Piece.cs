@@ -9,14 +9,12 @@ public class Piece : TiledGameObject {
 	public Board board;
 	private MoveLogic moveLogic;
 	public float jumpHeight = 0;
-	[SerializeField] private List<Coord> moves;
-	[SerializeField] private List<Coord> captures;
-	[SerializeField] private List<Coord> defends;
-	private bool moveAreUpToDate;
+	[SerializeField] private List<Move> moves;
+	private bool movesAreUpToDate;
 	public int moveCount = 0;
 
 	public void MarkMovesAsInvalid() {
-		moveAreUpToDate = false;
+		movesAreUpToDate = false;
 	}
 
 	protected override void Start() {
@@ -25,23 +23,23 @@ public class Piece : TiledGameObject {
 	}
 
 	// TODO can't move into check
-	public virtual void DoMove(Coord coord) {
+	public virtual void DoMove(Move move) {
 		if (moveLogic != null) {
-			moveLogic.DoMove(coord);
+			moveLogic.DoMove(move);
 		} else {
-			MoveInternal(coord);
+			MoveInternal(move.to);
 		}
-		moveAreUpToDate = false;
+		movesAreUpToDate = false;
 		++moveCount;
 	}
 
-	public virtual void UndoMove(Coord coord) {
+	public virtual void UndoMove(Move move) {
 		if (moveLogic != null) {
-			moveLogic.UndoMove(coord);
+			moveLogic.UndoMove(move);
 		} else {
-			MoveInternal(coord);
+			MoveInternal(move.from);
 		}
-		moveAreUpToDate = false;
+		movesAreUpToDate = false;
 		--moveCount;
 	}
 
@@ -79,18 +77,14 @@ public class Piece : TiledGameObject {
 		MoveLogic.LerpPath(this, bezier, team.speed, true);
 	}
 
-	public void GetMoves(List<Coord> out_moves, List<Coord> out_captures, List<Coord> out_defends) {
+	public void GetMoves(List<Move> out_moves, MoveKind moveKind) {
 		if (moveLogic == null) { return; }
-		if (!moveAreUpToDate) {
-			if (moves == null) { moves = new List<Coord>(); } else { moves.Clear(); }
-			if (captures == null) { captures = new List<Coord>(); } else { captures.Clear(); }
-			if (defends == null) { defends = new List<Coord>(); } else { defends.Clear(); }
-			moveLogic.GetMoves(moves, captures, defends);
-			moveAreUpToDate = true;
+		if (!movesAreUpToDate) {
+			if (moves == null) { moves = new List<Move>(); } else { moves.Clear(); }
+			moveLogic.GetMoves(moves, moveKind);
+			movesAreUpToDate = true;
 		}
 		if (moves != null) { out_moves?.AddRange(moves); }
-		if (captures != null) { out_captures?.AddRange(captures); }
-		if (defends != null) { out_defends?.AddRange(defends); }
 	}
 
 	public override int GetHashCode() {
