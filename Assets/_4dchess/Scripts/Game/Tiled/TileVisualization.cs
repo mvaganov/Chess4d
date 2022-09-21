@@ -25,34 +25,51 @@ public class TileVisualization : MonoBehaviour {
 	System.Action<TiledGameObject> markProcessing = null) {
 		//ClearTiles();
 		if (moves == null) { return currentMarks; }
-		TiledGameObject marker;
-		Tile tile;
-		Transform markerTransform;
+		TiledGameObject marker = null;
 		foreach (Move move in moves) {
-			switch (move) {
-				// TODO for En Passant, show move and capture line branching out of same source? or looping back?
-				// for castling show king arrow hopping and rook arrow sliding
-				// for promotion show fancy up-arrow icon at the end? maybe an upward branch? maybe a question mark box?
-				case Capture cap:
-					marker = markPool.Get();
-					currentMarks.Add(marker);
-					tile = board.GetTile(cap.fromCaptured);
-					markerTransform = marker.transform;
-					markerTransform.SetParent(tile.transform);
-					markerTransform.localPosition = Vector3.zero;
-					markProcessing?.Invoke(marker);
-					break;
-				case Move mov:
-					marker = markPool.Get();
-					currentMarks.Add(marker);
-					tile = board.GetTile(mov.to);
-					markerTransform = marker.transform;
-					markerTransform.SetParent(tile.transform);
-					markerTransform.localPosition = Vector3.zero;
-					markProcessing?.Invoke(marker);
-					break;
+			if (AddMark(move, board)) {
+				markProcessing?.Invoke(marker);
 			}
 		}
 		return currentMarks;
+	}
+	public TiledGameObject AddMark(Move move, Board board) {
+		TiledGameObject marker = CreateMark(move, board);
+		if (marker == null) { return null; }
+		currentMarks.Add(marker);
+		return marker;
+	}
+	public TiledGameObject CreateMark(Move move, Board board) {
+		TiledGameObject marker = null;
+		Tile tile;
+		Transform markerTransform;
+		switch (move) {
+			// TODO for En Passant, show move and capture line branching out of same source? or looping back?
+			// for castling show king arrow hopping and rook arrow sliding
+			// for promotion show fancy up-arrow icon at the end? maybe an upward branch? maybe a question mark box?
+			case Capture cap:
+				marker = markPool.Get();
+				tile = board.GetTile(cap.fromCaptured);
+				markerTransform = marker.transform;
+				markerTransform.SetParent(tile.transform);
+				markerTransform.localPosition = Vector3.zero;
+				Piece capturable = cap.pieceCaptured;
+				if (marker.Label != null) {
+					if (capturable != null) {
+						marker.Label.text = $"capture";//\n[{capturable.code}]";
+					} else {
+						marker.Label.text = "defend";
+					}
+				}
+				break;
+			case Move mov:
+				marker = markPool.Get();
+				tile = board.GetTile(mov.to);
+				markerTransform = marker.transform;
+				markerTransform.SetParent(tile.transform);
+				markerTransform.localPosition = Vector3.zero;
+				break;
+		}
+		return marker;
 	}
 }

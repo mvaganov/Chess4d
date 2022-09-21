@@ -11,6 +11,7 @@ public class RaycastInteraction : MonoBehaviour {
 	private List<Move> currentMoves;
 	TiledGameObject selected;
 	public TileVisualization moves;
+	public TileVisualization captures;
 	public TileVisualization selection;
 	public TileVisualization moveArrows;
 	public TileVisualization defendArrows;
@@ -22,6 +23,7 @@ public class RaycastInteraction : MonoBehaviour {
 		if (cam == null) { cam = Camera.main; }
 		if (game == null) { game = FindObjectOfType<ChessGame>(); }
 		if (moves == null) { Debug.LogWarning($"missing value for {nameof(moves)}"); }
+		if (captures == null) { Debug.LogWarning($"missing value for {nameof(captures)}"); }
 		if (selection == null) { Debug.LogWarning($"missing value for {nameof(selection)}"); }
 		if (moveArrows == null) { Debug.LogWarning($"missing value for {nameof(moveArrows)}"); }
 	}
@@ -84,7 +86,9 @@ public class RaycastInteraction : MonoBehaviour {
 	private void ClearPreviousSelectionVisuals() {
 		if (selected == null) { return; }
 		selected.ResetColor();
+		defendArrows.ClearTiles();
 		selection.ClearTiles();
+		captures.ClearTiles();
 		moves.ClearTiles();
 	}
 
@@ -93,38 +97,78 @@ public class RaycastInteraction : MonoBehaviour {
 		Piece piece = selected as Piece;
 		if (piece == null) { return; }
 		List<Move> moveLocations = new List<Move>();
-		List<Move> captureLocations = new List<Move>();
-		List<Move> defendLocations = new List<Move>();
+		//List<Move> captureLocations = new List<Move>();
+		//List<Move> defendLocations = new List<Move>();
 		piece.GetMoves(moveLocations, MoveKind.Move);
-		piece.GetMoves(captureLocations, MoveKind.Attack);
-		piece.GetMoves(defendLocations, MoveKind.Defend);
+		//piece.GetMoves(captureLocations, MoveKind.Attack);
+		//piece.GetMoves(defendLocations, MoveKind.Defend);
 		if (currentMoves == null) { currentMoves = new List<Move>(); }
 		else { currentMoves.Clear(); }
 		currentMoves.AddRange(moveLocations);
-		currentMoves.AddRange(captureLocations);
+		//currentMoves.AddRange(captureLocations);
 		moves.ClearTiles();
-		moves.CreateMarks(moveLocations, piece.board, Color.yellow);
-		moves.CreateMarks(captureLocations, piece.board, Color.red);
-		return;
+		captures.ClearTiles();
 		selection.ClearTiles();
+		defendArrows.ClearTiles();
+		for (int i = 0; i < currentMoves.Count; ++i) {
+			AddPieceSelectionVisualFor(currentMoves[i], piece.board);
+		}
+//		moves.CreateMarks(moveLocations, piece.board, Color.yellow);
+//		moves.CreateMarks(captureLocations, piece.board, Color.red);
 		Coord pieceCoord = piece.GetCoord();
 		selection.CreateMarks(new Move[] { new Move(piece,pieceCoord, pieceCoord) }, piece.board, Color.green);
-		defendArrows.ClearTiles();
-		for(int i = defendLocations.Count-1; i >= 0; --i) {
-			Capture cap = defendLocations[i] as Capture;
-			if (cap == null) { continue; }
-			Piece defended = cap.pieceCaptured;//piece.board.GetPiece(defendLocations[i]);
-			if (defended == null || !piece.team.IsAlliedWith(defended.team)) {
-				defendLocations.RemoveAt(i);
-			}
+		return;
+		//for(int i = defendLocations.Count-1; i >= 0; --i) {
+		//	Capture cap = defendLocations[i] as Capture;
+		//	if (cap == null) { continue; }
+		//	Piece defended = cap.pieceCaptured;//piece.board.GetPiece(defendLocations[i]);
+		//	if (defended == null || !piece.team.IsAlliedWith(defended.team)) {
+		//		defendLocations.RemoveAt(i);
+		//	}
+		//}
+		//Coord c = piece.GetCoord();
+		//defendArrows.CreateMarks(defendLocations, piece.board, tile => {
+		//	if (tile is TiledWire tiledArrow) {
+		//		tiledArrow.Destination = c;
+		//		tiledArrow.Material.color = Color.yellow;
+		//	}
+		//});
+	}
+
+	private TiledGameObject AddPieceSelectionVisualFor(Move someKindOfMove, Board board) {
+		TiledGameObject tgo = null;
+		switch (someKindOfMove) {
+			case Pawn.EnPassant ep:
+				Debug.Log("EN PASSANT!");
+				tgo = captures.AddMark(ep, board);
+				tgo.Color = new Color(1,.25f,0);
+				break;
+			case Capture cap:
+				if (cap.IsDefend) {
+					if (cap.pieceCaptured != null) {
+						tgo = defendArrows.AddMark(cap, board);
+						TiledWire tw = tgo as TiledWire;
+						tw.Destination = cap.from;
+						tgo.Color = new Color(1,1,0);
+					}
+				} else {
+					tgo = captures.AddMark(cap, board);
+					tgo.Color = new Color(1, 0, 0);
+					//TiledWire tw = tgo as TiledWire;
+					//tw.Destination = cap.from;
+					//tw.Color = Color.red;
+				}
+				break;
+			case Pawn.DoublePawnMove dbp:
+				tgo = moves.AddMark(dbp, board);
+				tgo.Color = new Color(1,.75f,0);
+				break;
+			case Move move:
+				tgo = moves.AddMark(move, board);
+				tgo.Color = Color.yellow;
+				break;
 		}
-		Coord c = piece.GetCoord();
-		defendArrows.CreateMarks(defendLocations, piece.board, tile => {
-			if (tile is TiledWire tiledArrow) {
-				tiledArrow.Destination = c;
-				tiledArrow.Material.color = Color.yellow;
-			}
-		});
+		return tgo;
 	}
 
 	private void ColorAccentHovered(TiledGameObject hoveredObject) {
