@@ -8,6 +8,7 @@ public class TiledWire : TiledGameObject {
 		set => Wire.LineRenderer.material = value;
 	}
 	[SerializeField] private Coord _destinationCoord;
+	// TODO allow setting the source as well, so that arrows can come and go.
 	public Coord Destination {
 		get { return _destinationCoord; }
 		set {

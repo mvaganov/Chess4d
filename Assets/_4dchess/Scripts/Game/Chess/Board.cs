@@ -9,12 +9,8 @@ public class Board : MonoBehaviour {
 	public Vector3 tileSize = new Vector3(1,2,1);
 	public Material[] TileMaterials;
 	public List<Tile> tiles = new List<Tile>();
-	// TODO reimplement as movesToLocation, with Move and Capture data
 	// TODO move this to ChessGame?
 	private List<List<Move>> movesToLocation = new List<List<Move>>();
-	//private List<List<Piece>> piecesThatCanMoveToLocation = new List<List<Piece>>();
-	//private List<List<Piece>> piecesThatCanCaptureLocation = new List<List<Piece>>();
-	//private List<List<Piece>> piecesThatCanDefendLocation = new List<List<Piece>>();
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Tile TilePrefab;
 	private Transform _transform;
@@ -53,33 +49,19 @@ public class Board : MonoBehaviour {
 
 	public void RecalculatePieceMoves() {
 		EnsureClearLedger(movesToLocation);
-		//EnsureClearLedger(piecesThatCanMoveToLocation);
-		//EnsureClearLedger(piecesThatCanCaptureLocation);
-		//EnsureClearLedger(piecesThatCanDefendLocation);
 		List<Piece> allPieces = GetAllPieces();
 		allPieces.ForEach(p => p.MarkMovesAsInvalid());
-		//Debug.Log(string.Join("\n", allPieces.ConvertAll(p => {
-		//	List<Coord> moves = p.GetMoves();
-		//	int count = moves != null ? moves.Count : -1;
-		//	return p.name + ": " + count;
-		//})));
 		List<Move> moves = new List<Move>();
-		List<Move> captures = new List<Move>();
-		List<Move> defends = new List<Move>();
 		for (int i = 0; i < allPieces.Count; ++i) {
 			Piece p = allPieces[i];
-			p.GetMoves(moves, MoveKind.MoveAttackDefend);
-			AddToMapping(movesToLocation, p, moves);
+			p.GetMoves(moves);
+			AddToMapping(movesToLocation, moves);
 			moves.Clear();
-			//AddToList(piecesThatCanMoveToLocation, p, moves, GetMoveLocation);
-			//moves.Clear();
-			//AddToList(piecesThatCanCaptureLocation, p, captures, GetCaptureLocation);
-			//captures.Clear();
-			//AddToList(piecesThatCanDefendLocation, p, defends, GetCaptureLocation);
-			//defends.Clear();
 		}
 	}
+
 	private Coord GetMoveLocation(Move m) => m.to;
+
 	private Coord GetCaptureLocation(Move m) {
 		if (m is Capture c) {
 			return c.fromCaptured;
@@ -96,7 +78,7 @@ public class Board : MonoBehaviour {
 		}
 	}
 
-	private void AddToMapping(List<List<Move>> out_ledger, Piece piece, List<Move> moves) {
+	private void AddToMapping(List<List<Move>> out_ledger, List<Move> moves) {
 		for (int m = 0; m < moves.Count; ++m) {
 			Move mov = moves[m];
 			Coord coord = mov.to;
@@ -118,15 +100,6 @@ public class Board : MonoBehaviour {
 			out_ledger[tileIndex].Add(piece);
 		}
 	}
-
-	//public List<Piece> GetPiecesThatCanMove(Coord coord) {
-	//	int index = TileIndex(coord);
-	//	return piecesThatCanMoveToLocation[index];
-	//}
-	//public List<Piece> GetPiecesThatCanDefend(Coord coord) {
-	//	int index = TileIndex(coord);
-	//	return piecesThatCanDefendLocation[index];
-	//}
 
 	public List<Move> GetMovesTo(Coord coord) {
 		int index = TileIndex(coord);
@@ -186,9 +159,5 @@ public class Board : MonoBehaviour {
 		if (game == null) {
 			game = GetComponentInParent<ChessGame>();
 		}
-	}
-
-	void Update() {
-
 	}
 }

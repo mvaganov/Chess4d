@@ -54,7 +54,7 @@ public class Pawn : MoveLogic {
 		if (possibleTarget == null || possibleTarget.code != p.code) {
 			return null;
 		}
-		UnityEngine.Debug.Log("maybe en passant?");
+		//UnityEngine.Debug.Log("maybe en passant?");
 		Pawn pawn = possibleTarget.GetComponent<Pawn>();
 		if (possibleTarget.moveCount != 1 || pawn.didDoubleMoveOnTurn == board.game.chessMoves.CurrentMove.index) {
 			return null;

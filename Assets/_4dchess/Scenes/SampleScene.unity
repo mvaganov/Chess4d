@@ -2219,8 +2219,8 @@ MonoBehaviour:
   moves: {fileID: 1010063922}
   captures: {fileID: 1566739770}
   selection: {fileID: 242245484}
-  moveArrows: {fileID: 1355893368}
   defendArrows: {fileID: 1933217765}
+  tempDefendArrows: {fileID: 1355893368}
 --- !u!1001 &487125780
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7250,7 +7250,7 @@ GameObject:
   - component: {fileID: 1355893367}
   - component: {fileID: 1355893368}
   m_Layer: 0
-  m_Name: Mover Arrows
+  m_Name: Temp Defend Arrows
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
