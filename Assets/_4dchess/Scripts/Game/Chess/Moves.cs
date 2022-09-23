@@ -71,17 +71,17 @@ public class Moves : MonoBehaviour {
 				}
 			}
 		} while (currentMove.index != actualIndexToTravelTo && next != null);
-		if (actualIndexToTravelTo != currentMove.index) {
-			return;
+		if (actualIndexToTravelTo == currentMove.index) {
+			next = currentMove.next.Count > targetMove.BranchIndex ? currentMove.next[targetMove.BranchIndex] : null;
+			if (next == null) {
+				throw new Exception($"can't go to next[{targetMove.BranchIndex}] after {currentMove.index} {currentMove}");
+			}
+			currentMove.next.RemoveAt(targetMove.BranchIndex);
+			currentMove.next.Insert(0, next);
+			next.Do();
+			currentMove = next;
 		}
-		next = currentMove.next.Count > targetMove.BranchIndex ? currentMove.next[targetMove.BranchIndex] : null;
-		if (next == null) {
-			throw new Exception($"can't go to next[{targetMove.BranchIndex}] after {currentMove.index} {currentMove}");
-		}
-		currentMove.next.RemoveAt(targetMove.BranchIndex);
-		currentMove.next.Insert(0, next);
-		next.Do();
-		currentMove = next;
+		// TODO refresh UI, like chessVisuals.ResetPieceSelectionVisuals(); and board.RecalculatePieceMoves()
 	}
 
 	public bool UndoMove() {

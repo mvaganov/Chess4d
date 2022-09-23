@@ -34,22 +34,24 @@ public class TileVisualization : MonoBehaviour {
 		return currentMarks;
 	}
 	public TiledGameObject AddMark(Move move, Board board) {
-		TiledGameObject marker = CreateMark(move, board);
+		TiledGameObject marker = CreateMark(move, board, false);
 		if (marker == null) { return null; }
 		currentMarks.Add(marker);
 		return marker;
 	}
-	public TiledGameObject CreateMark(Move move, Board board) {
+	public TiledGameObject CreateMark(Move move, Board board, bool reverse) {
 		TiledGameObject marker = null;
 		Tile tile;
 		Transform markerTransform;
+		Coord coord;
 		switch (move) {
 			// TODO for En Passant, show move and capture line branching out of same source? or looping back?
 			// for castling show king arrow hopping and rook arrow sliding
 			// for promotion show fancy up-arrow icon at the end? maybe an upward branch? maybe a question mark box?
 			case Capture cap:
 				marker = markPool.Get();
-				tile = board.GetTile(cap.fromCaptured);
+				coord = reverse ? cap.from : cap.fromCaptured;
+				tile = board.GetTile(coord);
 				markerTransform = marker.transform;
 				markerTransform.SetParent(tile.transform);
 				markerTransform.localPosition = Vector3.zero;
@@ -61,15 +63,27 @@ public class TileVisualization : MonoBehaviour {
 						marker.Label.text = "defend";
 					}
 				}
+
 				break;
 			case Move mov:
 				marker = markPool.Get();
-				tile = board.GetTile(mov.to);
+				coord = reverse ? mov.from : mov.to;
+				tile = board.GetTile(coord);
 				markerTransform = marker.transform;
 				markerTransform.SetParent(tile.transform);
 				markerTransform.localPosition = Vector3.zero;
 				break;
 		}
+		if (marker is TiledWire tw) {
+			coord = reverse ? move.to : move.from;
+			tw.Destination = coord;
+		}
+		return marker;
+	}
+	public TiledGameObject AddMarkReverse(Move move, Board board) {
+		TiledGameObject marker = CreateMark(move, board, true);
+		if (marker == null) { return null; }
+		currentMarks.Add(marker);
 		return marker;
 	}
 }

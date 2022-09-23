@@ -2216,11 +2216,8 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 2
     m_NumAlphaKeys: 3
-  moves: {fileID: 1010063922}
-  captures: {fileID: 1566739770}
-  selection: {fileID: 242245484}
-  defendArrows: {fileID: 1933217765}
-  tempDefendArrows: {fileID: 1355893368}
+  analysis: {fileID: 1564371134}
+  visuals: {fileID: 1921063277}
 --- !u!1001 &487125780
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8390,6 +8387,7 @@ GameObject:
   - component: {fileID: 1564371132}
   - component: {fileID: 1564371131}
   - component: {fileID: 1564371133}
+  - component: {fileID: 1564371134}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -8512,6 +8510,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1564371134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564371130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5174e1e1f023f534abe6e5afbdd4e55e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1566739768
 GameObject:
   m_ObjectHideFlags: 0
@@ -10527,6 +10537,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1921063275}
   - component: {fileID: 1921063276}
+  - component: {fileID: 1921063277}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -10625,6 +10636,26 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+--- !u!114 &1921063277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1921063274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c196aa8f2ddb714d904282533ce47da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moves: {fileID: 1010063922}
+  captures: {fileID: 1566739770}
+  selection: {fileID: 242245484}
+  defendArrows: {fileID: 1933217765}
+  tempDefendArrows: {fileID: 1355893368}
+  currentHovered: {fileID: 0}
+  selected: {fileID: 0}
+  showKingDefender: 0
 --- !u!1 &1933217763
 GameObject:
   m_ObjectHideFlags: 0

@@ -114,4 +114,8 @@ public class ChessGame : MonoBehaviour {
 		capturedPiece = piece.board.GetPiece(move);
 		return capturedPiece != null && capturedPiece.team != piece.team;
 	}
+	public static bool IsMyKing(Piece me, Piece other) {
+		if (me == null || other == null || other.code != "K" || other.team != me.team) { return false; }
+		return true;
+	}
 }

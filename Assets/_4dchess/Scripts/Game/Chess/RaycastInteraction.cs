@@ -8,25 +8,27 @@ public class RaycastInteraction : MonoBehaviour {
 	public Transform rayHitMarker;
 	public Gradient hoveredColor;
 	private TiledGameObject currentHovered;
-	private List<Move> currentMoves;
-	TiledGameObject selected;
-	public TileVisualization moves;
-	public TileVisualization captures;
-	public TileVisualization selection;
-	public TileVisualization defendArrows;
-	public TileVisualization tempDefendArrows;
+	public ChessAnalysis analysis;
+	//public TiledGameObject selected;
+	//public TileVisualization moves;
+	//public TileVisualization captures;
+	//public TileVisualization selection;
+	//public TileVisualization defendArrows;
+	//public TileVisualization tempDefendArrows;
+	public ChessVisuals visuals;
 
 	private KeyCode undoMove = KeyCode.Backspace;
 	private KeyCode redoMove = KeyCode.Space;
+	//public bool showKingDefender;
 
 	void Start() {
 		if (cam == null) { cam = Camera.main; }
 		if (game == null) { game = FindObjectOfType<ChessGame>(); }
-		if (moves == null) { Debug.LogWarning($"missing value for {nameof(moves)}"); }
-		if (captures == null) { Debug.LogWarning($"missing value for {nameof(captures)}"); }
-		if (selection == null) { Debug.LogWarning($"missing value for {nameof(selection)}"); }
-		if (defendArrows == null) { Debug.LogWarning($"missing value for {nameof(defendArrows)}"); }
-		if (tempDefendArrows == null) { Debug.LogWarning($"missing value for {nameof(tempDefendArrows)}"); }
+		//if (moves == null) { Debug.LogWarning($"missing value for {nameof(moves)}"); }
+		//if (captures == null) { Debug.LogWarning($"missing value for {nameof(captures)}"); }
+		//if (selection == null) { Debug.LogWarning($"missing value for {nameof(selection)}"); }
+		//if (defendArrows == null) { Debug.LogWarning($"missing value for {nameof(defendArrows)}"); }
+		//if (tempDefendArrows == null) { Debug.LogWarning($"missing value for {nameof(tempDefendArrows)}"); }
 	}
 
 	void Update() {
@@ -43,11 +45,11 @@ public class RaycastInteraction : MonoBehaviour {
 			if (currentHovered != null) {
 				// handle a click at the hovered coordinate
 				Coord coord = currentHovered.GetCoord();
-				if (selected != null && selected is Piece selectedPiece) {
-					Debug.Log($"...unselected {selected}");
+				Piece selectedPiece = analysis.SelectedPiece;
+				if (selectedPiece != null) {
+					//Debug.Log($"...unselected {selected}");
 					// move selected piece if the move is valid
-					int moveIndex = (currentMoves != null) ? currentMoves.FindIndex(m => m.to == coord) : -1;
-					if (coord != selectedPiece.GetCoord() && moveIndex >= 0) {
+					if (coord != selectedPiece.GetCoord() && analysis.IsValidMove(coord)) {
 						if (ChessGame.IsMoveCapture(selectedPiece, coord, out Piece capturedPiece)) {
 							game.Capture(selectedPiece, capturedPiece, coord, "");
 							currentHovered = null;
@@ -59,15 +61,16 @@ public class RaycastInteraction : MonoBehaviour {
 						Debug.Log("invalid move, unselecting.");
 						currentHovered = null;
 					}
-					defendArrows.ClearTiles();
+					visuals.defendArrows.ClearTiles();
 				}
 			}
-			ClearPreviousSelectionVisuals();
-			selected = currentHovered;
-			if (selected != null) {
-				Debug.Log($"selected {selected}");
-			}
-			ResetPieceSelectionVisuals();
+			visuals.ClearPreviousSelectionVisuals();
+			visuals.selected = currentHovered;
+			//if (selected != null) {
+			//	Debug.Log($"selected {selected}");
+			//}
+			Piece piece = currentHovered != null ? currentHovered.GetBoard().GetPiece(currentHovered.GetCoord()) : null;
+			ResetPieceSelectionVisuals(piece);
 		}
 		Ray ray = cam.ScreenPointToRay(Input.mousePosition);
 		if (Physics.Raycast(ray, out RaycastHit rh)) {
@@ -75,84 +78,54 @@ public class RaycastInteraction : MonoBehaviour {
 				PlaceRayHitMarker(rh);
 			}
 			ColorAccentHovered(rh.collider.GetComponent<TiledGameObject>());
-			DrawSquareDefenders(currentHovered);
+			visuals.DrawSquareDefenders(currentHovered);
 			// TODO if currentHovered is one of the valid moves
 				// draw threat&defense lines for this piece if it were to move to the currentHovered location
 		} else {
 			ClearHoverAccent();
-			DrawSquareDefenders(null);
+			visuals.DrawSquareDefenders(null);
 		}
 	}
 
-	private void ClearPreviousSelectionVisuals() {
-		if (selected == null) { return; }
-		selected.ResetColor();
-		defendArrows.ClearTiles();
-		selection.ClearTiles();
-		captures.ClearTiles();
-		moves.ClearTiles();
-	}
+	//private void ClearPreviousSelectionVisuals() {
+	//	if (selected == null) { return; }
+	//	selected.ResetColor();
+	//	defendArrows.ClearTiles();
+	//	selection.ClearTiles();
+	//	captures.ClearTiles();
+	//	moves.ClearTiles();
+	//}
 
-	private void ResetPieceSelectionVisuals() {
-		if (selected == null) { return; }
-		Piece piece = selected as Piece;
-		if (piece == null) { return; }
-		List<Move> moveLocations = new List<Move>();
-		piece.GetMoves(moveLocations);
-		if (currentMoves == null) { currentMoves = new List<Move>(); }
-		else { currentMoves.Clear(); }
-		currentMoves.AddRange(moveLocations);
-		moves.ClearTiles();
-		captures.ClearTiles();
-		selection.ClearTiles();
-		defendArrows.ClearTiles();
-		for (int i = 0; i < currentMoves.Count; ++i) {
-			AddPieceSelectionVisualFor(currentMoves[i], piece.board);
-		}
-		Coord pieceCoord = piece.GetCoord();
-		selection.CreateMarks(new Move[] { new Move(piece,pieceCoord, pieceCoord) }, piece.board, Color.green);
-	}
-
-	private TiledGameObject AddPieceSelectionVisualFor(Move someKindOfMove, Board board) {
-		TiledGameObject tgo = null;
-		switch (someKindOfMove) {
-			case Pawn.EnPassant ep:
-				Debug.Log("EN PASSANT!");
-				tgo = moves.AddMark(ep, board);
-				tgo.Color = new Color(1, .5f, 0);
-				{
-					tgo = defendArrows.AddMark(ep, board);
-					TiledWire tw = tgo as TiledWire;
-					tw.Destination = ep.from;
-					tgo.Color = new Color(1, .5f, 0);
-				}
-				break;
-			case Capture cap:
-				if (cap.IsDefend) {
-					if (cap.pieceCaptured != null) {
-						tgo = defendArrows.AddMark(cap, board);
-						TiledWire tw = tgo as TiledWire;
-						tw.Destination = cap.from;
-						tgo.Color = new Color(1,1,0);
-					}
-				} else {
-					tgo = captures.AddMark(cap, board);
-					tgo.Color = new Color(1, 0, 0);
-					//TiledWire tw = tgo as TiledWire;
-					//tw.Destination = cap.from;
-					//tw.Color = Color.red;
-				}
-				break;
-			case Pawn.DoublePawnMove dbp:
-				tgo = moves.AddMark(dbp, board);
-				tgo.Color = new Color(1,.75f,0);
-				break;
-			case Move move:
-				tgo = moves.AddMark(move, board);
-				tgo.Color = Color.yellow;
-				break;
-		}
-		return tgo;
+	private void ResetPieceSelectionVisuals(Piece piece) {
+		Debug.Log("selecting "+ piece);
+		analysis.SetCurrentPiece(piece);
+		visuals.ResetPieceSelectionVisuals(analysis);
+		//if (selected == null) { return; }
+		//Piece piece = selected as Piece;
+		//if (piece == null) { return; }
+		//analysis.SetCurrentPiece(piece);
+		////List<Move> pieceMoves = new List<Move>();
+		////piece.GetMoves(pieceMoves);
+		////if (currentMoves == null) { currentMoves = new List<Move>(); } else { currentMoves.Clear(); }
+		////if (validMoves == null) { validMoves = new List<Move>(); } else { validMoves.Clear(); }
+		
+		////currentMoves.AddRange(pieceMoves);
+		////for (int i = 0; i < pieceMoves.Count; i++) {
+		////	if (IsValidMove(piece, pieceMoves[i])) {
+		////		validMoves.Add(pieceMoves[i]);
+		////	}
+		////}
+		//for (int i = 0; i < analysis.CurrentMoves.Count; ++i) {
+		//	Move move = analysis.CurrentMoves[i];
+		//	if (!showKingDefender && move is Capture cap && IsMyKing(piece, cap.pieceCaptured)) { continue; }
+		//	AddPieceSelectionVisualFor(move, piece.board);
+		//}
+		//moves.ClearTiles();
+		//captures.ClearTiles();
+		//selection.ClearTiles();
+		//defendArrows.ClearTiles();
+		//Coord pieceCoord = piece.GetCoord();
+		//selection.CreateMarks(new Move[] { new Move(piece,pieceCoord, pieceCoord) }, piece.board, Color.green);
 	}
 
 	private void ColorAccentHovered(TiledGameObject hoveredObject) {
@@ -168,48 +141,6 @@ public class RaycastInteraction : MonoBehaviour {
 			currentHovered.ResetColor();
 		}
 		currentHovered = null;
-	}
-
-	public void DrawSquareDefenders(TiledGameObject target) {
-		if (tempDefendArrows == null) { return; }
-		tempDefendArrows.ClearTiles();
-		if (target == null) { return; }
-		Board board = target.GetBoard();
-		if (board == null) {
-			Debug.Log("no board?");
-			return;
-		}
-		Coord currentCoord = target.GetCoord();
-		List<Move> activityAtSquare = board.GetMovesTo(currentCoord);
-		List<Move> defenders = new List<Move>();
-		//Piece selectedPiece = selected as Piece;
-		Coord selectedCoord = (selected != null) ? selected.GetCoord() : Coord.zero;
-		for (int i = 0; i < activityAtSquare.Count; i++) {
-			Capture cap = activityAtSquare[i] as Capture;
-			if (cap == null) { continue; }
-			defenders.Add(cap);
-		}
-		Debug.Log($" {target} {activityAtSquare.Count} {defenders.Count}");
-		for (int i = 0; i < defenders.Count; ++i) {
-			TiledGameObject tiledObject = tempDefendArrows.AddMark(defenders[i], board);
-			TiledWire tw = tiledObject as TiledWire;
-			if (tw != null) {
-				tw.Destination = defenders[i].from;
-				tiledObject.Color = Color.magenta;
-			}
-		}
-		//List<TiledGameObject> arrows = tempDefendArrows.CreateMarks(defenders, board, tile => {
-		//	TiledWire tiledArrow = tile as TiledWire;
-		//	if (tiledArrow == null) { return; }
-		//	tiledArrow.Destination = currentCoord;
-		//	tiledArrow.Color = Color.yellow;
-		//	if (selectedPiece != null) {
-		//		Piece defender = board.GetPiece(tiledArrow.GetCoord());
-		//		if (selectedPiece == null || defender.team != selectedPiece.team) {
-		//			tiledArrow.Color = Color.red;
-		//		}
-		//	}
-		//});
 	}
 
 	public void PlaceRayHitMarker(RaycastHit rh) {
