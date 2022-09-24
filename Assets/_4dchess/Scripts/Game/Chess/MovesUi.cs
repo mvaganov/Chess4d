@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +16,7 @@ public class MovesUi : MonoBehaviour {
 	[ContextMenuItem(nameof(ShowTextTrue),nameof(ShowTextTrue)),
 	ContextMenuItem(nameof(HideText), nameof(HideText)),]
 	[SerializeField] private bool _showText = true;
-	public List<GameObject> branches = new List<GameObject>();
+	//private List<GameObject> branches = new List<GameObject>();
 
 	public bool ShowText {
 		get => _showText;
@@ -37,22 +38,27 @@ public class MovesUi : MonoBehaviour {
 	public MoveUi CurrentMoveUi {
 		get {
 			MoveNode current = chessMoves.CurrentMove;
-			for (int i = transform.childCount - 1; i >= 0; --i) {
-				Transform child = transform.GetChild(i);
-				MoveUi moveUi = child.GetComponent<MoveUi>();
-				if (moveUi != null && moveUi.move == current) {
-					return moveUi;
-				}
-				MoveUi[] moves = child.GetComponentsInChildren<MoveUi>();
-				for (int j = 0; j < moves.Length; ++j) {
-					if (moves[j].move == current) {
-						return moves[j];
-					}
-				}
-			}
-			return null;
+			return Find(m => m.move == current);
 		}
 	}
+
+	public MoveUi Find(Func<MoveUi, bool> predicate) {
+		for (int i = transform.childCount - 1; i >= 0; --i) {
+			Transform child = transform.GetChild(i);
+			MoveUi moveUi = child.GetComponent<MoveUi>();
+			if (moveUi != null && predicate(moveUi)) {
+				return moveUi;
+			}
+			MoveUi[] moves = child.GetComponentsInChildren<MoveUi>();
+			for (int j = 0; j < moves.Length; ++j) {
+				if (predicate(moves[j])) {
+					return moves[j];
+				}
+			}
+		}
+		return null;
+	}
+
 	public void OnMove(MoveNode move) {
 		RebuildUi();
 	}
@@ -93,6 +99,7 @@ public class MovesUi : MonoBehaviour {
 		}
 		RefreshLayouts();
 		notesInput?.SetTextWithoutNotify(chessMoves.CurrentMove.notes);
+		Debug.Log(CurrentMoveUi);
 	}
 
 	public void RefreshLayouts() {

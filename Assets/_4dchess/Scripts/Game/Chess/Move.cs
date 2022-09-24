@@ -138,7 +138,7 @@ public class Capture : Move {
 			}
 			return $"{identifier}x{to}";
 		} else {
-			return base.ToString();
+			return "_" + base.ToString();
 		}
 	}
 

@@ -19,6 +19,14 @@ public class Pawn : MoveLogic {
 	public class EnPassant : Capture {
 		public EnPassant(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
 		: base(pieceMoved, from, to, pieceCaptured, fromCaptured) { }
+		public override void Do() {
+			base.Do();
+			UnityEngine.Debug.Log("DID en passant");
+		}
+		public override void Undo() {
+			base.Undo();
+			UnityEngine.Debug.Log("UNdid en passant");
+		}
 	}
 	private int didDoubleMoveOnTurn = -1;
 	// TODO mark a flag to identify the turn that this pawn did a double move, required for en passant logic
@@ -41,10 +49,10 @@ public class Pawn : MoveLogic {
 		if (moveKind.HasFlag(MoveKind.Defend) || moveKind.HasFlag(MoveKind.Attack)) {
 			StandardMoves(new Coord[] { dir + Coord.left, dir + Coord.right }, 1, out_moves, MoveKind.AttackDefend);
 		}
-		// TODO en passant
 		Move leftEP = HasPossibleEnPassant(board, p, coord, coord + dir + Coord.left, coord + Coord.left);
+		if (leftEP != null) { out_moves.Add(leftEP); }
 		Move rightEP = HasPossibleEnPassant(board, p, coord, coord + dir + Coord.right, coord + Coord.right);
-		// TODO add leftEP and rightEP to out_moves if they exist
+		if (rightEP != null) { out_moves.Add(rightEP); }
 		// TODO pawn promotion
 	}
 	private Move HasPossibleEnPassant(Board board, Piece p, Coord thisPieceLocation, Coord nextPieceLocation, Coord otherPieceLocation) {
@@ -55,11 +63,13 @@ public class Pawn : MoveLogic {
 			return null;
 		}
 		//UnityEngine.Debug.Log("maybe en passant?");
-		Pawn pawn = possibleTarget.GetComponent<Pawn>();
-		if (possibleTarget.moveCount != 1 || pawn.didDoubleMoveOnTurn == board.game.chessMoves.CurrentMove.index) {
+		Pawn pawn;
+		if (possibleTarget.moveCount != 1 || (pawn = possibleTarget.GetComponent<Pawn>()) == null) {
 			return null;
 		}
-		UnityEngine.Debug.Log("TODO posible en passant on " + leftTile.GetCoord() + " if the pawn just double moved");
+		bool onlyJustNowDidDoubleMove = pawn.didDoubleMoveOnTurn != board.game.chessMoves.CurrentMove.index;
+		UnityEngine.Debug.Log("en passant " + leftTile.GetCoord() + " just double moved? "+ onlyJustNowDidDoubleMove);
+		if (!onlyJustNowDidDoubleMove) return null;
 		// TODO create en passant move
 		return new EnPassant(p, thisPieceLocation, nextPieceLocation, possibleTarget, otherPieceLocation);
 	}

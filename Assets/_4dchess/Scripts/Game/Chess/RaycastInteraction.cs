@@ -4,31 +4,21 @@ using UnityEngine.EventSystems;
 
 public class RaycastInteraction : MonoBehaviour {
 	public ChessGame game;
+	public ChessAnalysis analysis;
+	public ChessVisuals visuals;
 	public Camera cam;
 	public Transform rayHitMarker;
 	public Gradient hoveredColor;
-	private TiledGameObject currentHovered;
-	public ChessAnalysis analysis;
-	//public TiledGameObject selected;
-	//public TileVisualization moves;
-	//public TileVisualization captures;
-	//public TileVisualization selection;
-	//public TileVisualization defendArrows;
-	//public TileVisualization tempDefendArrows;
-	public ChessVisuals visuals;
+	public TiledGameObject currentHovered;
 
 	private KeyCode undoMove = KeyCode.Backspace;
 	private KeyCode redoMove = KeyCode.Space;
-	//public bool showKingDefender;
 
 	void Start() {
 		if (cam == null) { cam = Camera.main; }
 		if (game == null) { game = FindObjectOfType<ChessGame>(); }
-		//if (moves == null) { Debug.LogWarning($"missing value for {nameof(moves)}"); }
-		//if (captures == null) { Debug.LogWarning($"missing value for {nameof(captures)}"); }
-		//if (selection == null) { Debug.LogWarning($"missing value for {nameof(selection)}"); }
-		//if (defendArrows == null) { Debug.LogWarning($"missing value for {nameof(defendArrows)}"); }
-		//if (tempDefendArrows == null) { Debug.LogWarning($"missing value for {nameof(tempDefendArrows)}"); }
+		if (analysis == null) { analysis = FindObjectOfType<ChessAnalysis>(); }
+		if (visuals == null) { visuals = FindObjectOfType<ChessVisuals>(); }
 	}
 
 	void Update() {
@@ -42,35 +32,14 @@ public class RaycastInteraction : MonoBehaviour {
 			game.RedoMove();
 		}
 		if (Input.GetMouseButtonUp(0)) {
-			if (currentHovered != null) {
-				// handle a click at the hovered coordinate
-				Coord coord = currentHovered.GetCoord();
-				Piece selectedPiece = analysis.SelectedPiece;
-				if (selectedPiece != null) {
-					//Debug.Log($"...unselected {selected}");
-					// move selected piece if the move is valid
-					if (coord != selectedPiece.GetCoord() && analysis.IsValidMove(coord)) {
-						if (ChessGame.IsMoveCapture(selectedPiece, coord, out Piece capturedPiece)) {
-							game.Capture(selectedPiece, capturedPiece, coord, "");
-							currentHovered = null;
-						} else {
-							game.Move(selectedPiece, coord, "");
-						}
-						selectedPiece.board.RecalculatePieceMoves();
-					} else {
-						Debug.Log("invalid move, unselecting.");
-						currentHovered = null;
-					}
-					visuals.defendArrows.ClearTiles();
-				}
-			}
+			Click();
 			visuals.ClearPreviousSelectionVisuals();
 			visuals.selected = currentHovered;
-			//if (selected != null) {
-			//	Debug.Log($"selected {selected}");
-			//}
-			Piece piece = currentHovered != null ? currentHovered.GetBoard().GetPiece(currentHovered.GetCoord()) : null;
-			ResetPieceSelectionVisuals(piece);
+			Board currentPiecesBoard = currentHovered != null ? currentHovered.GetBoard() : null;
+			Piece piece = currentPiecesBoard != null ? currentPiecesBoard.GetPiece(currentHovered.GetCoord()) : null;
+			Debug.Log("selecting " + piece);
+			analysis.SetCurrentPiece(piece);
+			visuals.ResetPieceSelectionVisuals(analysis);
 		}
 		Ray ray = cam.ScreenPointToRay(Input.mousePosition);
 		if (Physics.Raycast(ray, out RaycastHit rh)) {
@@ -87,45 +56,48 @@ public class RaycastInteraction : MonoBehaviour {
 		}
 	}
 
-	//private void ClearPreviousSelectionVisuals() {
-	//	if (selected == null) { return; }
-	//	selected.ResetColor();
-	//	defendArrows.ClearTiles();
-	//	selection.ClearTiles();
-	//	captures.ClearTiles();
-	//	moves.ClearTiles();
-	//}
+	private void Click() {
+		if (currentHovered == null) { return; }
+		// handle a click at the hovered coordinate
+		Coord coord = currentHovered.GetCoord();
+		Piece selectedPiece = analysis.SelectedPiece;
+		if (selectedPiece != null) {
+			//Debug.Log($"...unselected {selected}");
+			// move selected piece if the move is valid
+			List<Move> moves = analysis.GetMovesAt(coord, MoveIsNotDefensive);
+			if (coord != selectedPiece.GetCoord() && moves.Count != 0) {
+				switch (moves.Count) {
+					case 1:
+						//moves[0].Do();
+						game.chessMoves.MakeMove(moves[0], "");
+						break;
+					default:
+						Debug.Log($"must disambiguate between {moves.Count} moves: [{string.Join(", ", moves)}]");
+						for (int i = 0; i < moves.Count; i++) {
+							Move m = moves[i];
+							Debug.Log($"{m.GetType().Name} {m.pieceMoved} {m.from} {m.to}");
+						}
+						break;
+				}
+				//if (ChessGame.IsMoveCapture(selectedPiece, coord, out Piece capturedPiece)) {
+				//	game.chessMoves.MakeMove(moves[0], "");
+				//	//game.Capture(selectedPiece, capturedPiece, coord, "");
+				//} else {
+				//	game.Move(selectedPiece, coord, "");
+				//}
+				selectedPiece.board.RecalculatePieceMoves();
+			} else {
+				Debug.Log("invalid move, unselecting.");
+			}
+			visuals.defendArrows.ClearTiles();
+			currentHovered = null;
+		}
+	}
 
-	private void ResetPieceSelectionVisuals(Piece piece) {
-		Debug.Log("selecting "+ piece);
-		analysis.SetCurrentPiece(piece);
-		visuals.ResetPieceSelectionVisuals(analysis);
-		//if (selected == null) { return; }
-		//Piece piece = selected as Piece;
-		//if (piece == null) { return; }
-		//analysis.SetCurrentPiece(piece);
-		////List<Move> pieceMoves = new List<Move>();
-		////piece.GetMoves(pieceMoves);
-		////if (currentMoves == null) { currentMoves = new List<Move>(); } else { currentMoves.Clear(); }
-		////if (validMoves == null) { validMoves = new List<Move>(); } else { validMoves.Clear(); }
-		
-		////currentMoves.AddRange(pieceMoves);
-		////for (int i = 0; i < pieceMoves.Count; i++) {
-		////	if (IsValidMove(piece, pieceMoves[i])) {
-		////		validMoves.Add(pieceMoves[i]);
-		////	}
-		////}
-		//for (int i = 0; i < analysis.CurrentMoves.Count; ++i) {
-		//	Move move = analysis.CurrentMoves[i];
-		//	if (!showKingDefender && move is Capture cap && IsMyKing(piece, cap.pieceCaptured)) { continue; }
-		//	AddPieceSelectionVisualFor(move, piece.board);
-		//}
-		//moves.ClearTiles();
-		//captures.ClearTiles();
-		//selection.ClearTiles();
-		//defendArrows.ClearTiles();
-		//Coord pieceCoord = piece.GetCoord();
-		//selection.CreateMarks(new Move[] { new Move(piece,pieceCoord, pieceCoord) }, piece.board, Color.green);
+	private bool MoveIsNotDefensive(Move move) {
+		Capture cap = move as Capture;
+		if (cap == null) { return true;}
+		return !cap.IsDefend;
 	}
 
 	private void ColorAccentHovered(TiledGameObject hoveredObject) {

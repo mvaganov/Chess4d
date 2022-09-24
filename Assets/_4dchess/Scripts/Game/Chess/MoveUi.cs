@@ -17,13 +17,16 @@ public class MoveUi : MonoBehaviour {
 
 	public void RefreshElement() {
 		Piece piece = move.move != null ? move.move.pieceMoved : null;
+		ChessGame game;
 		if (piece != null) {
 			int teamIndex = piece.team.TeamIndex;
-			ChessGame game = piece.team.game;
+			game = piece.team.game;
 			icon.sprite = System.Array.Find(game.pieceCodes, code => code.code == piece.code).icons[teamIndex];
-			if (move == game.chessMoves.CurrentMove) {
-				activeMarker.SetActive(true);
-			}
+		} else {
+			game = FindObjectOfType<ChessGame>();
+		}
+		if (move == game.chessMoves.CurrentMove) {
+			activeMarker.SetActive(true);
 		}
 		label.text = move.ToString();
 	}

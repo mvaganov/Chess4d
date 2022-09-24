@@ -51,13 +51,17 @@ public class ChessGame : MonoBehaviour {
 		// TODO implement icon that hovers over piece's head, always orients to ortho camera rotation, and is only visible by ortho camera
 	}
 
-	public void Move(Piece p, Coord position, string notes) {
-		chessMoves.MakeMove(p, p.GetCoord(), position, notes);
-	}
+	//public void Move(Piece p, Coord position, string notes) {
+	//	chessMoves.MakeMove(p, p.GetCoord(), position, notes);
+	//}
 
-	public void Capture(Piece moved, Piece captured, Coord movePosition, string notes) {
-		chessMoves.MakeCapture(moved, moved.GetCoord(), movePosition, captured, captured.GetCoord(), notes);
-	}
+	//public void Capture(Piece moved, Piece captured, Coord movePosition, string notes) {
+	//	chessMoves.MakeCapture(moved, moved.GetCoord(), movePosition, captured, captured.GetCoord(), notes);
+	//}
+
+	//public void Move(Move move) {
+	//	chessMoves.MakeMove
+	//}
 
 	public void UndoMove() {
 		chessMoves.UndoMove();

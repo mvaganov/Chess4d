@@ -48,6 +48,22 @@ public class TileVisualization : MonoBehaviour {
 			// TODO for En Passant, show move and capture line branching out of same source? or looping back?
 			// for castling show king arrow hopping and rook arrow sliding
 			// for promotion show fancy up-arrow icon at the end? maybe an upward branch? maybe a question mark box?
+			case Pawn.EnPassant ep:
+				marker = markPool.Get();
+				coord = reverse ? ep.from : ep.to;
+				tile = board.GetTile(coord);
+				markerTransform = marker.transform;
+				markerTransform.SetParent(tile.transform);
+				markerTransform.localPosition = Vector3.zero;
+				if (marker.Label != null) {
+					Piece capturable = ep.pieceCaptured;
+					if (capturable != null) {
+						marker.Label.text = $"en passant";//\n[{capturable.code}]";
+					} else {
+						marker.Label.text = "IMPOSSI BLE";
+					}
+				}
+				break;
 			case Capture cap:
 				marker = markPool.Get();
 				coord = reverse ? cap.from : cap.fromCaptured;
@@ -55,8 +71,8 @@ public class TileVisualization : MonoBehaviour {
 				markerTransform = marker.transform;
 				markerTransform.SetParent(tile.transform);
 				markerTransform.localPosition = Vector3.zero;
-				Piece capturable = cap.pieceCaptured;
 				if (marker.Label != null) {
+					Piece capturable = cap.pieceCaptured;
 					if (capturable != null) {
 						marker.Label.text = $"capture";//\n[{capturable.code}]";
 					} else {

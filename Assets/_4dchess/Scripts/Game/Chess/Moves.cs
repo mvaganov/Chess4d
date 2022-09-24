@@ -26,13 +26,16 @@ public class Moves : MonoBehaviour {
 		return list;
 	}
 
-	public void MakeMove(Piece pieceMoved, Coord from, Coord to, string notes) {
-		DoThis(new MoveNode(currentMove.index + 1, new Move(pieceMoved, from, to), notes));
+	public void MakeMove(Move move, string notes) {
+		DoThis(new MoveNode(currentMove.index + 1, move, notes));
 	}
-	public void MakeCapture(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured,
-	string notes) {
-		DoThis(new MoveNode(currentMove.index + 1, new Capture(pieceMoved, from, to, pieceCaptured, fromCaptured), notes));
-	}
+	//public void MakeMove(Piece pieceMoved, Coord from, Coord to, string notes) {
+	//	DoThis(new MoveNode(currentMove.index + 1, new Move(pieceMoved, from, to), notes));
+	//}
+	//public void MakeCapture(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured,
+	//string notes) {
+	//	DoThis(new MoveNode(currentMove.index + 1, new Capture(pieceMoved, from, to, pieceCaptured, fromCaptured), notes));
+	//}
 
 	private void DoThis(MoveNode move) {
 		int doneAlready = currentMove.next.IndexOf(move);
@@ -52,6 +55,7 @@ public class Moves : MonoBehaviour {
 	public void GoToMove(MoveNode targetMove) {
 		int actualIndexToTravelTo = targetMove.index - 1;
 		MoveNode next = null;
+		HashSet<Board> boards = new HashSet<Board>();
 		do {
 			if (currentMove.index < actualIndexToTravelTo) {
 				next = currentMove.next.Count > 0 ? currentMove.next[0] : null;
@@ -70,6 +74,9 @@ public class Moves : MonoBehaviour {
 					currentMove = next;
 				}
 			}
+			if (currentMove.move != null && currentMove.move.pieceMoved != null) {
+				boards.Add(currentMove.move.pieceMoved.board);
+			}
 		} while (currentMove.index != actualIndexToTravelTo && next != null);
 		if (actualIndexToTravelTo == currentMove.index) {
 			next = currentMove.next.Count > targetMove.BranchIndex ? currentMove.next[targetMove.BranchIndex] : null;
@@ -81,7 +88,10 @@ public class Moves : MonoBehaviour {
 			next.Do();
 			currentMove = next;
 		}
-		// TODO refresh UI, like chessVisuals.ResetPieceSelectionVisuals(); and board.RecalculatePieceMoves()
+		// TODO refresh UI, like chessVisuals.ResetPieceSelectionVisuals();
+		foreach (Board board in boards) {
+			board.RecalculatePieceMoves();
+		}
 	}
 
 	public bool UndoMove() {

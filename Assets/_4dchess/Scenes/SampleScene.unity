@@ -2185,6 +2185,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   game: {fileID: 1564371131}
+  analysis: {fileID: 1564371134}
+  visuals: {fileID: 1921063277}
   cam: {fileID: 963194227}
   rayHitMarker: {fileID: 483499308}
   hoveredColor:
@@ -2216,8 +2218,7 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 2
     m_NumAlphaKeys: 3
-  analysis: {fileID: 1564371134}
-  visuals: {fileID: 1921063277}
+  currentHovered: {fileID: 0}
 --- !u!1001 &487125780
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10648,12 +10649,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c196aa8f2ddb714d904282533ce47da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  analysis: {fileID: 1564371134}
   moves: {fileID: 1010063922}
   captures: {fileID: 1566739770}
   selection: {fileID: 242245484}
   defendArrows: {fileID: 1933217765}
   tempDefendArrows: {fileID: 1355893368}
-  currentHovered: {fileID: 0}
   selected: {fileID: 0}
   showKingDefender: 0
 --- !u!1 &1933217763

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ChessVisuals : MonoBehaviour {
+	public ChessAnalysis analysis;
 	public TileVisualization moves;
 	public TileVisualization captures;
 	public TileVisualization selection;
@@ -30,7 +31,7 @@ public class ChessVisuals : MonoBehaviour {
 
 	public void ResetPieceSelectionVisuals(ChessAnalysis analysis) {
 		if (selected == null) { return; }
-		Piece piece = selected as Piece;
+		Piece piece = analysis.SelectedPiece;//selected as Piece;
 		if (piece == null) { return; }
 		moves.ClearTiles();
 		captures.ClearTiles();
@@ -39,12 +40,6 @@ public class ChessVisuals : MonoBehaviour {
 		Coord pieceCoord = piece.GetCoord();
 		selection.CreateMarks(new Move[] { new Move(piece, pieceCoord, pieceCoord) }, piece.board, Color.green);
 
-		//currentMoves.AddRange(pieceMoves);
-		//for (int i = 0; i < pieceMoves.Count; i++) {
-		//	if (IsValidMove(piece, pieceMoves[i])) {
-		//		validMoves.Add(pieceMoves[i]);
-		//	}
-		//}
 		if (analysis.CurrentMoves != null) {
 			for (int i = 0; i < analysis.CurrentMoves.Count; ++i) {
 				Move move = analysis.CurrentMoves[i];
@@ -58,12 +53,12 @@ public class ChessVisuals : MonoBehaviour {
 		TiledGameObject tgo = null;
 		switch (someKindOfMove) {
 			case Pawn.EnPassant ep:
-				Debug.Log("EN PASSANT!");
+				//Debug.Log("EN PASSANT!");
 				tgo = moves.AddMark(ep, board);
 				tgo.Color = new Color(1, .5f, 0); {
 					tgo = defendArrows.AddMark(ep, board);
 					TiledWire tw = tgo as TiledWire;
-					tw.Destination = ep.from;
+					tw.Destination = ep.fromCaptured;
 					tgo.Color = new Color(1, .5f, 0);
 				}
 				break;
@@ -101,7 +96,8 @@ public class ChessVisuals : MonoBehaviour {
 		if (target == null) { return; }
 		Board board = target.GetBoard();
 		if (board == null) {
-			Debug.Log("no board?");
+			// this happens when seeking the defender squares of captured pieces
+			//Debug.Log("no board");
 			return;
 		}
 		Coord currentCoord = target.GetCoord();
