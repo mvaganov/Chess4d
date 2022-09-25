@@ -67,6 +67,12 @@ public class Move {
 		this.pieceMoved = pieceMoved;
 	}
 
+	public Move(Move other) {
+		from = other.from;
+		to = other.to;
+		pieceMoved = other.pieceMoved;
+	}
+
 	public virtual void Do() { pieceMoved?.DoMove(this); }
 
 	public virtual void Undo() { pieceMoved?.UndoMove(this); }
@@ -78,7 +84,7 @@ public class Move {
 		// if there is more than one, prepend the column id of from.
 		// if there are multiple in the same column, provide the row id instead
 		// if there are multiple in both row and column, provide the entire from coordinate.
-		return $"{identifier}{to}";
+		return $"{identifier}{from}{to}";
 	}
 
 	public override bool Equals(object obj) {
@@ -146,7 +152,8 @@ public class Capture : Move {
 			if (identifier == "") {
 				identifier = from.ColumnId;
 			}
-			return $"{identifier}x{to}";
+			string otherIdentifier = pieceCaptured.code;
+			return $"{identifier}{from}x{otherIdentifier}{to}";
 		} else {
 			return "_" + base.ToString();
 		}

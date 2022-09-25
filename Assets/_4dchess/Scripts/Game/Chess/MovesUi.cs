@@ -118,7 +118,7 @@ public class MovesUi : MonoBehaviour {
 		for(int i = transform.childCount-1; i >= 0; --i) {
 			GameObject go = transform.GetChild(i).gameObject;
 			if (go == branchUiPrefab || go == moveUiPrefab) { continue; }
-			ChessGame.DestroyObject(go);
+			ChessGame.DestroyChessObject(go);
 		}
 	}
 }

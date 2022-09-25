@@ -40,7 +40,8 @@ public class Board : MonoBehaviour {
 			Tile tile = tiles[i];
 			Piece[] pieces = tile.GetComponentsInChildren<Piece>();
 			if (pieces != null && pieces.Length > 1) {
-				throw new System.Exception("there are "+ pieces.Length+" at "+tile);
+				throw new System.Exception("there are "+ pieces.Length+" at "+tile+": "+
+					string.Join(", ", System.Array.ConvertAll(pieces, p=>p.code)));
 			}
 			allPieces.AddRange(pieces);
 		}
@@ -151,7 +152,7 @@ public class Board : MonoBehaviour {
 		if (i >= tiles.Count || i < 0) { return; }
 		Tile tile = tiles[i];
 		if (tile == null) { return; }
-		ChessGame.DestroyObject(tile.gameObject);
+		ChessGame.DestroyChessObject(tile.gameObject);
 		tiles.RemoveAt(i);
 	}
 	void Start() {

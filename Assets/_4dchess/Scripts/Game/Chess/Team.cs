@@ -29,8 +29,8 @@ public class Team : MonoBehaviour {
 				coord.row++;
 				continue;
 			}
-			Piece p = CreatePiece(game.GetPrefab(code), coord, game.board);
-			p.transform.position += Vector3.up * i;
+			Piece p = game.CreatePiece(this, code, coord, game.board);//CreatePiece(game.GetPrefab(code), coord, game.board);
+			p.transform.position += Vector3.up * (10 + i);
 			coord.col++;
 		}
 		if (Application.isPlaying) {
@@ -42,22 +42,4 @@ public class Team : MonoBehaviour {
 		Pieces.ForEach(p => p.MoveToLocalCenter());
 	}
 
-	public Piece CreatePiece(Piece prefab, Coord coord, Board board) {
-		if (prefab == null) { return null; }
-		GameObject pieceObject = ChessGame.CreateObject(prefab.gameObject);
-		Piece piece = pieceObject.GetComponent<Piece>();
-		Pieces.Add(piece);
-		string name = this.name + " " + prefab.name + " " + Pieces.Count;
-		pieceObject.name = name;
-		Transform t = pieceObject.transform;
-		t.SetParent(board.transform);
-		t.Rotate(PieceRotation);
-		piece.team = this;
-		piece.board = board;
-		piece.Material = material;
-		t.position = board.CoordToWorldPosition(coord) + Vector3.up * 10;
-		piece.name = name;
-		piece.SetTile(coord);
-		return piece;
-	}
 }

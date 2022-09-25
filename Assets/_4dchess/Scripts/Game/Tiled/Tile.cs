@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Tile : TiledGameObject {
 	public Piece GetPiece() {
-		Piece piece = GetComponentInChildren<Piece>();
+		Piece piece = GetComponentInChildren<Piece>(false);
 		return piece;
 	}
 }

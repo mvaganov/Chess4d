@@ -78,7 +78,7 @@ public class ChessVisuals : MonoBehaviour {
 					//tw.Color = Color.red;
 				}
 				break;
-			case Pawn.DoublePawnMove dbp:
+			case Pawn.DoubleMove dbp:
 				tgo = moves.AddMark(dbp, board);
 				tgo.Color = new Color(1, .75f, 0);
 				break;

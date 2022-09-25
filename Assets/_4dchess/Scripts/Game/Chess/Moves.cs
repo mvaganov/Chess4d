@@ -59,7 +59,7 @@ public class Moves : MonoBehaviour {
 			Debug.Log("repeat!");
 			currentMove.next.RemoveAt(doneAlready);
 		}
-		Debug.Log("doing "+move);
+		Debug.Log("doing "+move+" "+move.GetType().Name);
 		currentMove.next.Insert(0, move);
 		move.prev = currentMove;
 		move.Do();

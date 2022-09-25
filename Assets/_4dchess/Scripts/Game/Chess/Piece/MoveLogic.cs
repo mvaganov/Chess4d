@@ -81,6 +81,7 @@ public class MoveLogic : MonoBehaviour {
 	}
 
 	public static void LerpPath(MonoBehaviour script, Vector3[] path, float speed, bool localPosition = false) {
+		if (!script.gameObject.activeInHierarchy) { return; }
 		script.StartCoroutine(LerpToPath(script.transform, path, speed, localPosition));
 	}
 

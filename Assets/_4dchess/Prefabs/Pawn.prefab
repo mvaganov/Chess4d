@@ -25,7 +25,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2539579758047041590, guid: e0eb511be04c6484a8b93af4081c598d, type: 3}
       propertyPath: code
-      value: 
+      value: P
       objectReference: {fileID: 0}
     - target: {fileID: 2539579758047041590, guid: e0eb511be04c6484a8b93af4081c598d, type: 3}
       propertyPath: jumpHeight
@@ -94,4 +94,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcfcb19b94e42d043a7def24225f8509, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hasMoved: 0

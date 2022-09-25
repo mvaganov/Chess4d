@@ -7,7 +7,7 @@ using UnityEditor;
 
 public class ChessGame : MonoBehaviour {
 	[System.Serializable]
-	public struct PieceCode {
+	public class PieceCode {
 		public string name;
 		public string code;
 		public Piece prefab;
@@ -21,15 +21,15 @@ public class ChessGame : MonoBehaviour {
 		public PieceCode(string name, string code) : this(name, code, null) { }
 	}
 	public PieceCode[] pieceCodes = new PieceCode[] {
-		new PieceCode("pawn", "p"),
-		new PieceCode("knight", "n"),
-		new PieceCode("bishop", "b"),
-		new PieceCode("rook", "r"),
-		new PieceCode("queen", "q"),
-		new PieceCode("king", "k"),
+		new PieceCode("pawn", ""),
+		new PieceCode("knight", "N"),
+		new PieceCode("bishop", "B"),
+		new PieceCode("rook", "R"),
+		new PieceCode("queen", "Q"),
+		new PieceCode("king", "K"),
 	};
-	public string PawnPromotionOptions = "nbrq";
-	private Dictionary<string, Piece> _prefabByCode = null;
+	public string PawnPromotionOptions = "NBRQ";
+	private Dictionary<string, PieceCode> _prefabByCode = null;
 
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Board board;
@@ -51,17 +51,25 @@ public class ChessGame : MonoBehaviour {
 		// TODO implement icon that hovers over piece's head, always orients to ortho camera rotation, and is only visible by ortho camera
 	}
 
-	//public void Move(Piece p, Coord position, string notes) {
-	//	chessMoves.MakeMove(p, p.GetCoord(), position, notes);
-	//}
-
-	//public void Capture(Piece moved, Piece captured, Coord movePosition, string notes) {
-	//	chessMoves.MakeCapture(moved, moved.GetCoord(), movePosition, captured, captured.GetCoord(), notes);
-	//}
-
-	//public void Move(Move move) {
-	//	chessMoves.MakeMove
-	//}
+	public Piece CreatePiece(Team team, string code, Coord coord, Board board) {
+		Piece prefab = GetPrefab(code);
+		if (prefab == null) { return null; }
+		GameObject pieceObject = CreateObject(prefab.gameObject);
+		Piece piece = pieceObject.GetComponent<Piece>();
+		//Pieces.Add(piece);
+		string name = team.name + " " + prefab.name;// + " " + Pieces.Count;
+		pieceObject.name = name;
+		Transform t = pieceObject.transform;
+		t.SetParent(board.transform);
+		t.Rotate(team.PieceRotation);
+		piece.team = team;
+		piece.board = board;
+		piece.Material = team.material;
+		t.position = board.CoordToWorldPosition(coord);
+		piece.name = name;
+		piece.SetTile(coord);
+		return piece;
+	}
 
 	public void UndoMove() {
 		chessMoves.UndoMove();
@@ -71,17 +79,20 @@ public class ChessGame : MonoBehaviour {
 		chessMoves.RedoMove(0);
 	}
 
-	public Piece GetPrefab(string code) {
+	public PieceCode GetPieceInfo(string code) {
 		if (_prefabByCode == null) {
-			_prefabByCode = new Dictionary<string, Piece>();
+			_prefabByCode = new Dictionary<string, PieceCode>();
 			for (int i = 0; i < pieceCodes.Length; ++i) {
-				_prefabByCode[pieceCodes[i].code] = pieceCodes[i].prefab;
+				_prefabByCode[pieceCodes[i].code] = pieceCodes[i];
 			}
 		}
-		if (_prefabByCode.TryGetValue(code, out Piece prefab)) {
-			return prefab;
-		}
+		if (_prefabByCode.TryGetValue(code, out PieceCode info)) { return info; }
 		return null;
+	}
+
+	public Piece GetPrefab(string code) {
+		PieceCode info = GetPieceInfo(code);
+		return (info != null) ? info.prefab : null;
 	}
 
 	public static GameObject CreateObject(GameObject go) {
@@ -94,7 +105,7 @@ public class ChessGame : MonoBehaviour {
 		return Instantiate(go);
 	}
 
-	public static void DestroyObject(GameObject go) {
+	public static void DestroyChessObject(GameObject go) {
 		if (go == null) { return; }
 #if UNITY_EDITOR
 		if (!Application.isPlaying) {
@@ -108,7 +119,7 @@ public class ChessGame : MonoBehaviour {
 	public static void DestroyListOfThingsBackwards<T>(List<T> things) where T : MonoBehaviour {
 		for (int i = things.Count - 1; i >= 0; --i) {
 			T thing = things[i];
-			if (thing != null) { DestroyObject(thing.gameObject); }
+			if (thing != null) { DestroyChessObject(thing.gameObject); }
 			things.RemoveAt(i);
 		}
 		things.Clear();
