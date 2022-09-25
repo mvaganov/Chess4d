@@ -7,11 +7,25 @@ public class ChessAnalysis : MonoBehaviour {
 	private List<Move> currentMoves;
 	private List<Move> validMoves;
 	private Piece selectedPiece;
+	[SerializeField] private Moves moves;
 	public List<Move> CurrentMoves => currentMoves;
 	public List<Move> ValidMoves => validMoves;
 	public Piece SelectedPiece {
 		get => selectedPiece;
 		set => selectedPiece = value;
+	}
+
+	public void Start() {
+		moves.onMove.AddListener(MoveMade);
+		moves.onUndoMove.AddListener(MoveMade);
+	}
+
+	public void MoveMade(MoveNode move) {
+		RecalculateSelectedPieceMoves();
+	}
+
+	public void RecalculateSelectedPieceMoves() {
+		selectedPiece?.board.RecalculatePieceMoves();
 	}
 
 	public bool IsValidMove(Coord coord) {

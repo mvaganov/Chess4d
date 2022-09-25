@@ -2395,7 +2395,6 @@ MonoBehaviour:
   Notes: {fileID: 707831422}
   notesInput: {fileID: 1842546780}
   _showText: 1
-  branches: []
 --- !u!114 &538098172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8523,6 +8522,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5174e1e1f023f534abe6e5afbdd4e55e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moves: {fileID: 1564371133}
 --- !u!1 &1566739768
 GameObject:
   m_ObjectHideFlags: 0

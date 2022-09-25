@@ -99,7 +99,7 @@ public class MovesUi : MonoBehaviour {
 		}
 		RefreshLayouts();
 		notesInput?.SetTextWithoutNotify(chessMoves.CurrentMove.notes);
-		Debug.Log(CurrentMoveUi);
+		//Debug.Log(CurrentMoveUi);
 	}
 
 	public void RefreshLayouts() {

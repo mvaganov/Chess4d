@@ -6,8 +6,11 @@ public class Pawn : MoveLogic {
 		public override void Do() {
 			Pawn p = pieceMoved.GetComponent<Pawn>();
 			int doubleMoveTurn = pieceMoved.board.game.chessMoves.CurrentMove.index + 1;
-			UnityEngine.Debug.Log($"double moving on turn {doubleMoveTurn}");
-			p.didDoubleMoveOnTurn = doubleMoveTurn;
+			int indexOfThisMove = -1;
+			MoveNode mn = pieceMoved.board.game.chessMoves.FindMoveNode(this);
+			if (mn != null) { indexOfThisMove = mn.index; }
+			UnityEngine.Debug.Log($"!!!!!!double moving on turn {doubleMoveTurn} ?{indexOfThisMove}?");
+			p.didDoubleMoveOnTurn = indexOfThisMove;// doubleMoveTurn;
 			pieceMoved?.DoMove(this);
 		}
 		public override void Undo() {
@@ -67,8 +70,9 @@ public class Pawn : MoveLogic {
 		if (possibleTarget.moveCount != 1 || (pawn = possibleTarget.GetComponent<Pawn>()) == null) {
 			return null;
 		}
-		bool onlyJustNowDidDoubleMove = pawn.didDoubleMoveOnTurn != board.game.chessMoves.CurrentMove.index;
-		UnityEngine.Debug.Log("en passant " + leftTile.GetCoord() + " just double moved? "+ onlyJustNowDidDoubleMove);
+		bool onlyJustNowDidDoubleMove = pawn.didDoubleMoveOnTurn == board.game.chessMoves.CurrentMove.index;
+		UnityEngine.Debug.Log("en passant " + leftTile.GetCoord() + " just double moved? "+ onlyJustNowDidDoubleMove+
+			"  "+ pawn.didDoubleMoveOnTurn+" "+ board.game.chessMoves.CurrentMove.index);
 		if (!onlyJustNowDidDoubleMove) return null;
 		// TODO create en passant move
 		return new EnPassant(p, thisPieceLocation, nextPieceLocation, possibleTarget, otherPieceLocation);

@@ -12,6 +12,21 @@ public class Moves : MonoBehaviour {
 
 	[System.Serializable] public class MoveEventHandler : UnityEvent<MoveNode> { }
 
+	public MoveNode FindMoveNode(Move move) {
+		MoveNode n = currentMove;
+		if (n.move == move) { return n; }
+		n = GetRoot();
+		return n.FindMoveRecursive(move);
+	}
+
+	public MoveNode GetRoot() {
+		MoveNode cursor = currentMove;
+		while (cursor.prev != null) {
+			cursor = cursor.prev;
+		}
+		return cursor;
+	}
+
 	public List<List<MoveNode>> GetMoveList() {
 		List<List<MoveNode>> list = new List<List<MoveNode>>();
 		MoveNode last = currentMove;
@@ -110,6 +125,7 @@ public class Moves : MonoBehaviour {
 		if (index < 0 || index >= currentMove.next.Count) { return false; }
 		currentMove = currentMove.next[index];
 		currentMove.Do();
+		onMove?.Invoke(currentMove);
 		return true;
 	}
 }

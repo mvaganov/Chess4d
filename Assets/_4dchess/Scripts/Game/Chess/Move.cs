@@ -45,6 +45,16 @@ public class MoveNode {
 	public override int GetHashCode() {
 		return ((move != null) ? move.GetHashCode() : 0) ^ index;
 	}
+
+	public MoveNode FindMoveRecursive(Move m) {
+		if (move == m) { return this; }
+		MoveNode found = null;
+		for (int i = 0; i < next.Count; ++i) {
+			found = next[i].FindMoveRecursive(m);
+			if (found != null) { break; }
+		}
+		return found;
+	}
 }
 
 public class Move {
