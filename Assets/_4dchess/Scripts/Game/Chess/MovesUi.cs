@@ -8,7 +8,7 @@ public class MovesUi : MonoBehaviour {
 	[ContextMenuItem(nameof(Clear), nameof(Clear)),
 	 ContextMenuItem(nameof(RebuildUi), nameof(RebuildUi))]
 	public ChessGame game;
-	public Moves chessMoves;
+	public MoveHistory chessMoves;
 	public GameObject branchUiPrefab;
 	public GameObject moveUiPrefab;
 	public GameObject Notes;

@@ -32,7 +32,7 @@ public class Pawn : MoveLogic {
 	}
 
 	public class Promotion : Move {
-		public string newPieceCode;
+		private string selectedPieceCode = null;
 		public Piece promotedPiece;
 		public Move moreInterestingMove;
 		public int selected = -1;
@@ -50,21 +50,22 @@ public class Pawn : MoveLogic {
 			} else {
 				base.Do();
 			}
-			UnityEngine.Debug.Log("DID pawn promotion to \'" + newPieceCode + "\'");
-			if (promotedPiece == null) {
-				// open up the piece selection UI
-				PieceSelection selectionUi = FindObjectOfType<PieceSelection>(true);
-				string options = pieceMoved.board.game.PawnPromotionOptions;
-				if (selected == -1) { selected = options.IndexOf("Q"); }
-				selectionUi.SelectPiece(options, pieceMoved.team, selected, DoReplacement);
+			UnityEngine.Debug.Log("DID pawn promotion to \'" + selectedPieceCode + "\'");
+			// open up the piece selection UI
+			PieceSelection selectionUi = FindObjectOfType<PieceSelection>(true);
+			string options = pieceMoved.board.game.PawnPromotionOptions;
+			if (selected == -1) { selected = options.IndexOf("Q"); }
+			if (promotedPiece != null && selectedPieceCode == promotedPiece.code) {
+				DoReplacement(selected);
 			} else {
-				UnityEngine.Debug.Log("already selected replacement: " + promotedPiece);
+				selectedPieceCode = null;
+				selectionUi.SelectPiece(options, pieceMoved.team, selected, DoReplacement);
 			}
 		}
 
 		public override void Undo() {
 			//base.Undo();
-			UnityEngine.Debug.Log("UNdid pawn promotion to " + newPieceCode);
+			UnityEngine.Debug.Log("UNdid pawn promotion to " + selectedPieceCode);
 			UndoReplacement();
 			if (moreInterestingMove != null) {
 				moreInterestingMove.Undo();
@@ -76,12 +77,7 @@ public class Pawn : MoveLogic {
 		private void DoReplacement(int index) {
 			selected = index;
 			string options = pieceMoved.board.game.PawnPromotionOptions;
-			newPieceCode = options[index].ToString();
-			DoReplacement(newPieceCode);
-		}
-
-		public class PreviousForm : UnityEngine.MonoBehaviour {
-			public Piece previous;
+			DoReplacement(options[index].ToString());
 		}
 
 		public void DoReplacement(string code) {
@@ -89,12 +85,37 @@ public class Pawn : MoveLogic {
 			Board board = pieceMoved.board;
 			ChessGame game = board.game;
 			Team team = pieceMoved.team;
-			promotedPiece = game.CreatePiece(team, code, to, board);
+			if (promotedPiece != null) {
+				MoveNode thisNode = game.chessMoves.FindMoveNode(this);
+				MoveNode parentMove = thisNode.prev;
+				for(int i = 0; i < parentMove.next.Count; ++i) {
+					MoveNode possibleMove = parentMove.next[i];
+					if (possibleMove == thisNode) { continue; }
+					Promotion promo = possibleMove.move as Promotion;
+					if (promo == null) { continue; }
+					if (promo.promotedPiece.code == code) {
+						game.chessMoves.GoToMove(possibleMove);
+						return;
+					}
+				}
+				if (promotedPiece.code != code) {
+					// TODO create a new MoveNode at the same branch (coming from the same source move) and finish there
+					Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new Move(this));
+					otherPromo.selectedPieceCode = code;
+					string options = pieceMoved.board.game.PawnPromotionOptions;
+					otherPromo.selected = options.IndexOf(code);
+					otherPromo.promotedPiece = game.CreatePiece(team, code, to, board);
+					return;
+				}
+			}
+			selectedPieceCode = code;
+			if (promotedPiece == null || promotedPiece.code != code) {
+				promotedPiece = game.CreatePiece(team, code, to, board);
+			}
 			pieceMoved.transform.SetParent(null, false);
 			pieceMoved.gameObject.SetActive(false);
 			int index = team.Pieces.IndexOf(pieceMoved);
 			team.Pieces[index] = promotedPiece;
-			//promotedPiece.gameObject.AddComponent<PreviousForm>().previous = pieceMoved;
 			pieceMoved.board.RecalculatePieceMoves();
 		}
 
@@ -107,13 +128,14 @@ public class Pawn : MoveLogic {
 			pieceMoved.gameObject.SetActive(true);
 			int index = team.Pieces.IndexOf(promotedPiece);
 			team.Pieces[index] = pieceMoved;
-			ChessGame.DestroyChessObject(promotedPiece.gameObject);
-			promotedPiece = null;
+			promotedPiece.gameObject.SetActive(false);
+			//ChessGame.DestroyChessObject(promotedPiece.gameObject);
+			//promotedPiece = null;
 			pieceMoved.board.RecalculatePieceMoves();
 		}
 
 		public override string ToString() {
-			return base.ToString() + "=" + newPieceCode;
+			return base.ToString() + "=" + (promotedPiece != null ? promotedPiece.code : "?");
 		}
 	}
 

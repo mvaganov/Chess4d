@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Moves : MonoBehaviour {
+public class MoveHistory : MonoBehaviour {
 	private MoveNode currentMove = new MoveNode(0, null, "game begins");
 	public MoveEventHandler onMove;
 	public MoveEventHandler onUndoMove;
@@ -15,6 +15,8 @@ public class Moves : MonoBehaviour {
 	public MoveNode FindMoveNode(Move move) {
 		MoveNode n = currentMove;
 		if (n.move == move) { return n; }
+		// TODO search backwards along the current timeline first... if the node isn't found there,
+		// then do the exhaustive resursive search
 		n = GetRoot();
 		return n.FindMoveRecursive(move);
 	}
@@ -52,7 +54,7 @@ public class Moves : MonoBehaviour {
 	//	DoThis(new MoveNode(currentMove.index + 1, new Capture(pieceMoved, from, to, pieceCaptured, fromCaptured), notes));
 	//}
 
-	private void DoThis(MoveNode move) {
+	public void DoThis(MoveNode move) {
 		int doneAlready = currentMove.next.IndexOf(move);
 		if (doneAlready >= 0) {
 			move = currentMove.next[doneAlready];

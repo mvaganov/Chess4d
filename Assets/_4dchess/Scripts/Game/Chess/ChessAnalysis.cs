@@ -7,7 +7,7 @@ public class ChessAnalysis : MonoBehaviour {
 	private List<Move> currentMoves;
 	private List<Move> validMoves;
 	private Piece selectedPiece;
-	[SerializeField] private Moves moves;
+	[SerializeField] private MoveHistory moves;
 	public List<Move> CurrentMoves => currentMoves;
 	public List<Move> ValidMoves => validMoves;
 	public Piece SelectedPiece {
