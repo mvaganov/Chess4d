@@ -46,7 +46,7 @@ public class Piece : TiledGameObject {
 	internal void MoveInternal(Coord coord) {
 		SetTile(coord);
 		if (jumpHeight == 0) {
-			MoveToLocalCenter(Vector3.zero);
+			LerpToLocalCenter(Vector3.zero);
 		} else {
 			JumpToLocalCenter(Vector3.zero, jumpHeight);
 		}
@@ -61,9 +61,9 @@ public class Piece : TiledGameObject {
 		return transform.GetComponentInParent<Tile>();
 	}
 
-	public virtual void MoveToLocalCenter() => MoveToLocalCenter(Vector3.zero);
+	public virtual void LerpToLocalCenter() => LerpToLocalCenter(Vector3.zero);
 
-	public virtual void MoveToLocalCenter(Vector3 offset) {
+	public virtual void LerpToLocalCenter(Vector3 offset) {
 		Vector3[] path = new Vector3[2] { transform.localPosition, offset };
 		MoveLogic.LerpPath(this, path, team.speed, true);
 	}

@@ -12,6 +12,10 @@ public class MoveHistory : MonoBehaviour {
 
 	[System.Serializable] public class MoveEventHandler : UnityEvent<MoveNode> { }
 
+	public void SetCurrentMove(MoveNode moveNode) {
+		currentMove = moveNode;
+	}
+
 	public MoveNode FindMoveNode(Move move) {
 		MoveNode n = currentMove;
 		if (n.move == move) { return n; }

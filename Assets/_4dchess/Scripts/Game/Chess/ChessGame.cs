@@ -59,16 +59,25 @@ public class ChessGame : MonoBehaviour {
 		//Pieces.Add(piece);
 		string name = team.name + " " + prefab.name;// + " " + Pieces.Count;
 		pieceObject.name = name;
-		Transform t = pieceObject.transform;
-		t.SetParent(board.transform);
-		t.Rotate(team.PieceRotation);
 		piece.team = team;
 		piece.board = board;
 		piece.Material = team.material;
-		t.position = board.CoordToWorldPosition(coord);
 		piece.name = name;
-		piece.SetTile(coord);
+		SetPiece(piece, board, coord);
+		//Transform t = piece.transform;
+		//t.SetParent(board.transform);
+		//t.Rotate(team.PieceRotation);
+		//t.position = board.CoordToWorldPosition(coord);
+		//piece.SetTile(coord);
 		return piece;
+	}
+
+	public void SetPiece(Piece piece, Board board, Coord coord) {
+		Transform t = piece.transform;
+		t.SetParent(board.transform);
+		t.Rotate(piece.team.PieceRotation);
+		t.position = board.CoordToWorldPosition(coord);
+		piece.SetTile(coord);
 	}
 
 	public void UndoMove() {

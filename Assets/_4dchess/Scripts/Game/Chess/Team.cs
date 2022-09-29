@@ -30,6 +30,10 @@ public class Team : MonoBehaviour {
 				continue;
 			}
 			Piece p = game.CreatePiece(this, code, coord, game.board);//CreatePiece(game.GetPrefab(code), coord, game.board);
+			Pieces.Add(p);
+			if (p == null) {
+				throw new System.Exception($"no such piece type '{code}'");
+			}
 			p.transform.position += Vector3.up * (10 + i);
 			coord.col++;
 		}
@@ -39,7 +43,6 @@ public class Team : MonoBehaviour {
 	}
 
 	public void MovePiecesToTile() {
-		Pieces.ForEach(p => p.MoveToLocalCenter());
+		Pieces.ForEach(p => p.LerpToLocalCenter());
 	}
-
 }

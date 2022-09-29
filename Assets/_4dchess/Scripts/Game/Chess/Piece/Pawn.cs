@@ -56,9 +56,9 @@ public class Pawn : MoveLogic {
 			string options = pieceMoved.board.game.PawnPromotionOptions;
 			if (selected == -1) { selected = options.IndexOf("Q"); }
 			if (promotedPiece != null && selectedPieceCode == promotedPiece.code) {
+				UnityEngine.Debug.Log("aleady did this before.");
 				DoReplacement(selected);
 			} else {
-				selectedPieceCode = null;
 				selectionUi.SelectPiece(options, pieceMoved.team, selected, DoReplacement);
 			}
 		}
@@ -85,7 +85,8 @@ public class Pawn : MoveLogic {
 			Board board = pieceMoved.board;
 			ChessGame game = board.game;
 			Team team = pieceMoved.team;
-			if (promotedPiece != null) {
+			if (promotedPiece != null && promotedPiece.code != code) {
+				UnityEngine.Debug.Log("redoing? "+code+" vs "+promotedPiece.code);
 				MoveNode thisNode = game.chessMoves.FindMoveNode(this);
 				MoveNode parentMove = thisNode.prev;
 				for(int i = 0; i < parentMove.next.Count; ++i) {
@@ -94,24 +95,33 @@ public class Pawn : MoveLogic {
 					Promotion promo = possibleMove.move as Promotion;
 					if (promo == null) { continue; }
 					if (promo.promotedPiece.code == code) {
+						UnityEngine.Debug.Log("did "+code+" before");
 						game.chessMoves.GoToMove(possibleMove);
 						return;
 					}
 				}
-				if (promotedPiece.code != code) {
-					// TODO create a new MoveNode at the same branch (coming from the same source move) and finish there
-					Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new Move(this));
-					otherPromo.selectedPieceCode = code;
-					string options = pieceMoved.board.game.PawnPromotionOptions;
-					otherPromo.selected = options.IndexOf(code);
-					otherPromo.promotedPiece = game.CreatePiece(team, code, to, board);
-					return;
-				}
+				UnityEngine.Debug.Log("never did " + code + " before, making branch");
+				// TODO create a new MoveNode at the same branch (coming from the same source move) and finish there
+				Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new Move(this));
+				otherPromo.selectedPieceCode = code;
+				string options = pieceMoved.board.game.PawnPromotionOptions;
+				otherPromo.selected = options.IndexOf(code);
+				otherPromo.promotedPiece = game.CreatePiece(team, code, to, board);
+				game.chessMoves.SetCurrentMove(parentMove);
+				game.chessMoves.CurrentMove.next.Insert(0, new MoveNode(thisNode.index, otherPromo, ""));
+				game.chessMoves.RedoMove(0);
+				return;
 			}
 			selectedPieceCode = code;
-			if (promotedPiece == null || promotedPiece.code != code) {
+			if (promotedPiece == null) {
+				UnityEngine.Debug.Log("new promotion? " + code);
 				promotedPiece = game.CreatePiece(team, code, to, board);
+			} else {
+				UnityEngine.Debug.Log("reactivating old promotion " + code);
+				promotedPiece.gameObject.SetActive(true);
+				game.SetPiece(promotedPiece, board, to);
 			}
+			UnityEngine.Debug.Log("did the old switcharoo");
 			pieceMoved.transform.SetParent(null, false);
 			pieceMoved.gameObject.SetActive(false);
 			int index = team.Pieces.IndexOf(pieceMoved);
@@ -127,11 +137,21 @@ public class Pawn : MoveLogic {
 			pieceMoved.transform.SetParent(tile.transform, false);
 			pieceMoved.gameObject.SetActive(true);
 			int index = team.Pieces.IndexOf(promotedPiece);
+			if (index < 0) {
+				index = team.Pieces.IndexOf(pieceMoved);
+				UnityEngine.Debug.Log("woah, promoted piece "+promotedPiece.code+" is not in list? is it in "+index+" ");
+				if (index < 0) {
+					UnityEngine.Debug.Log("we got a problem here, can't find "+pieceMoved+" or "+promotedPiece+" in list...");
+				} else {
+					UnityEngine.Debug.Log("...."+team.Pieces[index].code);
+				}
+			}
 			team.Pieces[index] = pieceMoved;
 			promotedPiece.gameObject.SetActive(false);
 			//ChessGame.DestroyChessObject(promotedPiece.gameObject);
 			//promotedPiece = null;
 			pieceMoved.board.RecalculatePieceMoves();
+			selectedPieceCode = null; // marker that will force selection again
 		}
 
 		public override string ToString() {
