@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-
+using UnityEngine;
 public class Pawn : MoveLogic {
 	private int didDoubleMoveOnTurn = -1;
 	public class DoubleMove : Move {
@@ -56,8 +56,8 @@ public class Pawn : MoveLogic {
 			string options = pieceMoved.board.game.PawnPromotionOptions;
 			if (selected == -1) { selected = options.IndexOf("Q"); }
 			if (promotedPiece != null && selectedPieceCode == promotedPiece.code) {
-				UnityEngine.Debug.Log("aleady did this before.");
-				DoReplacement(selected);
+				UnityEngine.Debug.Log("aleady did this before. "+ selectedPieceCode+ " "+options[selected]);
+				DoReplacement(selectedPieceCode);
 			} else {
 				selectionUi.SelectPiece(options, pieceMoved.team, selected, DoReplacement);
 			}
@@ -77,38 +77,58 @@ public class Pawn : MoveLogic {
 		private void DoReplacement(int index) {
 			selected = index;
 			string options = pieceMoved.board.game.PawnPromotionOptions;
+			//Debug.Log("SELECTED CHANGED TO " + index + " " + options[index]);
 			DoReplacement(options[index].ToString());
 		}
-
+		private static bool SHOULD_NOT_REPEAT = false;
 		public void DoReplacement(string code) {
 			UnityEngine.Debug.Log("replacing " + pieceMoved.code + " with " + code);
 			Board board = pieceMoved.board;
 			ChessGame game = board.game;
 			Team team = pieceMoved.team;
 			if (promotedPiece != null && promotedPiece.code != code) {
-				UnityEngine.Debug.Log("redoing? "+code+" vs "+promotedPiece.code);
-				MoveNode thisNode = game.chessMoves.FindMoveNode(this);
+				if (SHOULD_NOT_REPEAT) {
+					Debug.Log("OH NO! this should not have happened. Didn't we pick "+ promotedPiece.code+"? why does it think "+code+"?");
+					return;
+				}
+				UnityEngine.Debug.Log("redoing? "+code+" vs "+promotedPiece.code+" checking siblings...");
+				MoveNode thisNode = game.chessMoves.CurrentMove;//game.chessMoves.FindMoveNode(this);
 				MoveNode parentMove = thisNode.prev;
 				for(int i = 0; i < parentMove.next.Count; ++i) {
 					MoveNode possibleMove = parentMove.next[i];
+					Debug.Log(possibleMove.move.GetType());
 					if (possibleMove == thisNode) { continue; }
 					Promotion promo = possibleMove.move as Promotion;
 					if (promo == null) { continue; }
+					Debug.Log(promo.promotedPiece.code);
 					if (promo.promotedPiece.code == code) {
-						UnityEngine.Debug.Log("did "+code+" before");
-						game.chessMoves.GoToMove(possibleMove);
+						// this move's choice index was just changed. set it back to what it was!
+						string choices = pieceMoved.board.game.PawnPromotionOptions;
+						selected = choices.IndexOf(code);
+						// set the move that we have done before as the next move, and then do it.
+						UnityEngine.Debug.Log("did "+code+" before, doing it again");
+						promo.selectedPieceCode = promo.promotedPiece.code; // identify that we don't need to trigger UI again.
+						game.chessMoves.SetCurrentMove(parentMove);
+						parentMove.next.RemoveAt(i);
+						parentMove.next.Insert(0, possibleMove);
+						SHOULD_NOT_REPEAT = true;
+						game.chessMoves.RedoMove(0);
+						SHOULD_NOT_REPEAT = false;
+						//game.chessMoves.GoToMove(possibleMove);
 						return;
 					}
 				}
 				UnityEngine.Debug.Log("never did " + code + " before, making branch");
 				// TODO create a new MoveNode at the same branch (coming from the same source move) and finish there
 				Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new Move(this));
-				otherPromo.selectedPieceCode = code;
+				otherPromo.selectedPieceCode = code; // <-- this will force the new promotion event to skip the UI
 				string options = pieceMoved.board.game.PawnPromotionOptions;
 				otherPromo.selected = options.IndexOf(code);
 				otherPromo.promotedPiece = game.CreatePiece(team, code, to, board);
 				game.chessMoves.SetCurrentMove(parentMove);
-				game.chessMoves.CurrentMove.next.Insert(0, new MoveNode(thisNode.index, otherPromo, ""));
+				MoveNode alternatePromotion = new MoveNode(thisNode.index, otherPromo, "");
+				alternatePromotion.prev = game.chessMoves.CurrentMove;
+				game.chessMoves.CurrentMove.next.Insert(0, alternatePromotion);
 				game.chessMoves.RedoMove(0);
 				return;
 			}
@@ -148,8 +168,6 @@ public class Pawn : MoveLogic {
 			}
 			team.Pieces[index] = pieceMoved;
 			promotedPiece.gameObject.SetActive(false);
-			//ChessGame.DestroyChessObject(promotedPiece.gameObject);
-			//promotedPiece = null;
 			pieceMoved.board.RecalculatePieceMoves();
 			selectedPieceCode = null; // marker that will force selection again
 		}
@@ -182,14 +200,17 @@ public class Pawn : MoveLogic {
 		if (leftEP != null) { pawnMoves.Add(leftEP); }
 		Move rightEP = HasPossibleEnPassant(board, p, coord, coord + dir + Coord.right, coord + Coord.right);
 		if (rightEP != null) { pawnMoves.Add(rightEP); }
-		// TODO pawn promotion
-		for(int i = 0; i < pawnMoves.Count; ++i) {
-			Move m = pawnMoves[i];
-			if (IsLastRow(board, m.to)) {
-				pawnMoves[i] = new Promotion(pawnMoves[i]);
+		ReplaceAnyMoveOntoFinalSquareWithPawnPromotion(pawnMoves, board);
+		out_moves.AddRange(pawnMoves);
+	}
+
+	private void ReplaceAnyMoveOntoFinalSquareWithPawnPromotion(List<Move> out_pawnMoves, Board board) {
+		for (int i = 0; i < out_pawnMoves.Count; ++i) {
+			Move m = out_pawnMoves[i];
+			if (IsLastRow(board, m.to) && !(m is Promotion)) {
+				out_pawnMoves[i] = new Promotion(out_pawnMoves[i]);
 			}
 		}
-		out_moves.AddRange(pawnMoves);
 	}
 
 	public bool IsLastRow(Board board, Coord coord) {
@@ -202,16 +223,10 @@ public class Pawn : MoveLogic {
 
 	public override void DoMove(Move move) {
 		base.DoMove(move);
-		// TODO check if piece moved to last possible row.
-		// if so, show promotion UI.
-		// after promotion UI, create the selected piece in the capture area
-		// do a PawnPromotion move, which is a capture of that piece as capturing the pawn as the next move
-		// use the same move index as the move into the last row.
 	}
 
 	public override void UndoMove(Move move) {
 		base.UndoMove(move);
-		// if undoing a PawnPromotion, show the PawnPromotion UI again
 	}
 
 	private Move HasPossibleEnPassant(Board board, Piece p, Coord thisPieceLocation, Coord nextPieceLocation, Coord otherPieceLocation) {

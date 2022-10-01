@@ -65,7 +65,7 @@ public class MoveHistory : MonoBehaviour {
 			Debug.Log("repeat!");
 			currentMove.next.RemoveAt(doneAlready);
 		}
-		Debug.Log("doing "+move+" "+move.GetType().Name);
+		Debug.Log("doing " + move + " " + move.GetType().Name);
 		currentMove.next.Insert(0, move);
 		move.prev = currentMove;
 		move.Do();
@@ -116,7 +116,7 @@ public class MoveHistory : MonoBehaviour {
 	}
 
 	public bool UndoMove() {
-		if(currentMove.IsRoot) { return false; }
+		if (currentMove.IsRoot) { return false; }
 		currentMove.Undo();
 		currentMove = currentMove.prev;
 		onUndoMove?.Invoke(CurrentMove);

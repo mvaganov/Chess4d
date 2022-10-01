@@ -40,8 +40,10 @@ public class Board : MonoBehaviour {
 			Tile tile = tiles[i];
 			Piece[] pieces = tile.GetComponentsInChildren<Piece>();
 			if (pieces != null && pieces.Length > 1) {
-				throw new System.Exception("there are "+ pieces.Length+" at "+tile+": "+
-					string.Join(", ", System.Array.ConvertAll(pieces, p=>p.code)));
+				string errorMessage = ("there are "+ pieces.Length+" at "+tile+": "+
+					string.Join(", ", System.Array.ConvertAll(pieces, p=>p.name)));
+				//throw new System.Exception(errorMessage);
+				Debug.LogError(errorMessage);
 			}
 			allPieces.AddRange(pieces);
 		}
