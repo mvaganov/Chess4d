@@ -15,8 +15,8 @@ public class AxisMovement : MonoBehaviour {
 	
 	[System.Serializable] public struct KeyAxis {
 		public string name;
-		public float baseValue;
 		public KeyCode increase, decrease;
+		public float baseValue;
 		public KeyAxis(string name, KeyCode increase, KeyCode decrease, float baseValue) {
 			this.name = name;
 			this.increase = increase;

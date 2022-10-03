@@ -19,6 +19,22 @@ public class MoveLogic : MonoBehaviour {
 	public Piece piece => GetComponent<Piece>();
 	public Team team => GetComponent<Piece>().team;
 
+	public void Awake() {
+		if (!PieceHasCorrectLogic()) {
+			piece.RefreshMoveLogic();
+			PieceHasCorrectLogic();
+		}
+	}
+
+	private bool PieceHasCorrectLogic() {
+		Piece p = piece;
+		if (p.MoveLogic == null) { return false; }
+		if (p.MoveLogic != this) {
+			throw new Exception($"{p.name} has {p.MoveLogic.GetType().Name}, trying to add {GetType().Name}?");
+		}
+		return true;
+	}
+
 	public virtual void StandardMoves(IEnumerable<Coord> directions, int maxSpaces,
 	List<Move> out_moves, MoveKind moveKind) {
 		Piece p = piece;
@@ -138,5 +154,4 @@ public class MoveLogic : MonoBehaviour {
 			yield return null;
 		}
 	}
-
 }

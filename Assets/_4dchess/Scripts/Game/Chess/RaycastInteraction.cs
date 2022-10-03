@@ -25,14 +25,6 @@ public class RaycastInteraction : MonoBehaviour {
 		if (EventSystem.current.currentSelectedGameObject != null) {
 			return;
 		}
-		if (Input.GetKeyDown(undoMove)) {
-			game.UndoMove();
-			RefreshVisuals(visuals.selected);
-		}
-		if (Input.GetKeyDown(redoMove)) {
-			game.RedoMove();
-			RefreshVisuals(visuals.selected);
-		}
 		if (Input.GetMouseButtonUp(0)) {
 			Click();
 			RefreshVisuals(currentHovered);
@@ -57,7 +49,7 @@ public class RaycastInteraction : MonoBehaviour {
 		visuals.selected = tiledGameObjet;
 		Board currentPiecesBoard = currentHovered != null ? currentHovered.GetBoard() : null;
 		Piece piece = currentPiecesBoard != null ? currentPiecesBoard.GetPiece(currentHovered.GetCoord()) : null;
-		Debug.Log("selecting " + piece);
+		//Debug.Log("selecting " + piece);
 		analysis.SetCurrentPiece(piece);
 		visuals.ResetPieceSelectionVisuals(analysis);
 	}

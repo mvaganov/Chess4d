@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class MoveNode {
 	public Move move;
-	public int index;
+	public int turnIndex;
 	public int timestamp;
 	public List<MoveNode> next;
 	public MoveNode prev;
@@ -16,7 +16,7 @@ public class MoveNode {
 	public MoveNode(int index, Move move, string notes) {
 		this.move = move;
 		this.notes = notes;
-		this.index = index;
+		this.turnIndex = index;
 		timestamp = System.Environment.TickCount;
 		next = new List<MoveNode>();
 		prev = null;
@@ -40,17 +40,19 @@ public class MoveNode {
 	}
 
 	public override bool Equals(object obj) {
-		return obj is MoveNode mn && mn.index == index && mn.move.Equals(move);
+		return obj is MoveNode mn && mn.turnIndex == turnIndex && mn.move.Equals(move);
 	}
 	public override int GetHashCode() {
-		return ((move != null) ? move.GetHashCode() : 0) ^ index;
+		return ((move != null) ? move.GetHashCode() : 0) ^ turnIndex;
 	}
 
-	public MoveNode FindMoveRecursive(Move m) {
+	public MoveNode FindMoveRecursive(Move m, HashSet<MoveNode> ignoreBranches) {
 		if (move == m) { return this; }
 		MoveNode found = null;
 		for (int i = 0; i < next.Count; ++i) {
-			found = next[i].FindMoveRecursive(m);
+			MoveNode possibleNext = next[i];
+			if (ignoreBranches != null && ignoreBranches.Contains(possibleNext)) { continue; }
+			found = possibleNext.FindMoveRecursive(m, ignoreBranches);
 			if (found != null) { break; }
 		}
 		return found;

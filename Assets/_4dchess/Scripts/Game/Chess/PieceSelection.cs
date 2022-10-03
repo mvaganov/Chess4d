@@ -12,7 +12,7 @@ public class PieceSelection : MonoBehaviour {
 	private Action<int> callback;
 
 	public void UnselectAll() {
-		Debug.Log("unselect");
+		//Debug.Log("unselect");
 		for (int i = 0; i < content.childCount; i++) {
 			SelectionButtonUi sbutton = content.GetChild(i).GetComponent<SelectionButtonUi>();
 			sbutton.Unselect();

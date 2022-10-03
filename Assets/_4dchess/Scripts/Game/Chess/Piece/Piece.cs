@@ -13,12 +13,20 @@ public class Piece : TiledGameObject {
 	private bool movesAreUpToDate;
 	public int moveCount = 0;
 
+	public ChessGame Game => board.game;
+
+	public MoveLogic MoveLogic => moveLogic;
+
 	public void MarkMovesAsInvalid() {
 		movesAreUpToDate = false;
 	}
 
 	protected override void Start() {
 		base.Start();
+		RefreshMoveLogic();
+	}
+
+	public void RefreshMoveLogic() {
 		moveLogic = GetComponent<MoveLogic>();
 	}
 

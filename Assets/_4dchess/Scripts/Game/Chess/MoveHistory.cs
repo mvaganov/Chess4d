@@ -16,13 +16,28 @@ public class MoveHistory : MonoBehaviour {
 		currentMove = moveNode;
 	}
 
+	/// <summary>
+	/// find the point in history (or alternate timelines) that a specific piece moved from 'from' to 'to'.
+	/// </summary>
 	public MoveNode FindMoveNode(Move move) {
 		MoveNode n = currentMove;
+		// if we're at the node we're looking for, return it now. that was easy.
 		if (n.move == move) { return n; }
-		// TODO search backwards along the current timeline first... if the node isn't found there,
-		// then do the exhaustive resursive search
+		// look for nodes along this node's direct history, until beginning, or a branch in the timeline is found
+		while (n.prev != null && n.prev.next.Count > 1) {
+			n = n.prev;
+			if (n == null) { return null; }
+			if (n.move == move) { return n; }
+		}
+		HashSet<MoveNode> branchesToIgnore = new HashSet<MoveNode>();
+		// count this branch as fully ignored
+		branchesToIgnore.Add(n);
+		// and do a full check of the future (if it exists). if the node is in the future, get it
+		n = CurrentMove.FindMoveRecursive(move, null);
+		if (n != null) { return n; }
+		// then do the exhaustive resursive search starting from the very beginning, ignoring the searched branch
 		n = GetRoot();
-		return n.FindMoveRecursive(move);
+		return n.FindMoveRecursive(move, branchesToIgnore);
 	}
 
 	public MoveNode GetRoot() {
@@ -48,24 +63,16 @@ public class MoveHistory : MonoBehaviour {
 	}
 
 	public void MakeMove(Move move, string notes) {
-		DoThis(new MoveNode(currentMove.index + 1, move, notes));
+		DoThis(new MoveNode(currentMove.turnIndex + 1, move, notes));
 	}
-	//public void MakeMove(Piece pieceMoved, Coord from, Coord to, string notes) {
-	//	DoThis(new MoveNode(currentMove.index + 1, new Move(pieceMoved, from, to), notes));
-	//}
-	//public void MakeCapture(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured,
-	//string notes) {
-	//	DoThis(new MoveNode(currentMove.index + 1, new Capture(pieceMoved, from, to, pieceCaptured, fromCaptured), notes));
-	//}
 
 	public void DoThis(MoveNode move) {
 		int doneAlready = currentMove.next.IndexOf(move);
 		if (doneAlready >= 0) {
 			move = currentMove.next[doneAlready];
-			Debug.Log("repeat!");
 			currentMove.next.RemoveAt(doneAlready);
 		}
-		Debug.Log("doing " + move + " " + move.GetType().Name);
+		Debug.Log("doing " + move + " " + move.move.GetType().Name);
 		currentMove.next.Insert(0, move);
 		move.prev = currentMove;
 		move.Do();
@@ -74,22 +81,22 @@ public class MoveHistory : MonoBehaviour {
 	}
 
 	public void GoToMove(MoveNode targetMove) {
-		int actualIndexToTravelTo = targetMove.index - 1;
+		int actualIndexToTravelTo = targetMove.turnIndex - 1;
 		MoveNode next = null;
 		HashSet<Board> boards = new HashSet<Board>();
 		do {
-			if (currentMove.index < actualIndexToTravelTo) {
+			if (currentMove.turnIndex < actualIndexToTravelTo) {
 				next = currentMove.next.Count > 0 ? currentMove.next[0] : null;
 				if (next == null) {
-					throw new Exception($"can't go to next[0] after {currentMove.index} {currentMove}");
+					throw new Exception($"can't go to next[0] after {currentMove.turnIndex} {currentMove}");
 				}
 				next.Do();
 				currentMove = next;
-			} else if (currentMove.index > actualIndexToTravelTo) {
+			} else if (currentMove.turnIndex > actualIndexToTravelTo) {
 				currentMove.Undo();
 				next = currentMove.prev;
 				if (next == null && actualIndexToTravelTo > 0) {
-					throw new Exception($"can't go to move before {currentMove.index} {currentMove}");
+					throw new Exception($"can't go to move before {currentMove.turnIndex} {currentMove}");
 				}
 				if (next != null) {
 					currentMove = next;
@@ -98,11 +105,11 @@ public class MoveHistory : MonoBehaviour {
 			if (currentMove.move != null && currentMove.move.pieceMoved != null) {
 				boards.Add(currentMove.move.pieceMoved.board);
 			}
-		} while (currentMove.index != actualIndexToTravelTo && next != null);
-		if (actualIndexToTravelTo == currentMove.index) {
+		} while (currentMove.turnIndex != actualIndexToTravelTo && next != null);
+		if (actualIndexToTravelTo == currentMove.turnIndex) {
 			next = currentMove.next.Count > targetMove.BranchIndex ? currentMove.next[targetMove.BranchIndex] : null;
 			if (next == null) {
-				throw new Exception($"can't go to next[{targetMove.BranchIndex}] after {currentMove.index} {currentMove}");
+				throw new Exception($"can't go to next[{targetMove.BranchIndex}] after {currentMove.turnIndex} {currentMove}");
 			}
 			currentMove.next.RemoveAt(targetMove.BranchIndex);
 			currentMove.next.Insert(0, next);
