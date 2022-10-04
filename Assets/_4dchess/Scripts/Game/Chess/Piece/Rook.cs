@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 public class Rook : MoveLogic {
-	private static readonly Coord[] movePattern = new Coord[] {
+	public static readonly Coord[] movePattern = new Coord[] {
 		new Coord(+1, 0),
 		new Coord(-1, 0),
 		new Coord( 0,+1),

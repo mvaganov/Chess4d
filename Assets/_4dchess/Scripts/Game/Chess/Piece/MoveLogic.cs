@@ -9,7 +9,7 @@ public enum MoveKind {
 	Attack = 2,
 	MoveAttack = Move | Attack,
 	Defend = 4,
-	MoveDevend = Move | Defend,
+	MoveDefend = Move | Defend,
 	AttackDefend = Attack | Defend,
 	MoveAttackDefend = Move | Attack | Defend
 }

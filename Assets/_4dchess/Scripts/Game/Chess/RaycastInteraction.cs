@@ -11,9 +11,6 @@ public class RaycastInteraction : MonoBehaviour {
 	public Gradient hoveredColor;
 	public TiledGameObject currentHovered;
 
-	private KeyCode undoMove = KeyCode.Backspace;
-	private KeyCode redoMove = KeyCode.Space;
-
 	void Start() {
 		if (cam == null) { cam = Camera.main; }
 		if (game == null) { game = FindObjectOfType<ChessGame>(); }
@@ -36,8 +33,6 @@ public class RaycastInteraction : MonoBehaviour {
 			}
 			ColorAccentHovered(rh.collider.GetComponent<TiledGameObject>());
 			visuals.DrawSquareDefenders(currentHovered);
-			// TODO if currentHovered is one of the valid moves
-				// draw threat&defense lines for this piece if it were to move to the currentHovered location
 		} else {
 			ClearHoverAccent();
 			visuals.DrawSquareDefenders(null);

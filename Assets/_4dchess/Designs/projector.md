@@ -19,6 +19,7 @@ like chess on a non-orthogonal board
 * king -> director
 	* 1 move per order
 	* adjacent workers can move 2 per order
+	* if a piece can move long distances next to the king, the king may leap over it as part of the same move
 	* if another piece moves into his square he will move adjacent to where the other peice was
 
 ## gameplay

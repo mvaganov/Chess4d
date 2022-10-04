@@ -18,6 +18,7 @@ using UnityEngine;
 	}
 	public int col { get => x; set => x = value; }
 	public int row { get => y; set => y = value; }
+	public int MagnitudeManhattan => System.Math.Abs(x) + System.Math.Abs(y);
 	public Coord(int col, int row) {
 		vec2i = new Vector2Int(col, row);
 	}
