@@ -45,4 +45,27 @@ public class King : MoveLogic {
 
 		return moves;
 	}
+
+	public class Castle : Move {
+		public Move partnerMove;
+
+		public Castle(Piece pieceMoved, Coord from, Coord to, Piece partner, Coord partnerFrom, Coord partnerTo)
+		: base(pieceMoved, from, to) {
+			partnerMove = new Move(partner, partnerFrom, partnerTo);
+		}
+
+		public override void Do() { base.Do(); partnerMove.Do(); }
+
+		public override void Undo() { base.Do(); partnerMove.Do(); }
+
+		public override string ToString() { return base.ToString() + partnerMove.ToString(); }
+
+		public override bool Equals(object obj) {
+			return base.Equals(obj) && ((Castle)obj).partnerMove.Equals(partnerMove);
+		}
+
+		public override int GetHashCode() {
+			return from.GetHashCode() ^ to.GetHashCode() ^ pieceMoved.GetHashCode() ^ partnerMove.GetHashCode();
+		}
+	}
 }
