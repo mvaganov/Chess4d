@@ -85,11 +85,11 @@ public class Piece : TiledGameObject {
 		MoveLogic.LerpPath(this, bezier, team.speed, true);
 	}
 
-	public void GetMoves(List<Move> out_moves) {
+	public void GetMoves(List<Move> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
 		if (moveLogic == null) { return; }
 		if (!movesAreUpToDate) {
 			if (moves == null) { moves = new List<Move>(); } else { moves.Clear(); }
-			moveLogic.GetMoves(moves, MoveKind.MoveAttackDefend);
+			moveLogic.GetMoves(moves, moveKind);
 			movesAreUpToDate = true;
 		}
 		if (moves != null) { out_moves?.AddRange(moves); }

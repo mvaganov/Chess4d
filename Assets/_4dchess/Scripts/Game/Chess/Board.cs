@@ -67,7 +67,7 @@ public class Board : MonoBehaviour {
 
 	private Coord GetCaptureLocation(Move m) {
 		if (m is Capture c) {
-			return c.fromCaptured;
+			return c.captureCoord;
 		}
 		return GetMoveLocation(m);
 	}
@@ -86,8 +86,8 @@ public class Board : MonoBehaviour {
 			Move mov = moves[m];
 			Coord coord = mov.to;
 			switch (mov) {
-				case Pawn.EnPassant ep:       coord = ep.fromCaptured;  break;
-				case Capture cap:             coord = cap.fromCaptured; break;
+				case Pawn.EnPassant ep:       coord = ep.captureCoord;  break;
+				case Capture cap:             coord = cap.captureCoord; break;
 				//case Pawn.DoublePawnMove dpm: coord = dpm.to;           break;
 				//case Move move:               coord = move.to;          break;
 			}

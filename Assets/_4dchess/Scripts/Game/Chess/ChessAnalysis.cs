@@ -51,6 +51,11 @@ public class ChessAnalysis : MonoBehaviour {
 		if (selectedPiece == null) { return; }
 		List<Move> pieceMoves = new List<Move>();
 		piece.GetMoves(pieceMoves);
+		for (int i = pieceMoves.Count-1; i >= 0; --i) {
+			if (pieceMoves[i] as Defend != null) {
+				pieceMoves.RemoveAt(i);
+			}
+		}
 		currentMoves.AddRange(pieceMoves);
 		for (int i = 0; i < pieceMoves.Count; i++) {
 			if (IsValidMove(piece, pieceMoves[i])) {

@@ -1948,6 +1948,55 @@ Transform:
   m_Father: {fileID: 1564371132}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &328888928
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 328888929}
+  - component: {fileID: 328888930}
+  m_Layer: 0
+  m_Name: Special Tile and Arrows
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &328888929
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 328888928}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 407925200}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &328888930
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 328888928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfe29c4540b58544d83e0d9a10e2247a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markPool:
+    unallocatedLocation: {fileID: 1337838620}
+    prefab: {fileID: 3555410402216363709, guid: 11dde93a442e2324da2e2b5a3add5461, type: 3}
+    unallocated: []
+  currentMarks: []
 --- !u!1001 &356630384
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2398,6 +2447,7 @@ Transform:
   - {fileID: 242245483}
   - {fileID: 1355893367}
   - {fileID: 1933217764}
+  - {fileID: 328888929}
   m_Father: {fileID: 1921063275}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -12692,7 +12742,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 906004716}
   m_HandleRect: {fileID: 906004715}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -13469,6 +13519,7 @@ MonoBehaviour:
   selection: {fileID: 242245484}
   defendArrows: {fileID: 1933217765}
   tempDefendArrows: {fileID: 1355893368}
+  specialTileAndArrows: {fileID: 328888930}
   selected: {fileID: 0}
   showKingDefender: 0
 --- !u!1 &1933217763

@@ -2,8 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public partial class Pawn
-{
+public partial class Pawn {
 	public class DoubleMove : Move {
 		public DoubleMove(Piece pieceMoved, Coord from, Coord to) : base(pieceMoved, from, to) { }
 		public override void Do() {
@@ -32,7 +31,7 @@ public partial class Pawn
 			Tile sideTile = board.GetTile(otherPieceLocation);
 			if (sideTile == null) { return null; }
 			Piece possibleTarget = sideTile.GetPiece();
-			if (possibleTarget == null || possibleTarget.code != p.code) {
+			if (possibleTarget == null || possibleTarget.code != p.code || possibleTarget.team.IsAlliedWith(p.team)) {
 				return null;
 			}
 			//UnityEngine.Debug.Log("maybe en passant?");
@@ -46,6 +45,28 @@ public partial class Pawn
 			if (!onlyJustNowDidDoubleMove) return null;
 			// TODO create en passant move
 			return new EnPassant(p, pieceLocation, nextPieceLocation, possibleTarget, otherPieceLocation);
+		}
+
+		public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse) {
+			TiledGameObject marker = markPool.Get();
+			Coord coord = reverse ? from : to;
+			Board board = pieceMoved.board;
+			Tile tile = board.GetTile(coord);
+			Transform markerTransform = marker.transform;
+			markerTransform.SetParent(tile.transform);
+			markerTransform.localPosition = Vector3.zero;
+			if (marker.Label != null) {
+				if (pieceCaptured != null) {
+					marker.Label.text = $"en passant";//\n[{capturable.code}]";
+				} else {
+					marker.Label.text = "IMposSI 'BLE";
+				}
+			}
+			if (marker is TiledWire tw) {
+				//tw.Destination = reverse ? to : from;
+				tw.DrawLine(from, captureCoord);
+			}
+			return marker;
 		}
 	}
 

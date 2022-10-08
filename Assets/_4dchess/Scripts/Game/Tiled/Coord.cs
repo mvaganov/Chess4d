@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 // TODO replace with pair of shorts or pair of bytes even?
@@ -19,6 +20,7 @@ using UnityEngine;
 	public int col { get => x; set => x = value; }
 	public int row { get => y; set => y = value; }
 	public int MagnitudeManhattan => System.Math.Abs(x) + System.Math.Abs(y);
+	public Coord normalized => new Coord(System.Math.Sign(x), System.Math.Sign(y));
 	public Coord(int col, int row) {
 		vec2i = new Vector2Int(col, row);
 	}
@@ -40,6 +42,19 @@ using UnityEngine;
 	public static Coord operator -(Coord a, Coord b) => new Coord(a.vec2i - b.vec2i);
 	public static Coord operator *(Coord a, float n) => new Coord((int)(a.vec2i.x * n), (int)(a.vec2i.y * n));
 	public override int GetHashCode() => vec2i.GetHashCode();
+
+	public string ToString(string v) {
+		switch (v.ToLower()) {
+			case "colrow": return $"{x},{y}";
+			case "cr": return $"{x},{y}";
+			case "rowcol": return $"{y},{x}";
+			case "rc": return $"{y},{x}";
+			case "xy": return $"{x},{y}";
+			case "yx": return $"{y},{x}";
+		}
+		return ToString();
+	}
+
 	public override bool Equals(object obj) {
 		if (obj == null) { return false; }
 		if (obj is Coord c) { return this == c; }

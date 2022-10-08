@@ -83,9 +83,11 @@ public class RaycastInteraction : MonoBehaviour {
 	}
 
 	private bool MoveIsNotDefensive(Move move) {
+		//Defend def = move as Defend;
+		//return move as Defend == null;
 		Capture cap = move as Capture;
-		if (cap == null) { return true;}
-		return !cap.IsDefend;
+		if (cap == null) { return true; }
+		return !cap.isDefend;
 	}
 
 	private void ColorAccentHovered(TiledGameObject hoveredObject) {

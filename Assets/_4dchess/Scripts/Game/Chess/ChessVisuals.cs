@@ -9,6 +9,7 @@ public class ChessVisuals : MonoBehaviour {
 	public TileVisualization selection;
 	public TileVisualization defendArrows;
 	public TileVisualization tempDefendArrows;
+	public TileVisualization specialTileAndArrows;
 	public TiledGameObject selected;
 	public bool showKingDefender;
 
@@ -23,6 +24,7 @@ public class ChessVisuals : MonoBehaviour {
 	public void ClearPreviousSelectionVisuals() {
 		if (selected == null) { return; }
 		selected.ResetColor();
+		specialTileAndArrows.ClearTiles();
 		defendArrows.ClearTiles();
 		selection.ClearTiles();
 		captures.ClearTiles();
@@ -37,8 +39,9 @@ public class ChessVisuals : MonoBehaviour {
 		captures.ClearTiles();
 		selection.ClearTiles();
 		defendArrows.ClearTiles();
+		specialTileAndArrows.ClearTiles();
 		Coord pieceCoord = piece.GetCoord();
-		selection.CreateMarks(new Move[] { new Move(piece, pieceCoord, pieceCoord) }, piece.board, Color.green);
+		selection.CreateMarks(new Move[] { new Move(piece, pieceCoord, pieceCoord) }, Color.green);
 
 		if (analysis.CurrentMoves != null) {
 			for (int i = 0; i < analysis.CurrentMoves.Count; ++i) {
@@ -54,36 +57,34 @@ public class ChessVisuals : MonoBehaviour {
 		switch (someKindOfMove) {
 			case Pawn.EnPassant ep:
 				//Debug.Log("EN PASSANT!");
-				tgo = moves.AddMark(ep, board);
-				tgo.Color = new Color(1, .5f, 0); {
-					tgo = defendArrows.AddMark(ep, board);
-					TiledWire tw = tgo as TiledWire;
-					tw.Destination = ep.fromCaptured;
-					tgo.Color = new Color(1, .5f, 0);
-				}
+				tgo = specialTileAndArrows.AddMark(ep);
+				tgo.Color = new Color(1, .5f, 0);
+				break;
+			case Defend def:
+				tgo = defendArrows.AddMark(def);
+				tgo.Color = new Color(1, 1, 0);
 				break;
 			case Capture cap:
-				if (cap.IsDefend) {
-					if (cap.pieceCaptured != null) {
-						tgo = defendArrows.AddMark(cap, board);
-						TiledWire tw = tgo as TiledWire;
-						tw.Destination = cap.from;
-						tgo.Color = new Color(1, 1, 0);
-					}
-				} else {
-					tgo = captures.AddMark(cap, board);
+				//if (cap.IsDefend) {
+				//	if (cap.pieceCaptured != null) {
+				//		tgo = defendArrows.AddMark(cap);
+				//		tgo.Color = new Color(1, 1, 0);
+				//	}
+				//} else {
+					tgo = captures.AddMark(cap);
 					tgo.Color = new Color(1, 0, 0);
-					//TiledWire tw = tgo as TiledWire;
-					//tw.Destination = cap.from;
-					//tw.Color = Color.red;
-				}
+				//}
 				break;
 			case Pawn.DoubleMove dbp:
-				tgo = moves.AddMark(dbp, board);
+				tgo = moves.AddMark(dbp);
+				tgo.Color = new Color(1, .75f, 0);
+				break;
+			case King.Castle cas:
+				tgo = specialTileAndArrows.AddMark(cas);
 				tgo.Color = new Color(1, .75f, 0);
 				break;
 			case Move move:
-				tgo = moves.AddMark(move, board);
+				tgo = moves.AddMark(move);
 				tgo.Color = Color.yellow;
 				break;
 		}
@@ -115,7 +116,7 @@ public class ChessVisuals : MonoBehaviour {
 		}
 		//Debug.Log($" {target} {activityAtSquare.Count} {defenders.Count}");
 		for (int i = 0; i < defenders.Count; ++i) {
-			TiledGameObject tiledObject = tempDefendArrows.AddMarkReverse(defenders[i], board);
+			TiledGameObject tiledObject = tempDefendArrows.AddMarkReverse(defenders[i]);
 			tiledObject.Color = Color.magenta;
 			//TiledWire tw = tiledObject as TiledWire;
 			//if (tw != null) {

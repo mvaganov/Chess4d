@@ -66,14 +66,15 @@ public class MoveLogic : MonoBehaviour {
 					break;
 				}
 				Piece other = board.GetPiece(cursor);
-				Capture capture = new Capture(self, self.GetCoord(), cursor, other, cursor);
 				if (moveKind.HasFlag(MoveKind.Defend)) {
-					out_moves?.Add(capture);
+					Defend defend = new Defend(self, self.GetCoord(), cursor, other, cursor);
+					out_moves?.Add(defend);
 				}
 				if (other != null) {
 					bool isAllies = self.team.IsAlliedWith(other.team);
 					if (!isAllies) {
 						if (moveKind.HasFlag(MoveKind.Attack)) {
+							Capture capture = new Capture(self, self.GetCoord(), cursor, other, cursor);
 							out_moves?.Add(capture);
 						}
 					}

@@ -7,15 +7,23 @@ public class TiledWire : TiledGameObject {
 		get => Wire.LineRenderer.material;
 		set => Wire.LineRenderer.material = value;
 	}
+	public override Color Color {
+		get => Material.color;
+		set {
+			Renderer[] renderers = GetComponentsInChildren<Renderer>();
+			foreach (Renderer r in renderers) {
+				r.material.color = value;
+			}
+		}
+	}
 	[SerializeField] private Coord _destinationCoord;
 	// TODO allow setting the source as well, so that arrows can come and go.
 	public Coord Destination {
 		get { return _destinationCoord; }
-		set {
-			DrawLine(value);
-		}
+		set { DrawLine(GetCoord(), value); }
 	}
-	public void DrawLine(Coord value) {
+
+	public void DrawLine(Coord startCoord, Coord value) {
 		if (Wire == null) {
 			Wire = NonStandard.Wires.MakeWire();
 			Wire.transform.SetParent(transform);
@@ -23,8 +31,7 @@ public class TiledWire : TiledGameObject {
 			Wire.transform.Rotate(90, 0, 0);
 		}
 		_destinationCoord = value;
-		Transform _transform = transform;
-		Vector3 start = _transform.position;
+		Vector3 start = GetBoard().CoordToWorldPosition(startCoord);
 		Vector3 end = GetBoard().CoordToWorldPosition(_destinationCoord);
 
 		Vector3 startAdjust = Vector3.up;

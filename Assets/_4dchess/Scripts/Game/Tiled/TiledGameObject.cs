@@ -10,7 +10,7 @@ public class TiledGameObject : MonoBehaviour {
 		set => GetComponentInChildren<Renderer>().material = value;
 	}
 	public TMPro.TMP_Text Label;
-	public Color Color {
+	public virtual Color Color {
 		get => Material.color;
 		set => Material.color = value;
 	}
