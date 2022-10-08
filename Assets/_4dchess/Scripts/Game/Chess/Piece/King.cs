@@ -17,47 +17,9 @@ public class King : MoveLogic {
 	public override void GetMoves(List<Move> out_moves, MoveKind moveKind) {
 		StandardMoves(movePattern, 1, out_moves, moveKind);
 		if (piece.moveCount == 0) {
-			List<Move> castleMoves = GetCastleMoves(Rook.movePattern, "R");
+			List<Move> castleMoves = Castle.FindMoves(this, Rook.movePattern, "R");
 			out_moves.AddRange(castleMoves);
 		}
-	}
-
-	private List<Move> GetCastleMoves(Coord[] movePattern, string pieceCode) {
-		List<Move> moves = new List<Move>();
-		// look for rooks that have a line to the king using rook movement
-		StandardMoves(movePattern, 8, moves, MoveKind.Defend);
-		Debug.Log("looking for castles " + string.Join(", ", moves));
-		if (moves.Count > 0) {
-			Piece self = piece;
-			Coord here = self.GetCoord();
-			// get the ones sort of far away that haven't moved
-			for (int i = moves.Count - 1; i >= 0; --i) {
-				Capture cap = moves[i] as Capture;
-				//if (cap != null && cap.pieceCaptured != null && cap.pieceCaptured.code == "R") {
-				//	Debug.Log("found " + cap.pieceCaptured + " " + cap.pieceMoved.moveCount+" " +
-				//		(cap.captureCoord - here).ToString("xy") + " " + ((cap.captureCoord - here).MagnitudeManhattan));
-				//}
-				if (cap == null || cap.pieceCaptured == null || cap.pieceCaptured.moveCount != 0
-				|| cap.pieceCaptured.code != pieceCode || (cap.captureCoord - here).MagnitudeManhattan < 2) {
-					moves.RemoveAt(i);
-				}
-				else {
-					Debug.Log("found a castle? "+cap.pieceCaptured);
-				}
-			}
-			// mark the castle, which is the rook moving next to the king, and the king jumping over the rook
-			for(int i = 0; i < moves.Count; ++i) {
-				// replace the move with a castle to that target.
-				Capture cap = moves[i] as Capture;
-				Piece other = cap.pieceCaptured;
-				Coord there = other.GetCoord();
-				Coord delta = there - here;
-				Coord normal = delta.normalized;
-				Castle castle = new Castle(piece, here, here + normal * 2, other, other.GetCoord(), here + normal);
-				moves[i] = castle;
-			}
-		}
-		return moves;
 	}
 
 	public class Castle : Move {
@@ -68,9 +30,42 @@ public class King : MoveLogic {
 			partnerMove = new Move(partner, partnerFrom, partnerTo);
 		}
 
+		public static List<Move> FindMoves(MoveLogic king, Coord[] movePattern, string pieceCode) {
+			List<Move> moves = new List<Move>();
+			// look for rooks that have a line to the king using rook movement
+			king.StandardMoves(movePattern, 8, moves, MoveKind.Defend);
+			//Debug.Log("looking for castles " + string.Join(", ", moves));
+			if (moves.Count > 0) {
+				Piece self = king.piece;
+				Coord here = self.GetCoord();
+				// get the ones sort of far away that haven't moved
+				for (int i = moves.Count - 1; i >= 0; --i) {
+					Defend def = moves[i] as Defend;
+					if (def == null || def.pieceCaptured == null || def.pieceCaptured.moveCount != 0
+					|| def.pieceCaptured.code != pieceCode || (def.captureCoord - here).MagnitudeManhattan < 2) {
+						moves.RemoveAt(i);
+					} else {
+						Debug.Log("found a castle? " + def.pieceCaptured);
+					}
+				}
+				// mark the castle, which is the rook moving next to the king, and the king jumping over the rook
+				for (int i = 0; i < moves.Count; ++i) {
+					// replace the move with a castle to that target.
+					Capture cap = moves[i] as Capture;
+					Piece other = cap.pieceCaptured;
+					Coord there = other.GetCoord();
+					Coord delta = there - here;
+					Coord normal = delta.normalized;
+					Castle castle = new Castle(king.piece, here, here + normal * 2, other, other.GetCoord(), here + normal);
+					moves[i] = castle;
+				}
+			}
+			return moves;
+		}
+
 		public override void Do() { base.Do(); partnerMove.Do(); }
 
-		public override void Undo() { base.Do(); partnerMove.Do(); }
+		public override void Undo() { partnerMove.Undo(); base.Undo(); }
 
 		public override string ToString() { return base.ToString() + partnerMove.ToString(); }
 

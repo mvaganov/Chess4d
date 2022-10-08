@@ -4633,7 +4633,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2484cd8c2bb1bb941b983aaaa748fa2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _key: 0
+  _keys: 00000000
   _onKeyDown:
     Actions:
       m_PersistentCalls:
@@ -4654,6 +4654,7 @@ MonoBehaviour:
     Actions:
       m_PersistentCalls:
         m_Calls: []
+  _trigger: 0
 --- !u!1001 &747930182
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5616,7 +5617,7 @@ GameObject:
   - component: {fileID: 839522221}
   - component: {fileID: 839522222}
   m_Layer: 0
-  m_Name: MouseLook
+  m_Name: MouseLook WASD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5670,16 +5671,16 @@ MonoBehaviour:
   body: {fileID: 963194228}
   axis:
   - name: Horizontal
-    increase: 100
-    decrease: 97
+    _increase: 6400000013010000
+    _decrease: 6100000014010000
     baseValue: 1
   - name: Altitude
-    increase: 113
-    decrease: 101
+    _increase: 7100000018010000
+    _decrease: 6500000019010000
     baseValue: 1
   - name: Advance
-    increase: 119
-    decrease: 115
+    _increase: 7700000011010000
+    _decrease: 7300000012010000
     baseValue: 1
 --- !u!1001 &843086520
 PrefabInstance:
@@ -6554,7 +6555,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2484cd8c2bb1bb941b983aaaa748fa2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _key: 32
+  _keys: 20000000
   _onKeyDown:
     Actions:
       m_PersistentCalls:
@@ -6575,6 +6576,7 @@ MonoBehaviour:
     Actions:
       m_PersistentCalls:
         m_Calls: []
+  _trigger: 0
 --- !u!114 &916499651
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6587,7 +6589,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2484cd8c2bb1bb941b983aaaa748fa2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _key: 8
+  _keys: 08000000
   _onKeyDown:
     Actions:
       m_PersistentCalls:
@@ -6608,6 +6610,7 @@ MonoBehaviour:
     Actions:
       m_PersistentCalls:
         m_Calls: []
+  _trigger: 0
 --- !u!1001 &921587724
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7948,7 +7951,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2484cd8c2bb1bb941b983aaaa748fa2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _key: 324
+  _keys: 44010000110100001401000012010000130100001801000019010000
   _onKeyDown:
     Actions:
       m_PersistentCalls:
@@ -8005,6 +8008,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 1
           m_CallState: 2
+  _trigger: 1
 --- !u!1001 &1046504244
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -44,7 +44,7 @@ public partial class Pawn : MoveLogic {
 	private void ReplaceAnyMoveOntoFinalSquareWithPawnPromotion(List<Move> out_pawnMoves, Board board) {
 		for (int i = 0; i < out_pawnMoves.Count; ++i) {
 			Move m = out_pawnMoves[i];
-			if (IsLastRow(board, m.to) && !(m is Promotion)) {
+			if (IsLastRow(board, m.to) && !(m is Defend) && !(m is Promotion)) {
 				out_pawnMoves[i] = new Promotion(out_pawnMoves[i]);
 			}
 		}

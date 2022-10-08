@@ -12,22 +12,22 @@ public class AxisMovement : MonoBehaviour {
 		new KeyAxis("Altitude", KeyCode.Q, KeyCode.E, 1),
 		new KeyAxis("Advance", KeyCode.W, KeyCode.S, 1),
 	};
-	
+
 	[System.Serializable] public struct KeyAxis {
 		public string name;
-		public KeyCode increase, decrease;
+		public KeyCode[] _increase, _decrease;
 		public float baseValue;
 		public KeyAxis(string name, KeyCode increase, KeyCode decrease, float baseValue) {
 			this.name = name;
-			this.increase = increase;
-			this.decrease = decrease;
 			this.baseValue = baseValue;
+			this._increase = new KeyCode[] { increase };
+			this._decrease = new KeyCode[] { decrease };
 		}
 		public float Value {
 			get {
-				if (Input.GetKey(increase)) { return baseValue; }
-				if (Input.GetKey(decrease)) { return -baseValue; }
-				return -0;
+				for (int i = 0; i < _increase.Length; ++i) { if (Input.GetKey(_increase[i])) { return baseValue; } }
+				for (int i = 0; i < _decrease.Length; ++i) { if (Input.GetKey(_decrease[i])) { return -baseValue; } }
+				return 0;
 			}
 		}
 	}

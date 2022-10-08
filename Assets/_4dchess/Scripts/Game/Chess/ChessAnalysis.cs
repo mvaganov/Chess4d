@@ -34,8 +34,8 @@ public class ChessAnalysis : MonoBehaviour {
 
 	public List<Move> GetMovesAt(Coord coord, Func<Move, bool> filter) {
 		List<Move> moves = new List<Move>();
-		for (int i = 0; i < validMoves.Count; i++) {
-			Move move = validMoves[i];
+		for (int i = 0; i < currentMoves.Count; i++) {
+			Move move = currentMoves[i];
 			if (filter != null && !filter(move)) { continue; }
 			if (move.to == coord) {
 				moves.Add(move);

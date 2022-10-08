@@ -12,6 +12,28 @@ public class ChessVisuals : MonoBehaviour {
 	public TileVisualization specialTileAndArrows;
 	public TiledGameObject selected;
 	public bool showKingDefender;
+	private Dictionary<System.Type, TileVisualSpecifics> _tileVisualizationSettings = null;
+
+	private struct TileVisualSpecifics {
+		public Color color;
+		public TileVisualization visualizer;
+		public TileVisualSpecifics(Color color, TileVisualization visualizer) {
+			this.color = color;
+			this.visualizer = visualizer;
+		}
+	}
+
+	Dictionary<System.Type, TileVisualSpecifics> TileVisSettings {
+		get => (_tileVisualizationSettings != null) ? _tileVisualizationSettings :
+		_tileVisualizationSettings = new Dictionary<System.Type, TileVisualSpecifics>() {
+			[typeof(Pawn.EnPassant)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),
+			[typeof(Defend)] = new TileVisualSpecifics(new Color(1, 1, 0), defendArrows),
+			[typeof(Capture)] = new TileVisualSpecifics(new Color(1, 0, 0), captures),
+			[typeof(Pawn.DoubleMove)] = new TileVisualSpecifics(new Color(1, .75f, 0), moves),
+			[typeof(King.Castle)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),
+			[typeof(Move)] = new TileVisualSpecifics(new Color(1, 1, 0), moves),
+		};
+	}
 
 	private void Start() {
 		if (moves == null) { Debug.LogWarning($"missing value for {nameof(moves)}"); }
@@ -19,6 +41,7 @@ public class ChessVisuals : MonoBehaviour {
 		if (selection == null) { Debug.LogWarning($"missing value for {nameof(selection)}"); }
 		if (defendArrows == null) { Debug.LogWarning($"missing value for {nameof(defendArrows)}"); }
 		if (tempDefendArrows == null) { Debug.LogWarning($"missing value for {nameof(tempDefendArrows)}"); }
+		if (specialTileAndArrows == null) { Debug.LogWarning($"missing value for {nameof(specialTileAndArrows)}"); }
 	}
 
 	public void ClearPreviousSelectionVisuals() {
@@ -53,41 +76,13 @@ public class ChessVisuals : MonoBehaviour {
 	}
 
 	private TiledGameObject AddPieceSelectionVisualFor(Move someKindOfMove, Board board) {
-		TiledGameObject tgo = null;
-		switch (someKindOfMove) {
-			case Pawn.EnPassant ep:
-				//Debug.Log("EN PASSANT!");
-				tgo = specialTileAndArrows.AddMark(ep);
-				tgo.Color = new Color(1, .5f, 0);
-				break;
-			case Defend def:
-				tgo = defendArrows.AddMark(def);
-				tgo.Color = new Color(1, 1, 0);
-				break;
-			case Capture cap:
-				//if (cap.IsDefend) {
-				//	if (cap.pieceCaptured != null) {
-				//		tgo = defendArrows.AddMark(cap);
-				//		tgo.Color = new Color(1, 1, 0);
-				//	}
-				//} else {
-					tgo = captures.AddMark(cap);
-					tgo.Color = new Color(1, 0, 0);
-				//}
-				break;
-			case Pawn.DoubleMove dbp:
-				tgo = moves.AddMark(dbp);
-				tgo.Color = new Color(1, .75f, 0);
-				break;
-			case King.Castle cas:
-				tgo = specialTileAndArrows.AddMark(cas);
-				tgo.Color = new Color(1, .75f, 0);
-				break;
-			case Move move:
-				tgo = moves.AddMark(move);
-				tgo.Color = Color.yellow;
-				break;
+		TiledGameObject tgo;
+		if (!TileVisSettings.TryGetValue(someKindOfMove.GetType(), out TileVisualSpecifics setting)) {
+			setting.visualizer = specialTileAndArrows;
+			setting.color = Color.magenta;
 		}
+		tgo = setting.visualizer.AddMark(someKindOfMove);
+		tgo.Color = setting.color;
 		return tgo;
 	}
 
@@ -116,25 +111,8 @@ public class ChessVisuals : MonoBehaviour {
 		}
 		//Debug.Log($" {target} {activityAtSquare.Count} {defenders.Count}");
 		for (int i = 0; i < defenders.Count; ++i) {
-			TiledGameObject tiledObject = tempDefendArrows.AddMarkReverse(defenders[i]);
+			TiledGameObject tiledObject = tempDefendArrows.AddMark(defenders[i], true);
 			tiledObject.Color = Color.magenta;
-			//TiledWire tw = tiledObject as TiledWire;
-			//if (tw != null) {
-			//	tw.Destination = defenders[i].to;
-			//	tiledObject.Color = Color.magenta;
-			//}
 		}
-		//List<TiledGameObject> arrows = tempDefendArrows.CreateMarks(defenders, board, tile => {
-		//	TiledWire tiledArrow = tile as TiledWire;
-		//	if (tiledArrow == null) { return; }
-		//	tiledArrow.Destination = currentCoord;
-		//	tiledArrow.Color = Color.yellow;
-		//	if (selectedPiece != null) {
-		//		Piece defender = board.GetPiece(tiledArrow.GetCoord());
-		//		if (selectedPiece == null || defender.team != selectedPiece.team) {
-		//			tiledArrow.Color = Color.red;
-		//		}
-		//	}
-		//});
 	}
 }

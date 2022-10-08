@@ -2,21 +2,61 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class KeySensitivity : MonoBehaviour {
-	[SerializeField] private KeyCode _key;
+	[SerializeField] private KeyCode[] _keys = new KeyCode[1];
 	[SerializeField] private KeyEvent _onKeyDown = new KeyEvent();
 	[SerializeField] private KeyEvent _onKeyUp = new KeyEvent();
+	[SerializeField] private Trigger _trigger = Trigger.everyTimeAnyArePressedOrReleased;
+	private bool[] pressedStates;
 
-	public KeyCode Key { get => _key; set => _key = value; }
+	public KeyCode[] Keys { get => _keys; set => _keys = value; }
 	public UnityEvent OnKeyDown => _onKeyDown.Actions;
 	public UnityEvent OnKeyUp => _onKeyUp.Actions;
 
+	public enum Trigger { everyTimeAnyArePressedOrReleased, oneIsPressedAllAreReleased }
+
 	[System.Serializable] public class KeyEvent { public UnityEvent Actions; }
 
+	private void Start() {
+		pressedStates = new bool[_keys.Length];
+	}
+
 	public void Update() {
-		if (Input.GetKeyDown(Key)) {
-			OnKeyDown.Invoke();
-		} else if (Input.GetKeyUp(Key)) {
-			OnKeyUp.Invoke();
+		for(int i = 0; i < _keys.Length; i++) {
+			if (Input.GetKeyDown(_keys[i])) {
+				pressedStates[i] = true;
+				bool doTrigger = false;
+				switch (_trigger) {
+					case Trigger.oneIsPressedAllAreReleased: doTrigger = PressCountExactly(1); break;
+					case Trigger.everyTimeAnyArePressedOrReleased: doTrigger = true; break;
+				}
+				if (doTrigger) { OnKeyDown.Invoke(); }
+			} else if (Input.GetKeyUp(_keys[i])) {
+				pressedStates[i] = false;
+				bool doTrigger = false;
+				switch (_trigger) {
+					case Trigger.oneIsPressedAllAreReleased: doTrigger = NonePressed(); break;
+					case Trigger.everyTimeAnyArePressedOrReleased: doTrigger = true; break;
+				}
+				if (doTrigger) { OnKeyUp.Invoke(); }
+			}
 		}
+	}
+
+	public bool PressCountExactly(int count) {
+		int found = 0;
+		for (int i = pressedStates.Length-1; i >= 0; --i) {
+			if (pressedStates[i]) {
+				++found;
+				if (found > count) { return false; }
+			}
+		}
+		return found == count;
+	}
+
+	public bool NonePressed() {
+		for (int i = 0; i < pressedStates.Length; i++) {
+			if (pressedStates[i]) { return false; }
+		}
+		return true;
 	}
 }

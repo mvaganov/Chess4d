@@ -81,6 +81,9 @@ public partial class Pawn {
 			if (move.GetType() != typeof(Move)) {
 				moreInterestingMove = move;
 			}
+			if (move.GetType() == typeof(Defend)) {
+				throw new System.Exception("this should not upgrade to a promotion...");
+			}
 		}
 
 		public override void Do() {
