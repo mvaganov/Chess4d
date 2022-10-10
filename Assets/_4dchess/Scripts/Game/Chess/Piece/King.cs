@@ -14,12 +14,24 @@ public class King : MoveLogic {
 			new Coord(+1,-1),
 			new Coord(-1,-1),
 	};
+
 	public override void GetMoves(List<Move> out_moves, MoveKind moveKind) {
 		StandardMoves(movePattern, 1, out_moves, moveKind);
 		if (piece.moveCount == 0) {
 			List<Move> castleMoves = Castle.FindMoves(this, Rook.movePattern, "R");
 			out_moves.AddRange(castleMoves);
 		}
+	}
+
+	public class Check : Capture {
+		public Move triggeringMove;
+
+		public Check(Piece pieceMoved, Coord from, Coord to, Piece king)
+			: base(pieceMoved, from, to, king, king.GetCoord()) {
+		}
+
+		public override void Do() { base.Do(); triggeringMove.Do(); }
+		public override void Undo() { triggeringMove.Undo(); base.Undo(); }
 	}
 
 	public class Castle : Move {

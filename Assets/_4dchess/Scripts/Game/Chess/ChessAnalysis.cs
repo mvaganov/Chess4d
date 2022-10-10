@@ -8,6 +8,68 @@ public class ChessAnalysis : MonoBehaviour {
 	private List<Move> validMoves;
 	private Piece selectedPiece;
 	[SerializeField] private MoveHistory moves;
+	private King[] kingInCheck;
+
+	private Dictionary<Board,BoardAnalysis> boardAnalysis = new Dictionary<Board,BoardAnalysis>();
+
+	public class BoardAnalysis {
+		public Board board;
+		private List<List<Move>> movesToLocation = new List<List<Move>>();
+
+		public BoardAnalysis(Board board) {
+			this.board = board;
+		}
+
+		public void RecalculatePieceMoves() {
+			EnsureClearLedger(board, movesToLocation);
+			List<Piece> allPieces = board.GetAllPieces();
+			//allPieces.ForEach(p => p.MarkMovesAsInvalid());
+			List<Move> moves = new List<Move>();
+			for (int i = 0; i < allPieces.Count; ++i) {
+				Piece p = allPieces[i];
+				p.GetMovesForceCalculation(moves);
+				AddToMapping(board, movesToLocation, moves);
+				moves.Clear();
+			}
+		}
+		private static void EnsureClearLedger<T>(Board board, List<List<T>> out_ledger) {
+			for (int i = 0; i < out_ledger.Count; ++i) {
+				out_ledger[i].Clear();
+			}
+			for (int i = out_ledger.Count; i < board.tiles.Count; ++i) {
+				out_ledger.Add(new List<T>());
+			}
+		}
+		private static void AddToMapping(Board board, List<List<Move>> out_ledger, List<Move> moves) {
+			for (int m = 0; m < moves.Count; ++m) {
+				Move mov = moves[m];
+				Coord coord = mov.to;
+				switch (mov) {
+					case Pawn.EnPassant ep: coord = ep.captureCoord; break;
+					case Capture cap: coord = cap.captureCoord; break;
+						//case Pawn.DoublePawnMove dpm: coord = dpm.to;           break;
+						//case Move move:               coord = move.to;          break;
+				}
+				int tileIndex = board.TileIndex(coord);
+				out_ledger[tileIndex].Add(mov);
+			}
+		}
+
+		private void AddToList(List<List<Piece>> out_ledger, Piece piece, List<Move> moves, Func<Move, Coord> location) {
+			for (int m = 0; m < moves.Count; ++m) {
+				Coord coord = location(moves[m]);
+				int tileIndex = board.TileIndex(coord);
+				out_ledger[tileIndex].Add(piece);
+			}
+		}
+
+		public List<Move> GetMovesTo(Coord coord) {
+			int index = board.TileIndex(coord);
+			return movesToLocation[index];
+		}
+
+	}
+
 	public List<Move> CurrentMoves => currentMoves;
 	public List<Move> ValidMoves => validMoves;
 	public Piece SelectedPiece {
@@ -18,6 +80,8 @@ public class ChessAnalysis : MonoBehaviour {
 	public void Start() {
 		moves.onMove.AddListener(MoveMade);
 		moves.onUndoMove.AddListener(MoveMade);
+		ChessGame game = FindObjectOfType<ChessGame>();
+		kingInCheck = new King[game.teams.Count];
 	}
 
 	public void MoveMade(MoveNode move) {
@@ -25,7 +89,21 @@ public class ChessAnalysis : MonoBehaviour {
 	}
 
 	public void RecalculateSelectedPieceMoves() {
-		selectedPiece?.board.RecalculatePieceMoves();
+		if (selectedPiece == null) { return; }
+		RecalculateSelectedPieceMoves(selectedPiece.board);
+	}
+
+	public BoardAnalysis GetAnalysis(Board board) {
+		if (!boardAnalysis.TryGetValue(board, out BoardAnalysis analysis)) {
+			boardAnalysis[board] = analysis = new BoardAnalysis(board);
+		}
+		return analysis;
+	}
+
+	public void RecalculateSelectedPieceMoves(Board board) {
+		//selectedPiece?.board.RecalculatePieceMoves();
+		BoardAnalysis analysis = GetAnalysis(board);
+		analysis.RecalculatePieceMoves();
 	}
 
 	public bool IsValidMove(Coord coord) {

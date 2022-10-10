@@ -7,32 +7,33 @@ using UnityEditor;
 
 public class ChessGame : MonoBehaviour {
 	[System.Serializable]
-	public class PieceCode {
+	public class PieceInfo {
 		public string name;
 		public string code;
 		public Piece prefab;
 		public Sprite[] icons;
-		public PieceCode(string name, string code, Piece prefab) {
+		public PieceInfo(string name, string code, Piece prefab) {
 			this.name = name;
 			this.code = code;
 			this.prefab = prefab;
 			icons =	new Sprite[2];
 		}
-		public PieceCode(string name, string code) : this(name, code, null) { }
+		public PieceInfo(string name, string code) : this(name, code, null) { }
 	}
-	public PieceCode[] pieceCodes = new PieceCode[] {
-		new PieceCode("pawn", ""),
-		new PieceCode("knight", "N"),
-		new PieceCode("bishop", "B"),
-		new PieceCode("rook", "R"),
-		new PieceCode("queen", "Q"),
-		new PieceCode("king", "K"),
+	public PieceInfo[] pieceCodes = new PieceInfo[] {
+		new PieceInfo("king", "K"),
+		new PieceInfo("pawn", "P"),
+		new PieceInfo("knight", "N"),
+		new PieceInfo("bishop", "B"),
+		new PieceInfo("rook", "R"),
+		new PieceInfo("queen", "Q"),
 	};
 	public string PawnPromotionOptions = "NBRQ";
-	private Dictionary<string, PieceCode> _prefabByCode = null;
+	private Dictionary<string, PieceInfo> _prefabByCode = null;
 
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Board board;
+	public ChessAnalysis analysis;
 	public MoveHistory chessMoves;
 	public List<Team> teams = new List<Team>();
 	public void OnValidate() {
@@ -48,6 +49,7 @@ public class ChessGame : MonoBehaviour {
 	void Start() {
 		teams.ForEach(t => t.MovePiecesToTile());
 		if (chessMoves == null) { chessMoves = FindObjectOfType<MoveHistory>(); }
+		if (analysis == null) { analysis = FindObjectOfType<ChessAnalysis>(); }
 		// TODO implement icon that hovers over piece's head, always orients to ortho camera rotation, and is only visible by ortho camera
 	}
 
@@ -88,19 +90,19 @@ public class ChessGame : MonoBehaviour {
 		chessMoves.RedoMove(0);
 	}
 
-	public PieceCode GetPieceInfo(string code) {
+	public PieceInfo GetPieceInfo(string code) {
 		if (_prefabByCode == null) {
-			_prefabByCode = new Dictionary<string, PieceCode>();
+			_prefabByCode = new Dictionary<string, PieceInfo>();
 			for (int i = 0; i < pieceCodes.Length; ++i) {
 				_prefabByCode[pieceCodes[i].code] = pieceCodes[i];
 			}
 		}
-		if (_prefabByCode.TryGetValue(code, out PieceCode info)) { return info; }
+		if (_prefabByCode.TryGetValue(code, out PieceInfo info)) { return info; }
 		return null;
 	}
 
 	public Piece GetPrefab(string code) {
-		PieceCode info = GetPieceInfo(code);
+		PieceInfo info = GetPieceInfo(code);
 		return (info != null) ? info.prefab : null;
 	}
 

@@ -59,7 +59,7 @@ public class PieceSelection : MonoBehaviour {
 		}
 		for (int i = 0; i < options.Length; i++) {
 			string option = options[i].ToString();
-			ChessGame.PieceCode info = chessGame.GetPieceInfo(option);
+			ChessGame.PieceInfo info = chessGame.GetPieceInfo(option);
 			GameObject newButtonObject = Instantiate(prefabSelectionButton.gameObject);
 			SelectionButtonUi newButton = newButtonObject.GetComponent<SelectionButtonUi>();
 			if (info != null) {

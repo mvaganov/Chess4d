@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Board : MonoBehaviour {
+	[ContextMenuItem(nameof(RecalculatePieceMoves), nameof(RecalculatePieceMoves))]
 	public ChessGame game;
-	[ContextMenuItem(nameof(RecalculatePieceMoves),nameof(RecalculatePieceMoves))]
 	public Coord BoardSize = new Coord(8, 8);
 	public Vector3 tileSize = new Vector3(1,2,1);
 	public Material[] TileMaterials;
 	public List<Tile> tiles = new List<Tile>();
 	// TODO move this to ChessGame?
-	private List<List<Move>> movesToLocation = new List<List<Move>>();
+	//private List<List<Move>> movesToLocation = new List<List<Move>>();
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Tile TilePrefab;
 	private Transform _transform;
-	private int TileIndex(Coord coord) { return coord.row * BoardSize.col + coord.col; }
+	private ChessAnalysis.BoardAnalysis _analysis;
+	public ChessAnalysis.BoardAnalysis Analysis => (_analysis != null) ? _analysis : _analysis = game.analysis.GetAnalysis(this);
+	public int TileIndex(Coord coord) { return coord.row * BoardSize.col + coord.col; }
 	private Coord TileCoord(int index) { return new Coord(index % BoardSize.col, index / BoardSize.col); }
 	public bool IsValid(Coord coord) {
 		return coord.x >= 0 && coord.x < BoardSize.x && coord.y >= 0 && coord.y < BoardSize.y;
@@ -51,16 +53,7 @@ public class Board : MonoBehaviour {
 	}
 
 	public void RecalculatePieceMoves() {
-		EnsureClearLedger(movesToLocation);
-		List<Piece> allPieces = GetAllPieces();
-		allPieces.ForEach(p => p.MarkMovesAsInvalid());
-		List<Move> moves = new List<Move>();
-		for (int i = 0; i < allPieces.Count; ++i) {
-			Piece p = allPieces[i];
-			p.GetMoves(moves);
-			AddToMapping(movesToLocation, moves);
-			moves.Clear();
-		}
+		game.analysis.RecalculateSelectedPieceMoves(this);
 	}
 
 	private Coord GetMoveLocation(Move m) => m.to;
@@ -72,41 +65,8 @@ public class Board : MonoBehaviour {
 		return GetMoveLocation(m);
 	}
 
-	private void EnsureClearLedger<T>(List<List<T>> out_ledger) {
-		for (int i = 0; i < out_ledger.Count; ++i) {
-			out_ledger[i].Clear();
-		}
-		for (int i = out_ledger.Count; i < tiles.Count; ++i) {
-			out_ledger.Add(new List<T>());
-		}
-	}
-
-	private void AddToMapping(List<List<Move>> out_ledger, List<Move> moves) {
-		for (int m = 0; m < moves.Count; ++m) {
-			Move mov = moves[m];
-			Coord coord = mov.to;
-			switch (mov) {
-				case Pawn.EnPassant ep:       coord = ep.captureCoord;  break;
-				case Capture cap:             coord = cap.captureCoord; break;
-				//case Pawn.DoublePawnMove dpm: coord = dpm.to;           break;
-				//case Move move:               coord = move.to;          break;
-			}
-			int tileIndex = TileIndex(coord);
-			out_ledger[tileIndex].Add(mov);
-		}
-	}
-
-	private void AddToList(List<List<Piece>> out_ledger, Piece piece, List<Move> moves, Func<Move, Coord> location) {
-		for (int m = 0; m < moves.Count; ++m) {
-			Coord coord = location(moves[m]);
-			int tileIndex = TileIndex(coord);
-			out_ledger[tileIndex].Add(piece);
-		}
-	}
-
 	public List<Move> GetMovesTo(Coord coord) {
-		int index = TileIndex(coord);
-		return movesToLocation[index];
+		return Analysis.GetMovesTo(coord);
 	}
 
 	public Coord GetCoord(Tile tile) {

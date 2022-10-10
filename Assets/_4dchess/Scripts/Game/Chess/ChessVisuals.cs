@@ -7,11 +7,13 @@ public class ChessVisuals : MonoBehaviour {
 	public TileVisualization moves;
 	public TileVisualization captures;
 	public TileVisualization selection;
+	public TileVisualization kingInCheck;
 	public TileVisualization defendArrows;
 	public TileVisualization tempDefendArrows;
 	public TileVisualization specialTileAndArrows;
 	public TiledGameObject selected;
 	public bool showKingDefender;
+	public bool showKingInCheck;
 	private Dictionary<System.Type, TileVisualSpecifics> _tileVisualizationSettings = null;
 
 	private struct TileVisualSpecifics {
@@ -39,6 +41,7 @@ public class ChessVisuals : MonoBehaviour {
 		if (moves == null) { Debug.LogWarning($"missing value for {nameof(moves)}"); }
 		if (captures == null) { Debug.LogWarning($"missing value for {nameof(captures)}"); }
 		if (selection == null) { Debug.LogWarning($"missing value for {nameof(selection)}"); }
+		if (kingInCheck == null) { Debug.LogWarning($"missing value for {nameof(kingInCheck)}"); }
 		if (defendArrows == null) { Debug.LogWarning($"missing value for {nameof(defendArrows)}"); }
 		if (tempDefendArrows == null) { Debug.LogWarning($"missing value for {nameof(tempDefendArrows)}"); }
 		if (specialTileAndArrows == null) { Debug.LogWarning($"missing value for {nameof(specialTileAndArrows)}"); }

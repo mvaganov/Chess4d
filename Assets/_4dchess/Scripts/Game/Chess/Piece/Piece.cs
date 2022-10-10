@@ -87,12 +87,18 @@ public class Piece : TiledGameObject {
 
 	public void GetMoves(List<Move> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
 		if (moveLogic == null) { return; }
-		if (!movesAreUpToDate) {
-			if (moves == null) { moves = new List<Move>(); } else { moves.Clear(); }
-			moveLogic.GetMoves(moves, moveKind);
-			movesAreUpToDate = true;
+		if (movesAreUpToDate) {
+			out_moves?.AddRange(moves);
+			return;
 		}
-		if (moves != null) { out_moves?.AddRange(moves); }
+		if (moves != null) { GetMovesForceCalculation(out_moves, moveKind); }
+	}
+
+	public void GetMovesForceCalculation(List<Move> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
+		if (moves == null) { moves = new List<Move>(); } else { moves.Clear(); }
+		moveLogic.GetMoves(moves, moveKind);
+		movesAreUpToDate = true;
+		out_moves?.AddRange(moves);
 	}
 
 	public override int GetHashCode() {
