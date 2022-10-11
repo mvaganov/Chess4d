@@ -11486,6 +11486,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 406402efadbebd943ad31fd4cddaaacb, type: 3}
   PawnPromotionOptions: NBRQ
   board: {fileID: 589796590}
+  analysis: {fileID: 1564371134}
   chessMoves: {fileID: 1564371133}
   teams:
   - {fileID: 317942652}
@@ -13521,11 +13522,13 @@ MonoBehaviour:
   moves: {fileID: 1010063922}
   captures: {fileID: 1566739770}
   selection: {fileID: 242245484}
+  kingInCheck: {fileID: 0}
   defendArrows: {fileID: 1933217765}
   tempDefendArrows: {fileID: 1355893368}
   specialTileAndArrows: {fileID: 328888930}
   selected: {fileID: 0}
   showKingDefender: 0
+  showKingInCheck: 0
 --- !u!1 &1933217763
 GameObject:
   m_ObjectHideFlags: 0
