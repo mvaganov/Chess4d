@@ -24,7 +24,7 @@ public class MoveHistory : MonoBehaviour {
 		// if we're at the node we're looking for, return it now. that was easy.
 		if (n.move == move) { return n; }
 		// look for nodes along this node's direct history, until beginning, or a branch in the timeline is found
-		while (n.prev != null && n.prev.next.Count > 1) {
+		while (n.prev != null && n.prev.FutureTimelineCount > 1) {
 			n = n.prev;
 			if (n == null) { return null; }
 			if (n.move == move) { return n; }
@@ -51,12 +51,12 @@ public class MoveHistory : MonoBehaviour {
 	public List<List<MoveNode>> GetMoveList() {
 		List<List<MoveNode>> list = new List<List<MoveNode>>();
 		MoveNode last = currentMove;
-		while (last.next.Count > 0) {
-			last = last.next[0];
+		while (last.FutureTimelineCount > 0) {
+			last = last.KnownNextMove;
 		}
 		MoveNode cursor = last;
 		do {
-			list.Add(cursor.next);
+			list.Add(cursor.GetAllTimelineBranches());
 			cursor = cursor.prev;
 		} while (cursor != null);
 		return list;
@@ -67,14 +67,15 @@ public class MoveHistory : MonoBehaviour {
 	}
 
 	public void DoThis(MoveNode move) {
-		int doneAlready = currentMove.next.IndexOf(move);
+		int doneAlready = currentMove.IndexOfBranch(move);
 		if (doneAlready >= 0) {
-			move = currentMove.next[doneAlready];
-			currentMove.next.RemoveAt(doneAlready);
+			//currentMove.GetTimelineBranch(doneAlready);
+			move = currentMove.PopTimeline(doneAlready);
 		}
 		Debug.Log("doing " + move + " " + move.move.GetType().Name);
-		currentMove.next.Insert(0, move);
+		currentMove.SetAsNextTimelineBranch(move);
 		move.prev = currentMove;
+		Debug.Log("added timeline " + currentMove.IndexOfBranch(move));
 		move.Do();
 		currentMove = move;
 		onMove?.Invoke(currentMove);
@@ -86,7 +87,7 @@ public class MoveHistory : MonoBehaviour {
 		HashSet<Board> boards = new HashSet<Board>();
 		do {
 			if (currentMove.turnIndex < actualIndexToTravelTo) {
-				next = currentMove.next.Count > 0 ? currentMove.next[0] : null;
+				next = currentMove.FutureTimelineCount > 0 ? currentMove.KnownNextMove : null;
 				if (next == null) {
 					throw new Exception($"can't go to next[0] after {currentMove.turnIndex} {currentMove}");
 				}
@@ -107,12 +108,13 @@ public class MoveHistory : MonoBehaviour {
 			}
 		} while (currentMove.turnIndex != actualIndexToTravelTo && next != null);
 		if (actualIndexToTravelTo == currentMove.turnIndex) {
-			next = currentMove.next.Count > targetMove.BranchIndex ? currentMove.next[targetMove.BranchIndex] : null;
+			next = currentMove.FutureTimelineCount > targetMove.BranchIndex
+				? currentMove.GetTimelineBranch(targetMove.BranchIndex) : null;
 			if (next == null) {
 				throw new Exception($"can't go to next[{targetMove.BranchIndex}] after {currentMove.turnIndex} {currentMove}");
 			}
-			currentMove.next.RemoveAt(targetMove.BranchIndex);
-			currentMove.next.Insert(0, next);
+			currentMove.PopTimeline(targetMove.BranchIndex);
+			currentMove.SetAsNextTimelineBranch(next);
 			next.Do();
 			currentMove = next;
 		}
@@ -130,13 +132,9 @@ public class MoveHistory : MonoBehaviour {
 		return true;
 	}
 
-	public List<MoveNode> GetNextMoves() {
-		return currentMove.next;
-	}
-
-	public bool RedoMove(int index) {
-		if (index < 0 || index >= currentMove.next.Count) { return false; }
-		currentMove = currentMove.next[index];
+	public bool RedoMove() {
+		if (currentMove.FutureTimelineCount > 0) { return false; }
+		currentMove = currentMove.KnownNextMove;
 		currentMove.Do();
 		onMove?.Invoke(currentMove);
 		return true;

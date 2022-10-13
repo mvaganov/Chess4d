@@ -5,13 +5,33 @@ public class MoveNode {
 	public Move move;
 	public int turnIndex;
 	public int timestamp;
-	public List<MoveNode> next;
+	private List<MoveNode> next;
 	public MoveNode prev;
 	public string notes;
 
 	public bool IsRoot => prev == null;
 
 	public int BranchIndex => prev == null ? -1 : prev.next.IndexOf(this);
+
+	public int FutureTimelineCount => next.Count;
+
+	public MoveNode KnownNextMove => next[0];
+
+	public List<MoveNode> PossibleFutures => next;
+
+	public int IndexOfBranch(MoveNode decision) { return next.IndexOf(decision); }
+
+	public MoveNode GetTimelineBranch(int index) { return next[index]; }
+
+	public void SetAsNextTimelineBranch(MoveNode next) { this.next.Insert(0, next); }
+
+	public MoveNode PopTimeline(int index) {
+		MoveNode branch = GetTimelineBranch(index);
+		next.RemoveAt(index);
+		return branch;
+	}
+
+	public List<MoveNode> GetAllTimelineBranches() { return next; }
 
 	public MoveNode(int index, Move move, string notes) {
 		this.move = move;

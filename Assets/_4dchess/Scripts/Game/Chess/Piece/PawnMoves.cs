@@ -14,6 +14,10 @@ public partial class Pawn {
 			GetPawn(pieceMoved, nameof(DoubleMove)).didDoubleMoveOnTurn = InvalidTurn;
 			pieceMoved?.UndoMove(this);
 		}
+		public override bool Equals(object obj) {
+			return obj.GetType() == GetType() && DuckTypeEquals(obj as Move);
+		}
+		public override int GetHashCode() { return base.GetHashCode(); }
 	}
 
 	public class EnPassant : Capture {
@@ -68,6 +72,10 @@ public partial class Pawn {
 			}
 			return marker;
 		}
+		public override bool Equals(object obj) {
+			return obj.GetType() == GetType() && DuckTypeEquals(obj as Capture);
+		}
+		public override int GetHashCode() { return base.GetHashCode(); }
 	}
 
 	public class Promotion : Move {
@@ -76,6 +84,18 @@ public partial class Pawn {
 		public Move moreInterestingMove;
 		const int InvalidUserSelection = -1;
 		public int userSelection = InvalidUserSelection;
+		public override bool Equals(object obj) {
+			return obj.GetType() == GetType() && DuckTypeEquals(obj as Promotion);
+		}
+		public virtual bool DuckTypeEquals(Promotion promo) {
+			return base.DuckTypeEquals(promo) && ((promotedPiece == null && promo.promotedPiece == null)
+			|| promotedPiece.code == promo.promotedPiece.code)
+			&& ((moreInterestingMove == null && promo.moreInterestingMove == null)
+			|| moreInterestingMove == promo.moreInterestingMove);
+		}
+		public override int GetHashCode() {
+			return base.GetHashCode() ^ (promotedPiece != null ? promotedPiece.GetHashCode() : 0);
+		}
 
 		public Promotion(Move move) : base(move) {
 			if (move.GetType() != typeof(Move)) {
@@ -153,8 +173,8 @@ public partial class Pawn {
 			ChessGame game = board.game;
 			MoveNode thisNode = game.chessMoves.CurrentMove;//game.chessMoves.FindMoveNode(this);
 			MoveNode parentMove = thisNode.prev;
-			for (int i = 0; i < parentMove.next.Count; ++i) {
-				MoveNode possibleMove = parentMove.next[i];
+			for (int i = 0; i < parentMove.FutureTimelineCount; ++i) {
+				MoveNode possibleMove = parentMove.GetTimelineBranch(i);
 				if (possibleMove == thisNode) { continue; }
 				Promotion promo = possibleMove.move as Promotion;
 				if (promo == null) { continue; }
@@ -163,9 +183,9 @@ public partial class Pawn {
 					//UnityEngine.Debug.Log("did " + code + " before, doing it again");
 					promo.selectedPieceCode = promo.promotedPiece.code; // identify that we don't need to trigger UI again.
 					game.chessMoves.SetCurrentMove(parentMove);
-					parentMove.next.RemoveAt(i);
-					parentMove.next.Insert(0, possibleMove);
-					game.chessMoves.RedoMove(0);
+					parentMove.PopTimeline(i);
+					parentMove.SetAsNextTimelineBranch(possibleMove);
+					game.chessMoves.RedoMove();
 					return true;
 				}
 			}
@@ -186,8 +206,8 @@ public partial class Pawn {
 			game.chessMoves.SetCurrentMove(parentMove);
 			MoveNode alternatePromotion = new MoveNode(thisNode.turnIndex, otherPromo, "");
 			alternatePromotion.prev = game.chessMoves.CurrentMove;
-			game.chessMoves.CurrentMove.next.Insert(0, alternatePromotion);
-			game.chessMoves.RedoMove(0);
+			game.chessMoves.CurrentMove.SetAsNextTimelineBranch(alternatePromotion);
+			game.chessMoves.RedoMove();
 		}
 
 		private void PromotePiece(string code) {

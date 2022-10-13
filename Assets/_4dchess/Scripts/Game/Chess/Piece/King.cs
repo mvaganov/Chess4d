@@ -32,6 +32,16 @@ public class King : MoveLogic {
 
 		public override void Do() { base.Do(); triggeringMove.Do(); }
 		public override void Undo() { triggeringMove.Undo(); base.Undo(); }
+		public override bool Equals(object obj) {
+			Check c = obj as Check;
+			return obj.GetType() == GetType() && DuckTypeEquals(c) && triggeringMove.Equals(c.triggeringMove);
+		}
+		public virtual bool DuckTypeEquals(Check check) {
+			return base.DuckTypeEquals(check as Capture) && (triggeringMove.Equals(check.triggeringMove));
+		}
+		public override int GetHashCode() {
+			return base.GetHashCode() ^ triggeringMove.GetHashCode();
+		}
 	}
 
 	public class Castle : Move {
@@ -40,6 +50,17 @@ public class King : MoveLogic {
 		public Castle(Piece pieceMoved, Coord from, Coord to, Piece partner, Coord partnerFrom, Coord partnerTo)
 		: base(pieceMoved, from, to) {
 			partnerMove = new Move(partner, partnerFrom, partnerTo);
+		}
+		public override bool Equals(object obj) {
+			Castle c = obj as Castle;
+			return obj.GetType() == GetType() && DuckTypeEquals(c) && partnerMove.Equals(c.partnerMove);
+		}
+
+		public virtual bool DuckTypeEquals(Castle castle) {
+			return base.DuckTypeEquals(castle as Move) && (partnerMove.Equals(castle.partnerMove));
+		}
+		public override int GetHashCode() {
+			return base.GetHashCode() ^ partnerMove.GetHashCode();
 		}
 
 		public static List<Move> FindMoves(MoveLogic king, Coord[] movePattern, string pieceCode) {
@@ -80,14 +101,6 @@ public class King : MoveLogic {
 		public override void Undo() { partnerMove.Undo(); base.Undo(); }
 
 		public override string ToString() { return base.ToString() + partnerMove.ToString(); }
-
-		public override bool Equals(object obj) {
-			return base.Equals(obj) && ((Castle)obj).partnerMove.Equals(partnerMove);
-		}
-
-		public override int GetHashCode() {
-			return from.GetHashCode() ^ to.GetHashCode() ^ pieceMoved.GetHashCode() ^ partnerMove.GetHashCode();
-		}
 
 		public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse) {
 			TiledGameObject marker = markPool.Get();

@@ -87,7 +87,7 @@ public class ChessGame : MonoBehaviour {
 	}
 
 	public void RedoMove() {
-		chessMoves.RedoMove(0);
+		chessMoves.RedoMove();
 	}
 
 	public PieceInfo GetPieceInfo(string code) {
