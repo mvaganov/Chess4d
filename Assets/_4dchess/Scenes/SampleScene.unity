@@ -4205,7 +4205,7 @@ MonoBehaviour:
         m_Calls: []
   - name: log
     objects:
-    - {fileID: 1350898490}
+    - {fileID: 1353355458}
     OnActivate:
       m_PersistentCalls:
         m_Calls:
@@ -9802,7 +9802,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.00035007083, y: 0}
+  m_AnchoredPosition: {x: 0.000027656555, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1286790173
@@ -10486,6 +10486,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 185849480}
     m_Modifications:
+    - target: {fileID: 405861990981043076, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
+      propertyPath: m_Name
+      value: Log Scroll View
+      objectReference: {fileID: 0}
+    - target: {fileID: 405861990981043076, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 405861991012162357, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
       propertyPath: m_AnchorMax.x
       value: 1
@@ -10540,7 +10548,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 405861991911988478, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 405861991911988479, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
       propertyPath: m_Pivot.x
@@ -10676,14 +10684,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
---- !u!1 &1350898490 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 405861991911988478, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
-  m_PrefabInstance: {fileID: 1350898489}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &1350898491 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 405861991911988479, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
+  m_PrefabInstance: {fileID: 1350898489}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1353355458 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 405861990981043076, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
   m_PrefabInstance: {fileID: 1350898489}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1355893366
@@ -13283,7 +13291,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 906004715}
   m_Direction: 0
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.93103534
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

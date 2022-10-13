@@ -8,6 +8,8 @@ public class LogUi : MonoBehaviour {
 	[SerializeField] private LogMessage _prefabLogMessage;
 	[SerializeField] private RectTransform _messageList;
 	[SerializeField] private ScrollRect _scrollRect;
+	[SerializeField] private bool _autoScrollToEnd = true;
+	const float ScrollBarEpsilon = 1f / 1024;
 	private Dictionary<LogType, MessageColor> _colorDict = new Dictionary<LogType, MessageColor>();
 
 	[SerializeField] private MessageColor[] _messageColors = new MessageColor[] {
@@ -33,6 +35,22 @@ public class LogUi : MonoBehaviour {
 		Application.logMessageReceived += LogReceived;
 	}
 
+	private void OnEnable() {
+		UpdateScrollableUi();
+	}
+
+	private void UpdateScrollableUi() {
+		StartCoroutine(UpdateMessageContentAreaForScrollBars());
+	}
+
+	private IEnumerator UpdateMessageContentAreaForScrollBars() {
+		bool wasAtTheBottomAlready = _scrollRect.verticalNormalizedPosition < ScrollBarEpsilon;
+		yield return null; // wait for the new children to register in the UI
+		LayoutRebuilder.ForceRebuildLayoutImmediate(_messageList.GetComponent<RectTransform>());
+		yield return null; // wait for the UI to recalculate
+		if (_autoScrollToEnd && wasAtTheBottomAlready) { _scrollRect.verticalScrollbar.value = 0; }
+	}
+
 	public void LogReceived(string text, string stackTrace, LogType type) {
 		LogMessage msg = Instantiate(_prefabLogMessage.gameObject).GetComponent<LogMessage>();
 		msg.gameObject.SetActive(true);
@@ -40,14 +58,8 @@ public class LogUi : MonoBehaviour {
 		msg.Text.color = _colorDict[type].color;
 		msg.Source.text = stackTrace;
 		msg.transform.SetParent(_messageList);
-		if (_scrollRect != null) {
-			StartCoroutine(ScrollToBottomCoroutine());
+		if (gameObject.activeSelf) {
+			UpdateScrollableUi();
 		}
-	}
-	private IEnumerator ScrollToBottomCoroutine() {
-		yield return null;
-		yield return null;
-		LayoutRebuilder.ForceRebuildLayoutImmediate(_messageList.GetComponent<RectTransform>());
-		_scrollRect.verticalScrollbar.value = 0;
 	}
 }
