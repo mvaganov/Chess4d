@@ -57,7 +57,7 @@ public class LogUi : MonoBehaviour {
 		msg.Text.text = text;
 		msg.Text.color = _colorDict[type].color;
 		msg.Source.text = stackTrace;
-		msg.transform.SetParent(_messageList);
+		msg.transform.SetParent(_messageList, false);
 		if (gameObject.activeSelf) {
 			UpdateScrollableUi();
 		}

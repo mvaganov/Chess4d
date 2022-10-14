@@ -16,6 +16,8 @@ public class MovesUi : MonoBehaviour {
 	[ContextMenuItem(nameof(ShowTextTrue),nameof(ShowTextTrue)),
 	ContextMenuItem(nameof(HideText), nameof(HideText)),]
 	[SerializeField] private bool _showText = true;
+	[SerializeField] private MemoryPool<MoveUi> _moveUiPool = new MemoryPool<MoveUi>();
+	[SerializeField] private MemoryPool<BranchUi> _branchUiPool = new MemoryPool<BranchUi>();
 	//private List<GameObject> branches = new List<GameObject>();
 
 	public bool ShowText {
@@ -40,6 +42,22 @@ public class MovesUi : MonoBehaviour {
 			MoveNode current = chessMoves.CurrentMove;
 			return Find(m => m.move == current);
 		}
+	}
+
+	private void Start() {
+		_branchUiPool.onReclaim = b => {
+			Transform branchParent = b.transform;
+			for(int i = branchParent.childCount - 1; i >= 0; --i) {
+				Transform child = branchParent.GetChild(i);
+				MoveUi m = child.GetComponent<MoveUi>();
+				if (m != null) {
+					_moveUiPool.Reclaim(m);
+					continue;
+				}
+				throw new Exception("move branch has a non-Move in it. what is going on here? " +
+					child.name + " in " + branchParent.name);
+			}
+		};
 	}
 
 	public MoveUi Find(Func<MoveUi, bool> predicate) {
@@ -77,7 +95,7 @@ public class MovesUi : MonoBehaviour {
 
 		MoveUi moveUi;
 		// insert start game move
-		moveUi = Instantiate(moveUiPrefab).GetComponent<MoveUi>();
+		moveUi = _moveUiPool.Get();//Instantiate(moveUiPrefab).GetComponent<MoveUi>();
 		moveUi.Move = moves[moves.Count - 1][0].prev;
 		ApplyToLayoutTransform(moveUi.transform, _transform);
 		//Debug.Log($"moves {moves.Count}: [{string.Join(", ",moves.ConvertAll(l=>l.Count.ToString()))}]");
@@ -86,9 +104,9 @@ public class MovesUi : MonoBehaviour {
 			List<MoveNode> moveOptions = moves[i];
 			//Debug.Log($"{moveOptions.Count}: [{string.Join(", ", moveOptions.ConvertAll(m => m.ToString()))}]");
 			if (moveOptions.Count == 0) { continue; }
-			GameObject branch = Instantiate(branchUiPrefab);
+			BranchUi branch = _branchUiPool.Get();//Instantiate(branchUiPrefab);
 			for (int m = 0; m < moveOptions.Count; ++m) {
-				moveUi = Instantiate(moveUiPrefab).GetComponent<MoveUi>();
+				moveUi = _moveUiPool.Get(); //Instantiate(moveUiPrefab).GetComponent<MoveUi>();
 				moveUi.Move = moveOptions[m];
 				if (!_showText) {
 					moveUi.label.gameObject.SetActive(false);
@@ -118,7 +136,15 @@ public class MovesUi : MonoBehaviour {
 		for(int i = transform.childCount-1; i >= 0; --i) {
 			GameObject go = transform.GetChild(i).gameObject;
 			if (go == branchUiPrefab || go == moveUiPrefab) { continue; }
-			ChessGame.DestroyChessObject(go);
+			BranchUi branchui;
+			MoveUi moveui;
+			if ((branchui = go.GetComponent<BranchUi>()) != null) {
+				_branchUiPool.Reclaim(branchui);
+			} else if ((moveui = go.GetComponent<MoveUi>()) != null) {
+				_moveUiPool.Reclaim(moveui);
+			} else {
+				ChessGame.DestroyChessObject(go);
+			}
 		}
 	}
 }

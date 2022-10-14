@@ -2450,6 +2450,7 @@ Transform:
   - {fileID: 1355893367}
   - {fileID: 1933217764}
   - {fileID: 328888929}
+  - {fileID: 646440727}
   m_Father: {fileID: 1921063275}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3429,6 +3430,14 @@ MonoBehaviour:
   Notes: {fileID: 707831422}
   notesInput: {fileID: 1842546780}
   _showText: 1
+  _moveUiPool:
+    unallocatedLocation: {fileID: 1337838620}
+    prefab: {fileID: 1765620887}
+    unallocated: []
+  _branchUiPool:
+    unallocatedLocation: {fileID: 1337838620}
+    prefab: {fileID: 1048390996}
+    unallocated: []
 --- !u!114 &538098172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4400,6 +4409,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd3791075ca236e43b56c423be3d6116, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &646440726
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 646440727}
+  - component: {fileID: 646440728}
+  m_Layer: 0
+  m_Name: King In Check
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &646440727
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 646440726}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 407925200}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &646440728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 646440726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfe29c4540b58544d83e0d9a10e2247a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markPool:
+    unallocatedLocation: {fileID: 1337838620}
+    prefab: {fileID: 3555410402216363709, guid: 89f6bac5282324e4a9848ac4f98360fe, type: 3}
+    unallocated: []
+  currentMarks: []
 --- !u!1001 &656118936
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8431,6 +8489,7 @@ GameObject:
   - component: {fileID: 1048390996}
   - component: {fileID: 1048390995}
   - component: {fileID: 1048390994}
+  - component: {fileID: 1048390998}
   m_Layer: 5
   m_Name: Branch
   m_TagString: Untagged
@@ -8536,6 +8595,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1048390992}
   m_CullTransparentMesh: 1
+--- !u!114 &1048390998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1048390992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee95471a475d694499265e9e45ede0f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1068956479
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14097,7 +14168,7 @@ MonoBehaviour:
   moves: {fileID: 1010063922}
   captures: {fileID: 1566739770}
   selection: {fileID: 242245484}
-  kingInCheck: {fileID: 0}
+  kingInCheck: {fileID: 646440728}
   defendArrows: {fileID: 1933217765}
   tempDefendArrows: {fileID: 1355893368}
   specialTileAndArrows: {fileID: 328888930}

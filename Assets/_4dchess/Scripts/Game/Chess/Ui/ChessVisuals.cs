@@ -34,6 +34,7 @@ public class ChessVisuals : MonoBehaviour {
 			[typeof(Pawn.DoubleMove)] = new TileVisualSpecifics(new Color(1, .75f, 0), moves),
 			[typeof(King.Castle)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),
 			[typeof(Move)] = new TileVisualSpecifics(new Color(1, 1, 0), moves),
+			[typeof(King.Check)] = new TileVisualSpecifics(new Color(1, 0, 1), kingInCheck),
 		};
 	}
 
