@@ -25,22 +25,30 @@ public class King : MoveLogic {
 
 	public class Check : Capture {
 		public Move triggeringMove;
-
-		public Check(Piece pieceMoved, Coord from, Coord to, Piece king)
-			: base(pieceMoved, from, to, king, king.GetCoord()) {
+		public bool isMate = false;
+		public Check(Move triggeringMove, Capture threateningMove)
+			: base(threateningMove) {
+			this.triggeringMove = triggeringMove;
 		}
 
-		public override void Do() { base.Do(); triggeringMove.Do(); }
-		public override void Undo() { triggeringMove.Undo(); base.Undo(); }
+		public override void Do() { triggeringMove.Do(); }
+
+		public override void Undo() { triggeringMove.Undo(); }
+
 		public override bool Equals(object obj) {
-			Check c = obj as Check;
-			return obj.GetType() == GetType() && DuckTypeEquals(c) && triggeringMove.Equals(c.triggeringMove);
+			return obj.GetType() == GetType() && DuckTypeEquals(obj as Check);
 		}
+
 		public virtual bool DuckTypeEquals(Check check) {
 			return base.DuckTypeEquals(check as Capture) && (triggeringMove.Equals(check.triggeringMove));
 		}
+
 		public override int GetHashCode() {
 			return base.GetHashCode() ^ triggeringMove.GetHashCode();
+		}
+
+		public override string ToString() {
+			return triggeringMove.ToString() + (!isMate ? "+" : "#");
 		}
 	}
 

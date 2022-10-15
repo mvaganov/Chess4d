@@ -150,6 +150,9 @@ public class Capture : Move {
 		this.pieceCaptured = pieceCaptured;
 	}
 
+	public Capture(Capture other) :
+	this(other.pieceMoved, other.from, other.to, other.pieceCaptured, other.captureCoord) { }
+
 	public override void Do() {
 		base.Do();
 		if (pieceCaptured != null) {

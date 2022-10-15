@@ -8,70 +8,13 @@ public class ChessAnalysis : MonoBehaviour {
 	private List<Move> validMoves;
 	private Piece selectedPiece;
 	[SerializeField] private MoveHistory moves;
-	private King[] kingInCheck;
-
+	private List<King> kingsInCheck = new List<King>();
 	private Dictionary<Board,BoardAnalysis> boardAnalysis = new Dictionary<Board,BoardAnalysis>();
+	[SerializeField] private ChessGame game;
 
-	public class BoardAnalysis {
-		public Board board;
-		private List<List<Move>> movesToLocation = new List<List<Move>>();
+	public List<Move> CurrentPieceCurrentMoves => currentMoves;
+	public List<Move> CurrentPieceValidMoves => validMoves;
 
-		public BoardAnalysis(Board board) {
-			this.board = board;
-		}
-
-		public void RecalculatePieceMoves() {
-			EnsureClearLedger(board, movesToLocation);
-			List<Piece> allPieces = board.GetAllPieces();
-			//allPieces.ForEach(p => p.MarkMovesAsInvalid());
-			List<Move> moves = new List<Move>();
-			for (int i = 0; i < allPieces.Count; ++i) {
-				Piece p = allPieces[i];
-				p.GetMovesForceCalculation(moves);
-				AddToMapping(board, movesToLocation, moves);
-				moves.Clear();
-			}
-		}
-		private static void EnsureClearLedger<T>(Board board, List<List<T>> out_ledger) {
-			for (int i = 0; i < out_ledger.Count; ++i) {
-				out_ledger[i].Clear();
-			}
-			for (int i = out_ledger.Count; i < board.tiles.Count; ++i) {
-				out_ledger.Add(new List<T>());
-			}
-		}
-		private static void AddToMapping(Board board, List<List<Move>> out_ledger, List<Move> moves) {
-			for (int m = 0; m < moves.Count; ++m) {
-				Move mov = moves[m];
-				Coord coord = mov.to;
-				switch (mov) {
-					case Pawn.EnPassant ep: coord = ep.captureCoord; break;
-					case Capture cap: coord = cap.captureCoord; break;
-						//case Pawn.DoublePawnMove dpm: coord = dpm.to;           break;
-						//case Move move:               coord = move.to;          break;
-				}
-				int tileIndex = board.TileIndex(coord);
-				out_ledger[tileIndex].Add(mov);
-			}
-		}
-
-		private void AddToList(List<List<Piece>> out_ledger, Piece piece, List<Move> moves, Func<Move, Coord> location) {
-			for (int m = 0; m < moves.Count; ++m) {
-				Coord coord = location(moves[m]);
-				int tileIndex = board.TileIndex(coord);
-				out_ledger[tileIndex].Add(piece);
-			}
-		}
-
-		public List<Move> GetMovesTo(Coord coord) {
-			int index = board.TileIndex(coord);
-			return movesToLocation[index];
-		}
-
-	}
-
-	public List<Move> CurrentMoves => currentMoves;
-	public List<Move> ValidMoves => validMoves;
 	public Piece SelectedPiece {
 		get => selectedPiece;
 		set => selectedPiece = value;
@@ -80,17 +23,18 @@ public class ChessAnalysis : MonoBehaviour {
 	public void Start() {
 		moves.onMove.AddListener(MoveMade);
 		moves.onUndoMove.AddListener(MoveMade);
-		ChessGame game = FindObjectOfType<ChessGame>();
-		kingInCheck = new King[game.teams.Count];
+		if (game == null) {
+			game = FindObjectOfType<ChessGame>();
+		}
 	}
 
 	public void MoveMade(MoveNode move) {
-		RecalculateSelectedPieceMoves();
+		RecalculatePieceMoves();
 	}
 
-	public void RecalculateSelectedPieceMoves() {
+	public void RecalculatePieceMoves() {
 		if (selectedPiece == null) { return; }
-		RecalculateSelectedPieceMoves(selectedPiece.board);
+		RecalculatePieceMoves(selectedPiece.board);
 	}
 
 	public BoardAnalysis GetAnalysis(Board board) {
@@ -100,10 +44,51 @@ public class ChessAnalysis : MonoBehaviour {
 		return analysis;
 	}
 
-	public void RecalculateSelectedPieceMoves(Board board) {
+	public void RecalculatePieceMoves(Board board) {
 		//selectedPiece?.board.RecalculatePieceMoves();
 		BoardAnalysis analysis = GetAnalysis(board);
 		analysis.RecalculatePieceMoves();
+		List<King.Check> checks = FindChecks(analysis);
+		if (checks.Count > 0) {
+			Debug.Log("CHECK! " + string.Join(", ", checks));
+		}
+	}
+
+	public List<King.Check> FindChecks(BoardAnalysis analysis) {
+		List<King.Check> checks = new List<King.Check>();
+		List<Piece> allKings = GetAllKings();
+		// check each king to see if there are unallied pieces that can capture him
+		for (int i = 0; i < allKings.Count; ++i) {
+			Piece king = allKings[i];
+			Coord kingLocation = king.GetCoord();
+			List<Move> moves = analysis.GetMovesTo(kingLocation);
+			for (int m = 0; m < moves.Count; ++m) {
+				Move move = moves[m];
+				if (move.GetType() == typeof(Defend)) { continue; }
+				if (move is Pawn.Promotion pp) {
+					move = pp.moreInterestingMove;
+				}
+				Capture cap = move as Capture;
+				if (cap != null && cap.pieceCaptured == king && !cap.pieceMoved.team.IsAlliedWith(king.team)) {
+					// the current move as enabling such a capture as a Check
+					King.Check check = new King.Check(game.chessMoves.CurrentMove.move, cap);
+					checks.Add(check);
+				}
+			}
+		}
+		return checks;
+	}
+
+	public List<Piece> GetAllKings() {
+		List<Piece> allKings = new List<Piece>();
+		for (int t = 0; t < game.teams.Count; ++t) {
+			for (int p = 0; p < game.teams[t].Pieces.Count; ++p) {
+				Piece king = game.teams[t].Pieces[p];
+				if (king.code != "K") { continue; }
+				allKings.Add(king);
+			}
+		}
+		return allKings;
 	}
 
 	public bool IsValidMove(Coord coord) {

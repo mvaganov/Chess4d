@@ -58,6 +58,9 @@ public class MovesUi : MonoBehaviour {
 					child.name + " in " + branchParent.name);
 			}
 		};
+		_moveUiPool.onReclaim = m => {
+			m.activeMarker.SetActive(false);
+		};
 	}
 
 	public MoveUi Find(Func<MoveUi, bool> predicate) {

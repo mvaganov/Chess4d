@@ -14,8 +14,8 @@ public class Board : MonoBehaviour {
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Tile TilePrefab;
 	private Transform _transform;
-	private ChessAnalysis.BoardAnalysis _analysis;
-	public ChessAnalysis.BoardAnalysis Analysis => (_analysis != null) ? _analysis : _analysis = game.analysis.GetAnalysis(this);
+	private BoardAnalysis _analysis;
+	public BoardAnalysis Analysis => (_analysis != null) ? _analysis : _analysis = game.analysis.GetAnalysis(this);
 	public int TileIndex(Coord coord) { return coord.row * BoardSize.col + coord.col; }
 	private Coord TileCoord(int index) { return new Coord(index % BoardSize.col, index / BoardSize.col); }
 	public bool IsValid(Coord coord) {
@@ -53,7 +53,7 @@ public class Board : MonoBehaviour {
 	}
 
 	public void RecalculatePieceMoves() {
-		game.analysis.RecalculateSelectedPieceMoves(this);
+		game.analysis.RecalculatePieceMoves(this);
 	}
 
 	private Coord GetMoveLocation(Move m) => m.to;

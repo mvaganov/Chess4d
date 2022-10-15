@@ -70,9 +70,9 @@ public class ChessVisuals : MonoBehaviour {
 		Coord pieceCoord = piece.GetCoord();
 		selection.CreateMarks(new Move[] { new Move(piece, pieceCoord, pieceCoord) }, Color.green);
 
-		if (analysis.CurrentMoves != null) {
-			for (int i = 0; i < analysis.CurrentMoves.Count; ++i) {
-				Move move = analysis.CurrentMoves[i];
+		if (analysis.CurrentPieceCurrentMoves != null) {
+			for (int i = 0; i < analysis.CurrentPieceCurrentMoves.Count; ++i) {
+				Move move = analysis.CurrentPieceCurrentMoves[i];
 				if (!showKingDefender && move is Capture cap && ChessGame.IsMyKing(piece, cap.pieceCaptured)) { continue; }
 				AddPieceSelectionVisualFor(move, piece.board);
 			}
