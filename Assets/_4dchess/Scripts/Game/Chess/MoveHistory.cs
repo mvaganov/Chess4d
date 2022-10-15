@@ -12,6 +12,20 @@ public class MoveHistory : MonoBehaviour {
 
 	[System.Serializable] public class MoveEventHandler : UnityEvent<MoveNode> { }
 
+	public int CountMovesSinceCaptureOrPawnAdvance() {
+		int count = 0;
+		MoveNode node = CurrentMove;
+		while (node != null && node.move != null) {
+			if (node.move is Capture || (node.move is Move m && m.pieceMoved.code == "P")) {
+				break;
+			}
+			node = node.prev;
+			++count;
+		}
+		return count;
+	}
+
+
 	public void SetCurrentMove(MoveNode moveNode) {
 		currentMove = moveNode;
 	}

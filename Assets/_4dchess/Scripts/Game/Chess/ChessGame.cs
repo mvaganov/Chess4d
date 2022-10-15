@@ -6,20 +6,6 @@ using UnityEditor;
 #endif
 
 public class ChessGame : MonoBehaviour {
-	[System.Serializable]
-	public class PieceInfo {
-		public string name;
-		public string code;
-		public Piece prefab;
-		public Sprite[] icons;
-		public PieceInfo(string name, string code, Piece prefab) {
-			this.name = name;
-			this.code = code;
-			this.prefab = prefab;
-			icons =	new Sprite[2];
-		}
-		public PieceInfo(string name, string code) : this(name, code, null) { }
-	}
 	public PieceInfo[] pieceCodes = new PieceInfo[] {
 		new PieceInfo("king", "K"),
 		new PieceInfo("pawn", "P"),
