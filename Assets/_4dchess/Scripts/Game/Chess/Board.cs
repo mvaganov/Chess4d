@@ -123,4 +123,8 @@ public class Board : MonoBehaviour {
 			game = GetComponentInParent<ChessGame>();
 		}
 	}
+
+	public string ToXfen() {
+		return XFEN.ToString(this);
+	}
 }

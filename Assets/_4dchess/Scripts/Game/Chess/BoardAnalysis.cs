@@ -6,12 +6,23 @@ using UnityEngine;
 public class BoardAnalysis {
 	public Board board;
 	private List<List<Move>> movesToLocation = new List<List<Move>>();
+	public string identity;
 
 	public BoardAnalysis(Board board) {
 		this.board = board;
 	}
 
-	public void RecalculatePieceMoves() {
+	public void RecalculatePieceMoves(Move whatJustHappened = null) {
+		string currentXfen = board.ToXfen();
+		if (identity == currentXfen) {
+			Debug.Log("already calculated, skipping.");
+			return;
+		}
+		// TODO mark units that need recalculation
+		// - this moving unit
+		// - units defending this moving unit
+		// - 
+		// remove that unit's moves from the analysis, then recalculate
 		EnsureClearLedger(board, movesToLocation);
 		List<Piece> allPieces = board.GetAllPieces();
 		//allPieces.ForEach(p => p.MarkMovesAsInvalid());
@@ -22,6 +33,7 @@ public class BoardAnalysis {
 			AddToMapping(board, movesToLocation, moves);
 			moves.Clear();
 		}
+		identity = currentXfen;
 	}
 
 	private static void EnsureClearLedger<T>(Board board, List<List<T>> out_ledger) {

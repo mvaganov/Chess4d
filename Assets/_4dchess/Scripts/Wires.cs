@@ -227,10 +227,9 @@ namespace NonStandard {
 		/// performance issue. if <see cref="pulseConstantlyReassignedColor"/> is true, that is noticable.
 		/// </summary>
 		public static void SetColor(LineRenderer lineRenderer, Color color) {
-			bool needsMaterial = lineRenderer.material == null || lineRenderer.material.name.StartsWith("Default-Material");
-			if (needsMaterial) { lineRenderer.material = WireMaterial; }
+			Material m = GetMaterial(lineRenderer);
 			if (color == default) { color = Color.magenta; }
-			if (lineRenderer.material.color == color && (_instance == null || _instance.pulseConstantlyReassignedColor)) {
+			if (m.color == color && (_instance == null || _instance.pulseConstantlyReassignedColor)) {
 				long t = Math.Abs(Environment.TickCount);
 				const long duration = 500;
 				long secComponent = t % duration;
@@ -238,7 +237,35 @@ namespace NonStandard {
 				Color.RGBToHSV(color, out float h, out float s, out float v);
 				color = Color.HSVToRGB(h, s + (a * .25f), v + (a * .25f));
 			}
-			lineRenderer.material.color = color;
+			m.color = color;
+		}
+
+		/// <summary>
+		/// special logic needed because Unity handles materials differently at edit time
+		/// </summary>
+		/// <param name="lineRenderer"></param>
+		private static Material GetMaterial(LineRenderer lineRenderer) {
+			Material m = null;
+#if UNITY_EDITOR
+			if (!Application.isPlaying) {
+				if (lineRenderer.sharedMaterial != null) {
+					m = new Material(lineRenderer.sharedMaterial);
+					lineRenderer.sharedMaterial = m;
+				}
+			} else
+#endif
+			m = lineRenderer.material;
+			bool needsMaterial = m == null ||
+				(m.name.StartsWith("Default-Material") && WireMaterial.name != "Default-Material");
+			if (needsMaterial) {
+#if UNITY_EDITOR
+				if (!Application.isPlaying) {
+					lineRenderer.sharedMaterial = m = new Material(WireMaterial);
+				} else
+#endif
+				lineRenderer.material = m = WireMaterial;
+			}
+			return m;
 		}
 
 		/// <summary>Makes a circle with a <see cref="LineRenderer"/></summary>
