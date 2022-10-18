@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Board : MonoBehaviour {
+	[TextArea(1,6)]
+	public string xfen = "rnbqkbnr/pppppppp/////PPPPPPPP/RNBQKBNR W AHah - 0 0";
 	[ContextMenuItem(nameof(RecalculatePieceMoves), nameof(RecalculatePieceMoves))]
 	public ChessGame game;
 	public Coord BoardSize = new Coord(8, 8);
 	public Vector3 tileSize = new Vector3(1,2,1);
 	public Material[] TileMaterials;
 	public List<Tile> tiles = new List<Tile>();
-	// TODO move this to ChessGame?
-	//private List<List<Move>> movesToLocation = new List<List<Move>>();
 	[ContextMenuItem(nameof(Generate),nameof(Generate))]
 	public Tile TilePrefab;
 	private Transform _transform;
@@ -126,5 +126,13 @@ public class Board : MonoBehaviour {
 
 	public string ToXfen() {
 		return XFEN.ToString(this);
+	}
+
+	public void LoadXfen(string xfen) {
+		Coord cursor = Coord.zero;
+		for(int i = 0; i < xfen.Length; ++i) {
+			char ch = xfen[i];
+			// TODO finish reading FEN string
+		}
 	}
 }

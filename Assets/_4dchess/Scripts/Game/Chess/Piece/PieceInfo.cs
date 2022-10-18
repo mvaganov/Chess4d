@@ -20,7 +20,6 @@ using UnityEngine;
 // Extended Forsyth-Edwards Notation
 public static class XFEN {
 	[Flags] public enum B {
-		Black = 0,
 		None = 0,
 		King = 1,
 		Pawn = 2,
@@ -28,8 +27,10 @@ public static class XFEN {
 		Bishop = 4,
 		Rook = 5,
 		Queen = 6,
+		AnyPiece = 7,
 		White = 8,
-		Red = 16,
+		Black = 16,
+		Red = 16|8,
 	}
 	public static Dictionary<B, char> pieceBinaryCodeToLetterMap = new Dictionary<B, char>() {
 		[B.Black | B.King] = 'k',
@@ -54,7 +55,57 @@ public static class XFEN {
 		[typeof(Queen)] = B.Queen
 	};
 
-	private static B[] teamFlags = { B.Black, B.White, B.Red };
+	private static B[] teamFlags = { B.White, B.Black, B.Red };
+	private static Dictionary<char, B> letterTopieceBinaryCodeMap = new Dictionary<char, B>();
+	private static Dictionary<B, Type> binaryCodeToPieceType = new Dictionary<B, Type>();
+
+	static XFEN() {
+		foreach (var kvp in pieceBinaryCodeToLetterMap) {
+			letterTopieceBinaryCodeMap[kvp.Value] = kvp.Key;
+		}
+		foreach (var kvp in pieceToBinaryCode) {
+			binaryCodeToPieceType[kvp.Value] = kvp.Key;
+		}
+	}
+
+	public static List<int> GetAllTeamIndex(B code) {
+		List<int> teams = new List<int>();
+		for (int i = 0; i < teamFlags.Length; ++i) {
+			if ((teamFlags[i] & code) == 0) {
+				teams.Add(i);
+			}
+		}
+		return teams;
+	}
+
+	public static int GetTeamIndex(B code) {
+		List<int> teams = GetAllTeamIndex(code);
+		if (teams.Count > 1) {
+			throw new Exception(code + " piece belongs to multiple teams: " + string.Join("|",teams));
+		}
+		if (teams.Count == 0) {
+			throw new Exception(code + " piece belongs to no teams?");
+		}
+		return teams[0];
+	}
+
+	public static bool TryGetPieceType(char letter, out Type type, out int teamIndex) {
+		type = null;
+		teamIndex = -1;
+		if (!letterTopieceBinaryCodeMap.TryGetValue(letter, out B code)) {
+			//throw new Exception($"unable to process fen code '{letter}' as piece");
+			return false;
+		}
+		int pieceCode = (int)code & (int)B.AnyPiece;
+		if (!binaryCodeToPieceType.TryGetValue((B)pieceCode, out Type pieceType)) {
+			//throw new Exception($"unable to process code {pieceCode} '{letter}' as piece");
+			return false;
+		}
+		type = pieceType;
+		teamIndex = GetTeamIndex(code);
+		return true;
+	}
+
 	public static B ConvertPieceToCode(Piece p) {
 		B team = teamFlags[p.team.TeamIndex];
 		B piece = pieceToBinaryCode[p.MoveLogic.GetType()];
