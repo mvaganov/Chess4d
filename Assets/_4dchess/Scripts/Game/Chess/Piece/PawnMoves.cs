@@ -202,7 +202,7 @@ public partial class Pawn {
 			otherPromo.selectedPieceCode = code; // <-- this will force the new promotion event to skip the UI
 			string options = pieceMoved.board.game.PawnPromotionOptions;
 			//otherPromo.userSelection = options.IndexOf(code);
-			otherPromo.promotedPiece = game.CreatePiece(team, code, to, board);
+			otherPromo.promotedPiece = game.GetPiece(team, code, to, board, true);
 			game.chessMoves.SetCurrentMove(parentMove);
 			MoveNode alternatePromotion = new MoveNode(thisNode.turnIndex, otherPromo, "");
 			alternatePromotion.prev = game.chessMoves.CurrentMove;
@@ -217,11 +217,11 @@ public partial class Pawn {
 			Team team = pieceMoved.team;
 			if (promotedPiece == null) {
 				//UnityEngine.Debug.Log("new promotion? " + code);
-				promotedPiece = game.CreatePiece(team, code, to, board);
+				promotedPiece = game.GetPiece(team, code, to, board, true);
 			} else {
 				//UnityEngine.Debug.Log("reactivating old promotion " + code);
 				promotedPiece.gameObject.SetActive(true);
-				game.SetPiece(promotedPiece, board, to);
+				board.SetPiece(promotedPiece, to);
 			}
 			//UnityEngine.Debug.Log("did the old switcharoo");
 			pieceMoved.transform.SetParent(null, false);

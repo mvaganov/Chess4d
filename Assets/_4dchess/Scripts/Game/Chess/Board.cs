@@ -36,6 +36,14 @@ public class Board : MonoBehaviour {
 		return GetTile(coord).GetPiece();
 	}
 
+	public void SetPiece(Piece piece, Coord coord) {
+		Transform t = piece.transform;
+		piece.board = this;
+		t.SetParent(transform);
+		t.Rotate(piece.team.PieceRotation);
+		piece.SetTile(coord);
+	}
+
 	public List<Piece> GetAllPieces() {
 		List<Piece> allPieces = new List<Piece>();
 		for(int i = 0; i < tiles.Count; ++i) {
@@ -128,11 +136,20 @@ public class Board : MonoBehaviour {
 		return XFEN.ToString(this);
 	}
 
-	public void LoadXfen(string xfen) {
-		Coord cursor = Coord.zero;
-		for(int i = 0; i < xfen.Length; ++i) {
-			char ch = xfen[i];
-			// TODO finish reading FEN string
+	public void LoadXfen(string xfen, Team[] teams) {
+		XFEN.FromString(this, teams, xfen);
+	}
+
+	/// <summary>
+	/// takes all pieces and puts them into the capture area of each team (for reuse when a new board is made)
+	/// </summary>
+	public void ReclaimPieces() {
+		for(int i = 0; i < tiles.Count; ++i) {
+			Tile t = tiles[i];
+			Piece p = t.GetPiece();
+			if (p != null) {
+				p.team.Capture(p);
+			}
 		}
 	}
 }

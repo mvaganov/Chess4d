@@ -39,34 +39,37 @@ public class ChessGame : MonoBehaviour {
 		// TODO implement icon that hovers over piece's head, always orients to ortho camera rotation, and is only visible by ortho camera
 	}
 
-	public Piece CreatePiece(Team team, string code, Coord coord, Board board) {
-		Piece prefab = GetPrefab(code);
-		if (prefab == null) { return null; }
-		GameObject pieceObject = CreateObject(prefab.gameObject);
-		Piece piece = pieceObject.GetComponent<Piece>();
-		//Pieces.Add(piece);
-		string name = team.name + " " + prefab.name;// + " " + Pieces.Count;
-		pieceObject.name = name;
-		piece.team = team;
-		piece.board = board;
-		piece.Material = team.material;
-		piece.name = name;
-		SetPiece(piece, board, coord);
-		//Transform t = piece.transform;
-		//t.SetParent(board.transform);
-		//t.Rotate(team.PieceRotation);
-		//t.position = board.CoordToWorldPosition(coord);
-		//piece.SetTile(coord);
+	public Piece GetPiece(Team team, string code, Coord coord, Board board, bool forceCreatePiece) {
+		//Piece prefab = GetPrefab(code);
+		//if (prefab == null) { return null; }
+		//Piece piece = !forceCreatePiece ? team.FindSparePiece(code) : null;
+		//if (piece == null) {
+		//	team.CreatePiece(code);
+		//	piece.transform.position = board.CoordToWorldPosition(coord);
+		//	//GameObject pieceObject = CreateObject(prefab.gameObject);
+		//	//piece = pieceObject.GetComponent<Piece>();
+		//	//string name = team.name + " " + prefab.name;// + " " + Pieces.Count;
+		//	//pieceObject.name = name;
+		//	//piece.team = team;
+		//	//piece.Material = team.material;
+		//	//piece.name = name;
+		//	//piece.transform.position = board.CoordToWorldPosition(coord);
+		//}
+		//SetPiece(piece, board, coord);
+		Piece piece = team.GetPiece(code, forceCreatePiece);
+		Debug.Log("piece " + piece + "? board "+board+"? "+ forceCreatePiece);
+		piece.transform.position = board.CoordToWorldPosition(coord);
+		board.SetPiece(piece, coord);
 		return piece;
 	}
 
-	public void SetPiece(Piece piece, Board board, Coord coord) {
-		Transform t = piece.transform;
-		t.SetParent(board.transform);
-		t.Rotate(piece.team.PieceRotation);
-		t.position = board.CoordToWorldPosition(coord);
-		piece.SetTile(coord);
-	}
+	//public void SetPiece(Piece piece, Board board, Coord coord) {
+	//	Transform t = piece.transform;
+	//	piece.board = board;
+	//	t.SetParent(board.transform);
+	//	t.Rotate(piece.team.PieceRotation);
+	//	piece.SetTile(coord);
+	//}
 
 	public void UndoMove() {
 		chessMoves.UndoMove();

@@ -168,10 +168,7 @@ public class Capture : Move {
 	}
 
 	private static void DoCapture(Piece attacker, Piece captured, Coord capturedLocation) {
-		Transform holdingArea = attacker.team.transform;
-		captured.transform.SetParent(holdingArea);
-		Vector3 holdingLocation = Vector3.right * (holdingArea.childCount - 1) / 2f;
-		captured.JumpToLocalCenter(holdingLocation, 3);
+		attacker.team.Capture(captured);
 	}
 
 	private static void Uncapture(Piece attacker, Piece captured, Coord capturedLocation) {
