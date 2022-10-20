@@ -15,6 +15,7 @@ public class Board : MonoBehaviour {
 	public Tile TilePrefab;
 	private Transform _transform;
 	private BoardAnalysis _analysis;
+	public int halfMovesSinceCaptureOrPawnMove = 0;
 	public BoardAnalysis Analysis => (_analysis != null) ? _analysis : _analysis = game.analysis.GetAnalysis(this);
 	public int TileIndex(Coord coord) { return coord.row * BoardSize.col + coord.col; }
 	private Coord TileCoord(int index) { return new Coord(index % BoardSize.col, index / BoardSize.col); }
@@ -132,13 +133,11 @@ public class Board : MonoBehaviour {
 		}
 	}
 
-	public string ToXfen() {
-		return XFEN.ToString(this);
-	}
+	public string ToXfen() { return XFEN.ToString(this); }
 
-	public void LoadXfen(string xfen, Team[] teams) {
-		XFEN.FromString(this, teams, xfen);
-	}
+	public void LoadXfen(string xfen, IList<Team> teams) { XFEN.FromString(this, teams, xfen); }
+
+	public void LoadXfen(IList<Team> teams) { LoadXfen(xfen, teams); }
 
 	/// <summary>
 	/// takes all pieces and puts them into the capture area of each team (for reuse when a new board is made)

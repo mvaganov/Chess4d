@@ -55,9 +55,9 @@ public class King : MoveLogic {
 	public class Castle : Move {
 		public Move partnerMove;
 
-		public Castle(Piece pieceMoved, Coord from, Coord to, Piece partner, Coord partnerFrom, Coord partnerTo)
-		: base(pieceMoved, from, to) {
-			partnerMove = new Move(partner, partnerFrom, partnerTo);
+		public Castle(Board board, Piece pieceMoved, Coord from, Coord to, Piece partner, Coord partnerFrom, Coord partnerTo)
+		: base(board, pieceMoved, from, to) {
+			partnerMove = new Move(board, partner, partnerFrom, partnerTo);
 		}
 		public override bool Equals(object obj) {
 			Castle c = obj as Castle;
@@ -97,7 +97,7 @@ public class King : MoveLogic {
 					Coord there = other.GetCoord();
 					Coord delta = there - here;
 					Coord normal = delta.normalized;
-					Castle castle = new Castle(king.piece, here, here + normal * 2, other, other.GetCoord(), here + normal);
+					Castle castle = new Castle(self.board, king.piece, here, here + normal * 2, other, other.GetCoord(), here + normal);
 					moves[i] = castle;
 				}
 			}

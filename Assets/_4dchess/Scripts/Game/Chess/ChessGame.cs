@@ -17,13 +17,20 @@ public class ChessGame : MonoBehaviour {
 	public string PawnPromotionOptions = "NBRQ";
 	private Dictionary<string, PieceInfo> _prefabByCode = null;
 
-	[ContextMenuItem(nameof(Generate),nameof(Generate))]
+	[ContextMenuItem(nameof(Generate),nameof(Generate)),
+	ContextMenuItem(nameof(GenerateFromXfen), nameof(GenerateFromXfen))]
 	public Board board;
 	public ChessAnalysis analysis;
 	public MoveHistory chessMoves;
 	public List<Team> teams = new List<Team>();
+
 	public void OnValidate() {
 	}
+
+	public void GenerateFromXfen() {
+		board.LoadXfen(teams);
+	}
+
 	public void Generate() {
 		board.Generate();
 		for(int i = 0; i < teams.Count; ++i) {
@@ -40,36 +47,12 @@ public class ChessGame : MonoBehaviour {
 	}
 
 	public Piece GetPiece(Team team, string code, Coord coord, Board board, bool forceCreatePiece) {
-		//Piece prefab = GetPrefab(code);
-		//if (prefab == null) { return null; }
-		//Piece piece = !forceCreatePiece ? team.FindSparePiece(code) : null;
-		//if (piece == null) {
-		//	team.CreatePiece(code);
-		//	piece.transform.position = board.CoordToWorldPosition(coord);
-		//	//GameObject pieceObject = CreateObject(prefab.gameObject);
-		//	//piece = pieceObject.GetComponent<Piece>();
-		//	//string name = team.name + " " + prefab.name;// + " " + Pieces.Count;
-		//	//pieceObject.name = name;
-		//	//piece.team = team;
-		//	//piece.Material = team.material;
-		//	//piece.name = name;
-		//	//piece.transform.position = board.CoordToWorldPosition(coord);
-		//}
-		//SetPiece(piece, board, coord);
 		Piece piece = team.GetPiece(code, forceCreatePiece);
 		Debug.Log("piece " + piece + "? board "+board+"? "+ forceCreatePiece);
 		piece.transform.position = board.CoordToWorldPosition(coord);
 		board.SetPiece(piece, coord);
 		return piece;
 	}
-
-	//public void SetPiece(Piece piece, Board board, Coord coord) {
-	//	Transform t = piece.transform;
-	//	piece.board = board;
-	//	t.SetParent(board.transform);
-	//	t.Rotate(piece.team.PieceRotation);
-	//	piece.SetTile(coord);
-	//}
 
 	public void UndoMove() {
 		chessMoves.UndoMove();
@@ -129,6 +112,7 @@ public class ChessGame : MonoBehaviour {
 		capturedPiece = piece.board.GetPiece(move);
 		return capturedPiece != null && capturedPiece.team != piece.team;
 	}
+
 	public static bool IsMyKing(Piece me, Piece other) {
 		if (me == null || other == null || other.code != "K" || other.team != me.team) { return false; }
 		return true;

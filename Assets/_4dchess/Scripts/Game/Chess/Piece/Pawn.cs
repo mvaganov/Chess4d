@@ -26,7 +26,7 @@ public partial class Pawn : MoveLogic {
 				Coord rushedMove = coord + direction * 2;
 				Tile tile = board.GetTile(rushedMove);
 				if (tile != null && tile.GetPiece() == null) {
-					pawnMoves.Add(new DoubleMove(p, coord, rushedMove));
+					pawnMoves.Add(new DoubleMove(p.board, p, coord, rushedMove));
 				}
 			}
 		}

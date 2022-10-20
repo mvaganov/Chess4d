@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 // Extended Forsyth-Edwards Notation
 public static class XFEN {
+	const string whitespace = " \n\t\r";
 	[Flags] public enum B {
 		None = 0,
 		King = 1,
@@ -148,49 +150,179 @@ public static class XFEN {
 		} else {
 			sb.Append(" - ");
 		}
-		int halfMoves = game.chessMoves.CountMovesSinceCaptureOrPawnAdvance();
+		int halfMoves = game.chessMoves.CountMovesSinceCaptureOrPawnAdvance(board);
 		sb.Append(halfMoves % 2).Append(" ").Append(halfMoves / 2);
 		return sb.ToString();
 	}
-	public static void FromString(Board board, Team[] teams, string xfen) {
-		// TODO clear board
+	public static void FromString(Board board, IList<Team> teams, string xfen) {
 		board.ReclaimPieces();
-		// iterate across the string
-		Coord cursor = Coord.zero;
-		bool doneReadingBoard = false;
-		for (int i = 0; !doneReadingBoard && i < xfen.Length; ++i) {
-			char ch = xfen[i];
-			int number = CountDigits(xfen, i);
-			if (number > 0) {
-				cursor.x += number;
-			} else switch(ch) {
-					case '/': case '\\': case '|': cursor.x = 0; ++cursor.y; break;
-					case ' ': doneReadingBoard = true; break;
-					default:
-						// get/make the pieces
-						char code = ch;
-						char.IsUpper(ch);
-						Team team;
-						if (char.IsUpper(ch)) {
-							team = teams[0];
-						} else {
-							team = teams[1];
-							code = char.ToUpper(ch);
-						}
-						Piece p = team.CreatePiece(code.ToString());
-						board.SetPiece(p, cursor);
-						break;
+		int index = 0;
+		ProcessBoardString(board, teams, xfen, ref index);
+		ProcessWhosTurnItIs(teams, xfen, ref index);
+		ProcessCastleableRooks(teams, xfen, ref index);
+		ProcessLastDoubleMovedPawn(teams, xfen, ref index);
+		ProcessHalfMovesSinceCaptureOrPawnMove(board, xfen, ref index);
+	}
+
+	private static void ProcessLastDoubleMovedPawn(IList<Team> teams, string xfen, ref int index) {
+		TrimWhitespace(xfen, ref index);
+		string token = ReadToken(xfen, ref index);
+		if (token != "-") {
+			Debug.Log("TODO make the last move the pawn that double-moved to this location " + token);
+		}
+		TrimWhitespace(xfen, ref index);
+	}
+
+	private static string ReadToken(string text, ref int index) {
+		TrimWhitespace(text, ref index);
+		int i = index;
+		for (; i < text.Length; i++) {
+			if (whitespace.IndexOf(text[i]) >= 0) {
+				break;
 			}
 		}
-		// set castle-able pieces
-		// TODO create a chess move that is a proxy for a pawn move or capture X number of moves ago.
+		string found = text.Substring(index, i - index);
+		index = i;
+		return found;
+	}
+
+	private static void ProcessHalfMovesSinceCaptureOrPawnMove(Board board, string xfen, ref int index) {
+		TrimWhitespace(xfen, ref index);
+		board.halfMovesSinceCaptureOrPawnMove += ReadNextInteger(board, xfen, ref index);
+		board.halfMovesSinceCaptureOrPawnMove += ReadNextInteger(board, xfen, ref index) * 2;
+		TrimWhitespace(xfen, ref index);
+	}
+
+	private static int ReadNextInteger(Board board, string xfen, ref int index) {
+		TrimWhitespace(xfen, ref index);
+		int digits = CountDigits(xfen, index);
+		int number = 0;
+		if (digits > 0) {
+			number = int.Parse(xfen.Substring(index, digits));
+		} else {
+			throw new Exception("expected number of turns since capture or pawn move. found \"" +
+				xfen.Substring(index) + "\"");
+		}
+		TrimWhitespace(xfen, ref index);
+		return number;
+	}
+
+	private static void ProcessBoardString(Board board, IList<Team> teams, string xfen, ref int i) {
+		Coord cursor = Coord.zero;
+		bool doneReadingBoard = false;
+		TrimWhitespace(xfen, ref i);
+		for (; !doneReadingBoard && i < xfen.Length; ++i) {
+			char ch = xfen[i];
+			int digits = CountDigits(xfen, i);
+			if (digits > 0) {
+				string numberString = xfen.Substring(i, digits);
+				Debug.Log(digits+": "+numberString);
+				int number = int.Parse(numberString);
+				i += digits - 1;
+				cursor.x += number;
+			} else switch (ch) {
+				case '/': case '\\': case '|': cursor.x = 0; ++cursor.y; break;
+				case ' ': doneReadingBoard = true; break;
+				default: ProcessXfenLetter(teams, ch, board, cursor); break;
+			}
+		}
+		TrimWhitespace(xfen, ref i);
 	}
 
 	public static int CountDigits(string s, int index) {
 		int count = 0;
-		for(int i = index; i < s.Length; ++i) {
-			if (char.IsDigit(s[i])) { ++count; }
+		for (int i = index; i < s.Length; ++i) {
+			if (char.IsDigit(s[i])) {
+				Debug.Log(s[i]);
+				++count;
+			} else {
+				break;
+			}
 		}
 		return count;
+	}
+
+	private static void ProcessXfenLetter(IList<Team> teams, char ch, Board board, Coord cursor) {
+		Piece p = ProcessXfenLetter(teams, ch);
+		board.SetPiece(p, cursor);
+	}
+
+	private static Piece ProcessXfenLetter(IList<Team> teams, char ch) {
+		char code = ch;
+		char.IsUpper(ch);
+		Team team;
+		if (char.IsUpper(ch)) {
+			team = teams[0];
+		} else {
+			team = teams[1];
+			code = char.ToUpper(ch);
+		}
+		Piece p = team.CreatePiece(code.ToString());
+		return p;
+	}
+
+	private static void TrimWhitespace(string xfen, ref int index) {
+		if (whitespace.IndexOf(xfen[index]) >= 0) {
+			++index;
+		}
+	}
+
+	private static void ProcessWhosTurnItIs(IList<Team> teams, string xfen, ref int index) {
+		TrimWhitespace(xfen, ref index);
+		char nextPlayerInitial = xfen[index++];
+		int playerIndex = FindIndex(teams, team => team.name[0] == nextPlayerInitial);
+		Debug.Log(teams[playerIndex].name + " goes next");
+		TrimWhitespace(xfen, ref index);
+	}
+
+	public static int FindIndex<T>(IList<T> list, Func<T, bool> predicate) {
+		for (int i = 0; i < list.Count; ++i) {
+			if (predicate(list[i])) { return i; }
+		}
+		return -1;
+	}
+
+	private static void ProcessCastleableRooks(IList<Team> teams, string xfen, ref int index) {
+		TrimWhitespace(xfen, ref index);
+		MakePiecesUncastleable(teams);
+		GetCastleColumns(xfen, ref index, out StringBuilder uppercase, out StringBuilder lowercase);
+		MakePiecesCastleable(new Team[] { teams[0] }, uppercase.ToString());
+		MakePiecesCastleable(new Team[] { teams[1] }, lowercase.ToString().ToUpper());
+		TrimWhitespace(xfen, ref index);
+	}
+
+	private static void MakePiecesUncastleable(IList<Team> teams, string castleableTypes = "R") {
+		ForEachPiece(teams, p => {
+			if (castleableTypes.IndexOf(p.code) < 0) { return; }
+			p.moveCount = 1;
+		});
+	}
+
+	private static void GetCastleColumns(string xfen, ref int i, out StringBuilder uppercase, out StringBuilder lowercase) {
+		uppercase = new StringBuilder();
+		lowercase = new StringBuilder();
+		for (; i < xfen.Length; ++i) {
+			char ch = xfen[i];
+			if (ch == ' ') { break; }
+			if (char.IsLower(ch)) { lowercase.Append(ch); }
+			if (char.IsUpper(ch)) { uppercase.Append(ch); }
+		}
+	}
+
+	private static void MakePiecesCastleable(IList<Team> teams, string columns, string castleableTypes = "R") {
+		ForEachPiece(teams, p => {
+			if (castleableTypes.IndexOf(p.code) < 0) { return; }
+			char column = (char)(p.GetCoord().col + 'A');
+			if (columns.IndexOf(column) < 0) { return; }
+			p.moveCount = 0;
+		});
+	}
+
+	private static void ForEachPiece(IList<Team> teams, Action<Piece> action) {
+		for (int t = 0; t < teams.Count; t++) {
+			for (int p = 0; p < teams[t].Pieces.Count; ++p) {
+				action.Invoke(teams[t].Pieces[p]);
+			}
+		}
 	}
 }

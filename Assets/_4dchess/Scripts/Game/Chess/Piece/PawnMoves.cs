@@ -4,7 +4,8 @@ using UnityEngine;
 
 public partial class Pawn {
 	public class DoubleMove : Move {
-		public DoubleMove(Piece pieceMoved, Coord from, Coord to) : base(pieceMoved, from, to) { }
+		public DoubleMove(Board board, Piece pieceMoved, Coord from, Coord to) :
+			base(board, pieceMoved, from, to) { }
 		public override void Do() {
 			MoveNode thisMove = pieceMoved.Game.chessMoves.FindMoveNode(this);
 			GetPawn(pieceMoved, nameof(DoubleMove)).didDoubleMoveOnTurn = thisMove.turnIndex;
@@ -21,8 +22,8 @@ public partial class Pawn {
 	}
 
 	public class EnPassant : Capture {
-		public EnPassant(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
-		: base(pieceMoved, from, to, pieceCaptured, fromCaptured) { }
+		public EnPassant(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
+		: base(board, pieceMoved, from, to, pieceCaptured, fromCaptured) { }
 		public override void Do() {
 			GetPawn(pieceMoved, nameof(EnPassant));
 			base.Do();
@@ -47,8 +48,7 @@ public partial class Pawn {
 			UnityEngine.Debug.Log("en passant " + sideTile.GetCoord() + " just double moved? " + onlyJustNowDidDoubleMove +
 				"  " + pawn.didDoubleMoveOnTurn + " " + board.game.chessMoves.CurrentMove.turnIndex);
 			if (!onlyJustNowDidDoubleMove) return null;
-			// TODO create en passant move
-			return new EnPassant(p, pieceLocation, nextPieceLocation, possibleTarget, otherPieceLocation);
+			return new EnPassant(board, p, pieceLocation, nextPieceLocation, possibleTarget, otherPieceLocation);
 		}
 
 		public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse) {

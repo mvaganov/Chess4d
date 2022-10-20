@@ -56,7 +56,7 @@ public class MoveLogic : MonoBehaviour {
 			cursor = position;
 			if (dir == Coord.zero && maxSpaces > 0) {
 				if (moveKind.HasFlag(MoveKind.Move)) {
-					out_moves?.Add(new Move(self, position, cursor));
+					out_moves?.Add(new Move(self.board, self, position, cursor));
 				}
 				continue;
 			}
@@ -67,21 +67,21 @@ public class MoveLogic : MonoBehaviour {
 				}
 				Piece other = board.GetPiece(cursor);
 				if (moveKind.HasFlag(MoveKind.Defend)) {
-					Defend defend = new Defend(self, self.GetCoord(), cursor, other, cursor);
+					Defend defend = new Defend(self.board, self, self.GetCoord(), cursor, other, cursor);
 					out_moves?.Add(defend);
 				}
 				if (other != null) {
 					bool isAllies = self.team.IsAlliedWith(other.team);
 					if (!isAllies) {
 						if (moveKind.HasFlag(MoveKind.Attack)) {
-							Capture capture = new Capture(self, self.GetCoord(), cursor, other, cursor);
+							Capture capture = new Capture(self.board, self, self.GetCoord(), cursor, other, cursor);
 							out_moves?.Add(capture);
 						}
 					}
 					break;
 				}
 				if (moveKind.HasFlag(MoveKind.Move)) {
-					out_moves?.Add(new Move(self, position, cursor));
+					out_moves?.Add(new Move(self.board, self, position, cursor));
 				}
 			}
 		}

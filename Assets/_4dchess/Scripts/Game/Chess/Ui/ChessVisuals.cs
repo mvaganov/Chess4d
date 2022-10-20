@@ -68,7 +68,7 @@ public class ChessVisuals : MonoBehaviour {
 		defendArrows.ClearTiles();
 		specialTileAndArrows.ClearTiles();
 		Coord pieceCoord = piece.GetCoord();
-		selection.CreateMarks(new Move[] { new Move(piece, pieceCoord, pieceCoord) }, Color.green);
+		selection.CreateMarks(new Move[] { new Move(piece.board, piece, pieceCoord, pieceCoord) }, Color.green);
 
 		if (analysis.CurrentPieceCurrentMoves != null) {
 			for (int i = 0; i < analysis.CurrentPieceCurrentMoves.Count; ++i) {

@@ -12,16 +12,17 @@ public class MoveHistory : MonoBehaviour {
 
 	[System.Serializable] public class MoveEventHandler : UnityEvent<MoveNode> { }
 
-	public int CountMovesSinceCaptureOrPawnAdvance() {
+	public int CountMovesSinceCaptureOrPawnAdvance(Board board) {
 		int count = 0;
 		MoveNode node = CurrentMove;
 		while (node != null && node.move != null) {
-			if (node.move is Capture || (node.move is Move m && m.pieceMoved.code == "P")) {
+			if (node.move.board == board && (node.move is Capture || (node.move is Move m && m.pieceMoved.code == "P"))) {
 				break;
 			}
 			node = node.prev;
 			++count;
 		}
+		count += board.halfMovesSinceCaptureOrPawnMove;
 		return count;
 	}
 

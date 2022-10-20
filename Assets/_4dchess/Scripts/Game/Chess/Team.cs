@@ -21,7 +21,7 @@ public class Team : MonoBehaviour {
 		if (game == null) {
 			game = FindObjectOfType<ChessGame>();
 		}
-		ChessGame.DestroyListOfThingsBackwards(Pieces);
+		ChessGame.DestroyListOfThingsBackwards(Pieces); // TODO reclaim pieces instead of destroying them
 		Coord coord = start;
 		for(int i = 0; i < layout.Length; ++i) {
 			string code = layout.Substring(i, 1);
@@ -31,7 +31,6 @@ public class Team : MonoBehaviour {
 				continue;
 			}
 			Piece p = game.GetPiece(this, code, coord, game.board, false);//CreatePiece(game.GetPrefab(code), coord, game.board);
-			Pieces.Add(p);
 			if (p == null) {
 				throw new System.Exception($"no such piece type '{code}'");
 			}
@@ -74,6 +73,7 @@ public class Team : MonoBehaviour {
 		piece.team = this;
 		piece.Material = this.material;
 		piece.name = name;
+		Pieces.Add(piece);
 		return piece;
 	}
 
@@ -91,7 +91,9 @@ public class Team : MonoBehaviour {
 			Piece piece = holdingArea.GetChild(i).GetComponent<Piece>();
 			if (piece == null) { continue; }
 			Vector3 holdingLocation = Vector3.right * 0.5f * i;
-			piece.JumpToLocalCenter(holdingLocation, 3);
+			if (piece.transform.localPosition != holdingLocation) {
+				piece.JumpToLocalCenter(holdingLocation, 3);
+			}
 		}
 	}
 }

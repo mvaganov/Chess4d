@@ -80,10 +80,14 @@ public class MoveNode {
 }
 
 public class Move {
+	/// <summary>
+	/// the board must be known because pieces could conceivably move between boards and do similar moves on different boards
+	/// </summary>
+	public Board board;
 	public Coord from, to;
 	public Piece pieceMoved;
 
-	public Move(Piece pieceMoved, Coord from, Coord to) {
+	public Move(Board board, Piece pieceMoved, Coord from, Coord to) {
 		this.from = from;
 		this.to = to;
 		this.pieceMoved = pieceMoved;
@@ -144,14 +148,14 @@ public class Capture : Move {
 			return myTeam.IsAlliedWith(pieceCaptured.team);
 		}
 	}
-	public Capture(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured) :
-	base(pieceMoved, from, to) {
+	public Capture(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured) :
+	base(board, pieceMoved, from, to) {
 		this.captureCoord = fromCaptured;
 		this.pieceCaptured = pieceCaptured;
 	}
 
 	public Capture(Capture other) :
-	this(other.pieceMoved, other.from, other.to, other.pieceCaptured, other.captureCoord) { }
+	this(other.board, other.pieceMoved, other.from, other.to, other.pieceCaptured, other.captureCoord) { }
 
 	public override void Do() {
 		base.Do();
@@ -223,8 +227,8 @@ public class Capture : Move {
 }
 
 public class Defend : Capture {
-	public Defend(Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
-		: base(pieceMoved, from, to, pieceCaptured, fromCaptured) {
+	public Defend(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
+		: base(board, pieceMoved, from, to, pieceCaptured, fromCaptured) {
 	}
 	public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse) {
 		TiledGameObject tgo = base.MakeMark(markPool, reverse);
