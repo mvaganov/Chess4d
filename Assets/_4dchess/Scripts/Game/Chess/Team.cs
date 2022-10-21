@@ -48,7 +48,8 @@ public class Team : MonoBehaviour {
 
 	public Piece FindSparePiece(string code) {
 		Transform holdingArea = transform;
-		for (int i = holdingArea.childCount - 1; i >= 0; ++i) {
+		//for (int i = holdingArea.childCount - 1; i >= 0; --i) {
+		for (int i = 0; i < holdingArea.childCount; ++i) {
 			Transform child = holdingArea.GetChild(i);
 			Piece p = child.GetComponent<Piece>();
 			if (p.code == code) { return p; }

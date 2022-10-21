@@ -196,7 +196,7 @@ public static class XFEN {
 	private static int ReadNextInteger(Board board, string xfen, ref int index) {
 		TrimWhitespace(xfen, ref index);
 		int digits = CountDigits(xfen, index);
-		int number = 0;
+		int number;
 		if (digits > 0) {
 			number = int.Parse(xfen.Substring(index, digits));
 		} else {
@@ -223,10 +223,18 @@ public static class XFEN {
 			} else switch (ch) {
 				case '/': case '\\': case '|': cursor.x = 0; ++cursor.y; break;
 				case ' ': doneReadingBoard = true; break;
-				default: ProcessXfenLetter(teams, ch, board, cursor); break;
+				default:
+						Piece p = ProcessXfenLetter(teams, ch, board, FilterCursor(board, cursor));
+						p.JumpToLocalCenter();
+						cursor.x++;
+						break;
 			}
 		}
 		TrimWhitespace(xfen, ref i);
+	}
+
+	private static Coord FilterCursor(Board board, Coord coord) {
+		return new Coord(coord.x, board.BoardSize.y - 1 - coord.y);
 	}
 
 	public static int CountDigits(string s, int index) {
@@ -242,9 +250,10 @@ public static class XFEN {
 		return count;
 	}
 
-	private static void ProcessXfenLetter(IList<Team> teams, char ch, Board board, Coord cursor) {
+	private static Piece ProcessXfenLetter(IList<Team> teams, char ch, Board board, Coord cursor) {
 		Piece p = ProcessXfenLetter(teams, ch);
 		board.SetPiece(p, cursor);
+		return p;
 	}
 
 	private static Piece ProcessXfenLetter(IList<Team> teams, char ch) {
@@ -257,7 +266,7 @@ public static class XFEN {
 			team = teams[1];
 			code = char.ToUpper(ch);
 		}
-		Piece p = team.CreatePiece(code.ToString());
+		Piece p = team.GetPiece(code.ToString(), false);
 		return p;
 	}
 

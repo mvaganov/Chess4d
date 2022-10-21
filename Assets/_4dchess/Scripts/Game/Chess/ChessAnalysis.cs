@@ -44,6 +44,14 @@ public class ChessAnalysis : MonoBehaviour {
 		return analysis;
 	}
 
+	public void RecalculateAllPieceMoves() {
+		Board[] boards = new Board[] { game.board };
+		for(int i = 0; i < boards.Length; ++i) {
+			Board board = boards[i];
+			RecalculatePieceMoves(board);
+		}
+	}
+
 	public void RecalculatePieceMoves(Board board) {
 		//selectedPiece?.board.RecalculatePieceMoves();
 		BoardAnalysis analysis = GetAnalysis(board);

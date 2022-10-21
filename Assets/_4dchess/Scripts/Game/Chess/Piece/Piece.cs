@@ -76,6 +76,10 @@ public class Piece : TiledGameObject {
 		MoveLogic.LerpPath(this, path, team.speed, true);
 	}
 
+	public void JumpToLocalCenter() {
+		JumpToLocalCenter(Vector3.zero, team.jumpHeight);
+	}
+
 	public virtual void JumpToLocalCenter(Vector3 offset, float jumpHeight) {
 		const int bezierPointCount = 24;
 		Vector3[] bezier = new Vector3[bezierPointCount];

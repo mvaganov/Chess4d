@@ -29,6 +29,7 @@ public class ChessGame : MonoBehaviour {
 
 	public void GenerateFromXfen() {
 		board.LoadXfen(teams);
+		analysis.RecalculateAllPieceMoves();
 	}
 
 	public void Generate() {
