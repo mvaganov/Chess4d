@@ -45,9 +45,8 @@ public class ChessAnalysis : MonoBehaviour {
 	}
 
 	public void RecalculateAllPieceMoves() {
-		Board[] boards = new Board[] { game.board };
-		for(int i = 0; i < boards.Length; ++i) {
-			Board board = boards[i];
+		IEnumerable<Board> boards = game.boards;
+		foreach(Board board in boards) {
 			RecalculatePieceMoves(board);
 		}
 	}

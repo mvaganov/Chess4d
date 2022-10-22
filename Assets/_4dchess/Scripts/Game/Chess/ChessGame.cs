@@ -14,12 +14,14 @@ public class ChessGame : MonoBehaviour {
 		new PieceInfo("rook", "R"),
 		new PieceInfo("queen", "Q"),
 	};
+	public BoardInfo[] boardsAtStart = new BoardInfo[] { new BoardInfo() };
 	public string PawnPromotionOptions = "NBRQ";
 	private Dictionary<string, PieceInfo> _prefabByCode = null;
 
-	[ContextMenuItem(nameof(Generate),nameof(Generate)),
-	ContextMenuItem(nameof(GenerateFromXfen), nameof(GenerateFromXfen))]
-	public Board board;
+	[ContextMenuItem(nameof(GenerateInEditor),nameof(GenerateInEditor)),
+	ContextMenuItem(nameof(GenerateAllBoards), nameof(GenerateAllBoards))]
+	public List<Board> boards = new List<Board>();
+	public Board prefab_board;
 	public ChessAnalysis analysis;
 	public MoveHistory chessMoves;
 	public List<Team> teams = new List<Team>();
@@ -27,13 +29,30 @@ public class ChessGame : MonoBehaviour {
 	public void OnValidate() {
 	}
 
-	public void GenerateFromXfen() {
-		board.LoadXfen(teams);
-		analysis.RecalculateAllPieceMoves();
+	public void GenerateAllBoards() {
+		for(int i = 0; i < boardsAtStart.Length; ++i) {
+			if (boards.Count <= i) {
+				boards.Add(CreateBoard());
+			}
+			boards[i].LoadXfen(boardsAtStart[i].xfen, teams);
+			analysis.RecalculatePieceMoves(boards[i]);
+		}
+		//analysis.RecalculateAllPieceMoves();
 	}
 
-	public void Generate() {
-		board.Generate();
+	private Board CreateBoard() {
+		Board board = CreateObject(prefab_board.gameObject).GetComponent<Board>();
+		board.game = this;
+		board.transform.SetParent(transform);
+		return board;
+	}
+
+	// TODO make this work correctly?
+	public void GenerateInEditor() {
+		if (boards.Count == 0) {
+			boards.Add(CreateBoard());
+		}
+		boards[0].Generate();
 		for(int i = 0; i < teams.Count; ++i) {
 			teams[i].Generate();
 		}
@@ -41,9 +60,11 @@ public class ChessGame : MonoBehaviour {
 	}
 
 	void Start() {
-		teams.ForEach(t => t.MovePiecesToTile());
+		//teams.ForEach(t => t.MovePiecesToTile());
 		if (chessMoves == null) { chessMoves = FindObjectOfType<MoveHistory>(); }
 		if (analysis == null) { analysis = FindObjectOfType<ChessAnalysis>(); }
+		GenerateAllBoards();
+		//analysis.RecalculateAllPieceMoves();
 		// TODO implement icon that hovers over piece's head, always orients to ortho camera rotation, and is only visible by ortho camera
 	}
 

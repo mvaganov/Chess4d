@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Board : MonoBehaviour {
-	[TextArea(1,6)]
-	public string xfen = "rnbqkbnr/pppppppp/////PPPPPPPP/RNBQKBNR W AHah - 0 0";
 	[ContextMenuItem(nameof(RecalculatePieceMoves), nameof(RecalculatePieceMoves))]
 	public ChessGame game;
 	public Coord BoardSize = new Coord(8, 8);
@@ -17,14 +15,25 @@ public class Board : MonoBehaviour {
 	private BoardAnalysis _analysis;
 	public int halfMovesSinceCaptureOrPawnMove = 0;
 	public BoardAnalysis Analysis => (_analysis != null) ? _analysis : _analysis = game.analysis.GetAnalysis(this);
+
+	public void Start() {
+		GenerateTilesIfMissing();
+		RecalculatePieceMoves();
+		if (game == null) {
+			game = GetComponentInParent<ChessGame>();
+		}
+	}
+
+	public void GenerateTilesIfMissing() {
+		if (tiles.Count == 0) {
+			Generate();
+		}
+	}
+
 	public int TileIndex(Coord coord) { return coord.row * BoardSize.col + coord.col; }
 	private Coord TileCoord(int index) { return new Coord(index % BoardSize.col, index / BoardSize.col); }
 	public bool IsValid(Coord coord) {
 		return coord.x >= 0 && coord.x < BoardSize.x && coord.y >= 0 && coord.y < BoardSize.y;
-	}
-	public Material MaterialOf(Coord tile) {
-		int materialIndex = (tile.row + tile.col) % TileMaterials.Length;
-		return TileMaterials[materialIndex];
 	}
 
 	public Tile GetTile(Coord coord) {
@@ -91,21 +100,30 @@ public class Board : MonoBehaviour {
 		Coord coord = new Coord();
 		ChessGame.DestroyListOfThingsBackwards(tiles);
 		do {
-			Vector3 position = CoordToLocalPosition(coord);
-			GameObject tileObject = ChessGame.CreateObject(TilePrefab.gameObject);
-			Tile tile = tileObject.GetComponent<Tile>();
-			tiles.Add(tile);
-			string name = coord.ToString();// $"{(char)('a' + coord.x)}{coord.y + 1}";
-			tileObject.name = name;
-			Transform t = tileObject.transform;
-			t.SetParent(_transform);
-			t.localPosition = position;
-			tile.Material = MaterialOf(coord);
-			tile.Label.text = name;
+			GenerateTile(coord);
 		} while (coord.Iterate(BoardSize));
 		if (Application.isPlaying) {
 			RecalculatePieceMoves();
 		}
+	}
+
+	private void GenerateTile(Coord coord) {
+		Vector3 position = CoordToLocalPosition(coord);
+		GameObject tileObject = ChessGame.CreateObject(TilePrefab.gameObject);
+		Tile tile = tileObject.GetComponent<Tile>();
+		tiles.Add(tile);
+		string name = coord.ToString();// $"{(char)('a' + coord.x)}{coord.y + 1}";
+		tileObject.name = name;
+		Transform t = tileObject.transform;
+		t.SetParent(_transform);
+		t.localPosition = position;
+		tile.Material = MaterialOf(coord);
+		tile.Label.text = name;
+	}
+
+	public Material MaterialOf(Coord tile) {
+		int materialIndex = (tile.row + tile.col) % TileMaterials.Length;
+		return TileMaterials[materialIndex];
 	}
 
 	public Vector3 CoordToLocalPosition(Coord coord) {
@@ -126,18 +144,10 @@ public class Board : MonoBehaviour {
 		ChessGame.DestroyChessObject(tile.gameObject);
 		tiles.RemoveAt(i);
 	}
-	void Start() {
-		RecalculatePieceMoves();
-		if (game == null) {
-			game = GetComponentInParent<ChessGame>();
-		}
-	}
 
 	public string ToXfen() { return XFEN.ToString(this); }
 
 	public void LoadXfen(string xfen, IList<Team> teams) { XFEN.FromString(this, teams, xfen); }
-
-	public void LoadXfen(IList<Team> teams) { LoadXfen(xfen, teams); }
 
 	/// <summary>
 	/// takes all pieces and puts them into the capture area of each team (for reuse when a new board is made)

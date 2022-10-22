@@ -155,6 +155,7 @@ public static class XFEN {
 		return sb.ToString();
 	}
 	public static void FromString(Board board, IList<Team> teams, string xfen) {
+		board.GenerateTilesIfMissing();
 		board.ReclaimPieces();
 		int index = 0;
 		ProcessBoardString(board, teams, xfen, ref index);
