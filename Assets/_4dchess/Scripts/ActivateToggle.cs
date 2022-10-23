@@ -22,8 +22,8 @@ public class ActivateToggle : MonoBehaviour {
 			bool activate = active && !this.active;
 			bool deactivate = !active && this.active;
 			this.active = active;
-			if (activate) { OnActivate.Invoke(); }
-			if (deactivate) { OnDeactivate.Invoke(); }
+			if (activate) { OnActivate.Invoke(); Debug.Log("activated " + name); }
+			if (deactivate) { OnDeactivate.Invoke(); Debug.Log("deactivated "+name); }
 			objects.ForEach(o => o.SetActive(active));
 		}
 	}

@@ -22,6 +22,7 @@ public class ChessGame : MonoBehaviour {
 
 	public List<Board> boards = new List<Board>();
 	public Board prefab_board;
+	[ContextMenuItem(nameof(RecalculateMoves), nameof(RecalculateMoves))]
 	public ChessAnalysis analysis;
 	public MoveHistory chessMoves;
 	public Camera orthoMapCamera;
@@ -54,10 +55,14 @@ public class ChessGame : MonoBehaviour {
 		board.GenerateTiles();
 		board.LoadXfen(binfo.xfen, teams);
 		board.transform.localPosition = binfo.BoardOffset;
-		if (!Application.isPlaying) {
-			analysis.RecalculatePieceMoves(board);
-		}
 		return board;
+	}
+
+	public void RecalculateMoves() {
+		Debug.Log("recalc");
+		for (int i = 0; i < boards.Count; ++i) {
+			analysis.RecalculatePieceMoves(boards[i]);
+		}
 	}
 
 	// TODO make this work correctly?
@@ -67,12 +72,10 @@ public class ChessGame : MonoBehaviour {
 	}
 
 	void Start() {
-		//teams.ForEach(t => t.MovePiecesToTile());
 		if (chessMoves == null) { chessMoves = FindObjectOfType<MoveHistory>(); }
 		if (analysis == null) { analysis = FindObjectOfType<ChessAnalysis>(); }
 		GenerateAllBoards();
-		//analysis.RecalculateAllPieceMoves();
-		// TODO implement icon that hovers over piece's head, always orients to ortho camera rotation, and is only visible by ortho camera
+		RecalculateMoves();
 	}
 
 	public Piece GetPiece(Team team, string code, Coord coord, Board board, bool forceCreatePiece) {

@@ -47,4 +47,8 @@ public class AxisMovement : MonoBehaviour {
 			}
 		}
 	}
+
+	public void CopyTransform(Transform t) {
+		body.position = t.position;
+	}
 }

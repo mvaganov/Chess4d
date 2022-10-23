@@ -6,13 +6,18 @@ public class RaycastInteraction : MonoBehaviour {
 	public ChessGame game;
 	public ChessAnalysis analysis;
 	public ChessVisuals visuals;
-	public Camera cam;
+	[SerializeField] private Camera _cam;
 	public Transform rayHitMarker;
 	public Gradient hoveredColor;
 	public TiledGameObject currentHovered;
 
+	public Camera RaycastCamera {
+		get => _cam;
+		set => _cam = value;
+	}
+
 	void Start() {
-		if (cam == null) { cam = Camera.main; }
+		if (_cam == null) { _cam = Camera.main; }
 		if (game == null) { game = FindObjectOfType<ChessGame>(); }
 		if (analysis == null) { analysis = FindObjectOfType<ChessAnalysis>(); }
 		if (visuals == null) { visuals = FindObjectOfType<ChessVisuals>(); }
@@ -26,7 +31,7 @@ public class RaycastInteraction : MonoBehaviour {
 			Click();
 			RefreshVisuals(currentHovered);
 		}
-		Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+		Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
 		if (Physics.Raycast(ray, out RaycastHit rh)) {
 			if (Input.GetMouseButton(0)) {
 				PlaceRayHitMarker(rh);
@@ -111,7 +116,7 @@ public class RaycastInteraction : MonoBehaviour {
 		}
 		rayHitMarker.transform.position = rh.point;
 		Vector3 up = rh.normal;
-		Vector3 right = cam.transform.right;
+		Vector3 right = _cam.transform.right;
 		Vector3 forward = Vector3.Cross(up, right); ;
 		rayHitMarker.transform.rotation = Quaternion.LookRotation(forward, up);
 	}

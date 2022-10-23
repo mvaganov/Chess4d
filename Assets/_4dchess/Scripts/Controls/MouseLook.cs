@@ -33,4 +33,8 @@ public class MouseLook : MonoBehaviour {
 			CameraTransform.rotation = Quaternion.Euler(eulerRotation);
 		}
 	}
+	public void CopyTransformRotation(Transform t) {
+		CameraTransform.rotation = t.rotation;
+		eulerRotation = CameraTransform.rotation.eulerAngles;
+	}
 }
