@@ -293,6 +293,7 @@ public static class XFEN {
 	}
 
 	private static void ProcessCastleableRooks(IList<Team> teams, string xfen, ref int index) {
+		foreach (Team t in teams) { t.PurgeEmptyPieceSlots(); }
 		TrimWhitespace(xfen, ref index);
 		MakePiecesUncastleable(teams);
 		GetCastleColumns(xfen, ref index, out StringBuilder uppercase, out StringBuilder lowercase);

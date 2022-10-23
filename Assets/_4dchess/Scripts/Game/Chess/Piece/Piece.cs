@@ -12,6 +12,7 @@ public class Piece : TiledGameObject {
 	[SerializeField] private List<Move> moves;
 	private bool movesAreUpToDate;
 	public int moveCount = 0;
+	public SpriteRenderer worldIcon;
 
 	public ChessGame Game => board.game;
 

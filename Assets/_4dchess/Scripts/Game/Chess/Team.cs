@@ -14,33 +14,22 @@ public class Team : MonoBehaviour {
 	public float jumpHeight = 1;
 	public Coord pawnDirection = new Coord(0, 1);
 	public int TeamIndex => game.teams.IndexOf(this);
-	public bool IsAlliedWith(Team team) {
-		return team == this;
-	}
-	public void Generate() {
+
+	private void Awake() {
 		if (game == null) {
 			game = FindObjectOfType<ChessGame>();
 		}
-		//// TODO remove this code, the boards generate pieces for the players, not the players for the boards.
-		//ChessGame.DestroyListOfThingsBackwards(Pieces); // TODO reclaim pieces instead of destroying them
-		//Coord coord = start;
-		//for(int i = 0; i < layout.Length; ++i) {
-		//	string code = layout.Substring(i, 1);
-		//	if (code == "\n") {
-		//		coord.col = 0;
-		//		coord.row++;
-		//		continue;
-		//	}
-		//	Piece p = game.GetPiece(this, code, coord, game.boards[0], false);//CreatePiece(game.GetPrefab(code), coord, game.board);
-		//	if (p == null) {
-		//		throw new System.Exception($"no such piece type '{code}'");
-		//	}
-		//	p.transform.position += Vector3.up * (10 + i);
-		//	coord.col++;
-		//}
-		//if (Application.isPlaying) {
-		//	MovePiecesToTile();
-		//}
+		PurgeEmptyPieceSlots();
+	}
+
+	public void PurgeEmptyPieceSlots() {
+		for (int i = Pieces.Count - 1; i >= 0; --i) {
+			if (Pieces[i] == null) { Pieces.RemoveAt(i); }
+		}
+	}
+
+	public bool IsAlliedWith(Team team) {
+		return team == this;
 	}
 
 	public void MovePiecesToTile() {
@@ -67,15 +56,19 @@ public class Team : MonoBehaviour {
 	}
 
 	public Piece CreatePiece(string code) {
-		Piece prefab = game.GetPrefab(code);
-		GameObject pieceObject = ChessGame.CreateObject(prefab.gameObject);
+		PieceInfo pInfo = game.GetPieceInfo(code);
+		GameObject pieceObject = ChessGame.CreateObject(pInfo.prefab.gameObject);
 		Piece piece = pieceObject.GetComponent<Piece>();
-		string name = this.name + " " + prefab.name;// + " " + Pieces.Count;
+		string name = this.name + " " + pInfo.name;// + " " + Pieces.Count;
 		pieceObject.name = name;
 		piece.team = this;
 		piece.Material = this.material;
 		piece.name = name;
 		piece.transform.position = transform.TransformPoint(GetHoldingLocalPosition(Pieces.Count));
+		piece.worldIcon.sprite = pInfo.icons[TeamIndex];
+		piece.worldIcon.color = material.color;
+		Billboard bb = piece.worldIcon.GetComponent<Billboard>();
+		bb._camera = game.orthoMapCamera;
 		Pieces.Add(piece);
 		return piece;
 	}

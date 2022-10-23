@@ -9,7 +9,7 @@ public class Board : MonoBehaviour {
 	public Vector3 tileSize = new Vector3(1,2,1);
 	public Material[] TileMaterials;
 	public List<Tile> tiles = new List<Tile>();
-	[ContextMenuItem(nameof(Generate),nameof(Generate))]
+	[ContextMenuItem(nameof(GenerateTiles),nameof(GenerateTiles))]
 	public Tile TilePrefab;
 	private Transform _transform;
 	private BoardAnalysis _analysis;
@@ -26,7 +26,7 @@ public class Board : MonoBehaviour {
 
 	public void GenerateTilesIfMissing() {
 		if (tiles.Count == 0) {
-			Generate();
+			GenerateTiles();
 		}
 	}
 
@@ -95,7 +95,7 @@ public class Board : MonoBehaviour {
 		return TileCoord(index);
 	}
 
-	public void Generate() {
+	public void GenerateTiles() {
 		HaveTransform();
 		Coord coord = new Coord();
 		ChessGame.DestroyListOfThingsBackwards(tiles);

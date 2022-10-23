@@ -6,6 +6,9 @@ using UnityEditor;
 #endif
 
 public class ChessGame : MonoBehaviour {
+	[ContextMenuItem(nameof(GenerateInEditor), nameof(GenerateInEditor)),
+	 ContextMenuItem(nameof(GenerateAllBoards), nameof(GenerateAllBoards))]
+	public BoardInfo[] boardsAtStart = new BoardInfo[] { new BoardInfo() };
 	public PieceInfo[] pieceCodes = new PieceInfo[] {
 		new PieceInfo("king", "K"),
 		new PieceInfo("pawn", "P"),
@@ -14,48 +17,52 @@ public class ChessGame : MonoBehaviour {
 		new PieceInfo("rook", "R"),
 		new PieceInfo("queen", "Q"),
 	};
-	public BoardInfo[] boardsAtStart = new BoardInfo[] { new BoardInfo() };
 	public string PawnPromotionOptions = "NBRQ";
 	private Dictionary<string, PieceInfo> _prefabByCode = null;
 
-	[ContextMenuItem(nameof(GenerateInEditor),nameof(GenerateInEditor)),
-	ContextMenuItem(nameof(GenerateAllBoards), nameof(GenerateAllBoards))]
 	public List<Board> boards = new List<Board>();
 	public Board prefab_board;
 	public ChessAnalysis analysis;
 	public MoveHistory chessMoves;
+	public Camera orthoMapCamera;
 	public List<Team> teams = new List<Team>();
 
 	public void OnValidate() {
 	}
 
-	public void GenerateAllBoards() {
-		for(int i = 0; i < boardsAtStart.Length; ++i) {
-			if (boards.Count <= i) {
-				boards.Add(CreateBoard());
-			}
-			boards[i].LoadXfen(boardsAtStart[i].xfen, teams);
-			analysis.RecalculatePieceMoves(boards[i]);
-		}
-		//analysis.RecalculateAllPieceMoves();
+	private void Awake() {
+		PurgeEmptyBoardSlots();
 	}
 
-	private Board CreateBoard() {
+	private void PurgeEmptyBoardSlots() {
+		for (int i = boards.Count - 1; i >= 0; --i) {
+			if (boards[i] == null) { boards.RemoveAt(i); }
+		}
+	}
+
+	public void GenerateAllBoards() {
+		DestroyListOfThingsBackwards(boards);
+		for (int i = 0; i < boardsAtStart.Length; ++i) {
+			boards.Add(CreateBoard(boardsAtStart[i]));
+		}
+	}
+
+	private Board CreateBoard(BoardInfo binfo) {
 		Board board = CreateObject(prefab_board.gameObject).GetComponent<Board>();
 		board.game = this;
 		board.transform.SetParent(transform);
+		board.GenerateTiles();
+		board.LoadXfen(binfo.xfen, teams);
+		board.transform.localPosition = binfo.BoardOffset;
+		if (!Application.isPlaying) {
+			analysis.RecalculatePieceMoves(board);
+		}
 		return board;
 	}
 
 	// TODO make this work correctly?
 	public void GenerateInEditor() {
-		if (boards.Count == 0) {
-			boards.Add(CreateBoard());
-		}
-		boards[0].Generate();
-		for(int i = 0; i < teams.Count; ++i) {
-			teams[i].Generate();
-		}
+		GenerateAllBoards();
 		EditorTool.MarkSceneDirty();
 	}
 

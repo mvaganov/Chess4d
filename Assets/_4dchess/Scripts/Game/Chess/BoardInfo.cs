@@ -6,4 +6,5 @@ using UnityEngine;
 	public string name = "standard";
 	[TextArea(1, 6)]
 	public string xfen = "rnbqkbnr/pppppppp/////PPPPPPPP/RNBQKBNR W AHah - 0 0";
+	public Vector3 BoardOffset = Vector3.zero;
 }
