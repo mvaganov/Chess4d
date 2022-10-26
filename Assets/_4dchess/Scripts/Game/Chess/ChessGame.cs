@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Collections;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -58,8 +59,17 @@ public class ChessGame : MonoBehaviour {
 		return board;
 	}
 
+	public void RecalculateNextUpdate() {
+		StartCoroutine(RecalculateMovesCoroutine());
+	}
+
+	private IEnumerator RecalculateMovesCoroutine() {
+		yield return null;
+		RecalculateMoves();
+	}
+
 	public void RecalculateMoves() {
-		Debug.Log("recalc");
+		//Debug.Log("recalc");
 		for (int i = 0; i < boards.Count; ++i) {
 			analysis.RecalculatePieceMoves(boards[i]);
 		}
@@ -75,7 +85,7 @@ public class ChessGame : MonoBehaviour {
 		if (chessMoves == null) { chessMoves = FindObjectOfType<MoveHistory>(); }
 		if (analysis == null) { analysis = FindObjectOfType<ChessAnalysis>(); }
 		GenerateAllBoards();
-		RecalculateMoves();
+		RecalculateNextUpdate();
 	}
 
 	public Piece GetPiece(Team team, string code, Coord coord, Board board, bool forceCreatePiece) {

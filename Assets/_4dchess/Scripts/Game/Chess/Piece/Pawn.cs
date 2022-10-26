@@ -22,7 +22,7 @@ public partial class Pawn : MoveLogic {
 		List<Move> pawnMoves = new List<Move>();
 		if (moveKind.HasFlag(MoveKind.Move)) {
 			StandardMoves(new Coord[] { direction }, 1, pawnMoves, MoveKind.Move);
-			if (piece.moveCount == 0) {
+			if (piece.moveCount == 0 && pawnMoves.Count > 0) {
 				Coord rushedMove = coord + direction * 2;
 				Tile tile = board.GetTile(rushedMove);
 				if (tile != null && tile.GetPiece() == null) {

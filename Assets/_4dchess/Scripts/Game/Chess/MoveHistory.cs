@@ -90,7 +90,7 @@ public class MoveHistory : MonoBehaviour {
 		Debug.Log("doing " + move + " " + move.move.GetType().Name);
 		currentMove.SetAsNextTimelineBranch(move);
 		move.prev = currentMove;
-		Debug.Log("added timeline " + currentMove.IndexOfBranch(move));
+		//Debug.Log("added timeline " + currentMove.IndexOfBranch(move));
 		move.Do();
 		currentMove = move;
 		onMove?.Invoke(currentMove);

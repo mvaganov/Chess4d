@@ -102,9 +102,9 @@ public class Board : MonoBehaviour {
 		do {
 			GenerateTile(coord);
 		} while (coord.Iterate(BoardSize));
-		if (Application.isPlaying) {
-			RecalculatePieceMoves();
-		}
+		//if (Application.isPlaying) {
+		//	RecalculatePieceMoves();
+		//}
 	}
 
 	private void GenerateTile(Coord coord) {

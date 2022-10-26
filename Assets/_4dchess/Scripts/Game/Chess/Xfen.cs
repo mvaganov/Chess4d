@@ -242,7 +242,7 @@ public static class XFEN {
 		int count = 0;
 		for (int i = index; i < s.Length; ++i) {
 			if (char.IsDigit(s[i])) {
-				Debug.Log(s[i]);
+				//Debug.Log(s[i]);
 				++count;
 			} else {
 				break;

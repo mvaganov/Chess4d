@@ -82,8 +82,8 @@ public class RaycastInteraction : MonoBehaviour {
 					break;
 			}
 			//analysis.RecalculatePieceMoves();
-		} else {
-			Debug.Log("invalid move, unselecting.");
+		//} else {
+		//	Debug.Log("invalid move, unselecting.");
 		}
 	}
 

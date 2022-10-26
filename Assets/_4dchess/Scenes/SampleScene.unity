@@ -2049,7 +2049,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -16, y: 16}
   m_SizeDelta: {x: 60, y: 30}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &625633269
@@ -4979,11 +4979,11 @@ RectTransform:
   m_Father: {fileID: 185849480}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -12, y: 32}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -16, y: -16}
   m_SizeDelta: {x: 48, y: 30}
-  m_Pivot: {x: 1, y: 0}
+  m_Pivot: {x: 1, y: 1}
 --- !u!114 &1198280388
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6648,38 +6648,38 @@ MonoBehaviour:
     code: P
     prefab: {fileID: 2956447344216807993, guid: 3f23020e2a5669e448be13cf719cf204, type: 3}
     icons:
-    - {fileID: 21300000, guid: ea243111fe057924c8911181eeb74d95, type: 3}
     - {fileID: 21300000, guid: 898579635fe0e964d8e34c12c0683c2d, type: 3}
+    - {fileID: 21300000, guid: ea243111fe057924c8911181eeb74d95, type: 3}
   - name: knight
     code: N
     prefab: {fileID: 114203353456072615, guid: 4b925a9b3dadc2347b9bf045dc1b57a0, type: 3}
     icons:
-    - {fileID: 21300000, guid: 5c2848708f03e634db6d6dc8cdd43097, type: 3}
     - {fileID: 21300000, guid: 652473ab73d42194283c8b4074ed83f0, type: 3}
+    - {fileID: 21300000, guid: 5c2848708f03e634db6d6dc8cdd43097, type: 3}
   - name: bishop
     code: B
     prefab: {fileID: 7828419355653423605, guid: 065625236064848449d76ec6ba905251, type: 3}
     icons:
-    - {fileID: 21300000, guid: 98a621ca5cabb4144972f72f7ffaa5fd, type: 3}
     - {fileID: 21300000, guid: b3b40de45af8c294aba5287c376552fc, type: 3}
+    - {fileID: 21300000, guid: 98a621ca5cabb4144972f72f7ffaa5fd, type: 3}
   - name: rook
     code: R
     prefab: {fileID: 7377574328862134811, guid: ea62bee0f85281847b8a19669a99d0f7, type: 3}
     icons:
-    - {fileID: 21300000, guid: 2c4e63b53982b6640b144def4944289b, type: 3}
     - {fileID: 21300000, guid: 93979dca617712b42948c1ea54a88bf2, type: 3}
+    - {fileID: 21300000, guid: 2c4e63b53982b6640b144def4944289b, type: 3}
   - name: queen
     code: Q
     prefab: {fileID: 5484355342938588292, guid: 98d50cc7cb098684f981e6af0ae1d6c0, type: 3}
     icons:
-    - {fileID: 21300000, guid: 0e1ddd1d8041bd845ac8ebe9c77e9397, type: 3}
     - {fileID: 21300000, guid: 09ba09663500d5443b1beee67221f828, type: 3}
+    - {fileID: 21300000, guid: 0e1ddd1d8041bd845ac8ebe9c77e9397, type: 3}
   - name: king
     code: K
     prefab: {fileID: 4350959020382565236, guid: d4857e6416d50c14bb3b86dde97048a5, type: 3}
     icons:
-    - {fileID: 21300000, guid: 406402efadbebd943ad31fd4cddaaacb, type: 3}
     - {fileID: 21300000, guid: 3ab5c62d7e43ed84e8614c5650c5360a, type: 3}
+    - {fileID: 21300000, guid: 406402efadbebd943ad31fd4cddaaacb, type: 3}
   PawnPromotionOptions: NBRQ
   boards: []
   prefab_board: {fileID: 2758739047729405941, guid: 96d26ff3401eef64cba5490b8a3b9ec3, type: 3}
@@ -7300,7 +7300,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 906004715}
   m_Direction: 0
   m_Value: 0
-  m_Size: 0.9997744
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
