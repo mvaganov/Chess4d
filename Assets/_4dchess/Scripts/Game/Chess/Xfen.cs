@@ -281,7 +281,7 @@ public static class XFEN {
 		TrimWhitespace(xfen, ref index);
 		char nextPlayerInitial = xfen[index++];
 		int playerIndex = FindIndex(teams, team => team.name[0] == nextPlayerInitial);
-		Debug.Log(teams[playerIndex].name + " goes next");
+		teams[playerIndex].game.WhoStartsTheGame = playerIndex;
 		TrimWhitespace(xfen, ref index);
 	}
 

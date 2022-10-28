@@ -15,7 +15,7 @@ public class BoardAnalysis {
 	public void RecalculatePieceMoves(Move whatJustHappened = null) {
 		string currentXfen = board.ToXfen();
 		if (identity == currentXfen) {
-			Debug.Log("already calculated, skipping.");
+			//Debug.Log("already calculated, skipping.");
 			//return;
 		}
 		// TODO mark units that need recalculation

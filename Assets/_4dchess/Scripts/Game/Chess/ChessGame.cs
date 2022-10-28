@@ -26,8 +26,42 @@ public class ChessGame : MonoBehaviour {
 	[ContextMenuItem(nameof(RecalculateMoves), nameof(RecalculateMoves))]
 	public ChessAnalysis analysis;
 	public MoveHistory chessMoves;
+	public BriefMessage message;
 	public Camera orthoMapCamera;
 	public List<Team> teams = new List<Team>();
+	private int _whoStartsTheGame = 0;
+
+	public int WhoStartsTheGame {
+		get => _whoStartsTheGame;
+		set => _whoStartsTheGame = value;
+	}
+
+	public int WhoWentLast {
+		get {
+			Move m = chessMoves.CurrentMove.move;
+			if (m != null) {
+				return m.pieceMoved.team.TeamIndex;
+			}
+			return -1;
+		}
+	}
+
+	public int GetWhosTurnItIs(int whoWentLast = -1) {
+		if (teams.Count == 0) return -1;
+		if (whoWentLast == -1) {
+			whoWentLast = WhoWentLast;
+		}
+		if (whoWentLast < 0) { return _whoStartsTheGame; }
+		int next = whoWentLast + 1;
+		while (next >= teams.Count) {
+			next -= teams.Count;
+		}
+		return next;
+	}
+
+	public int GetWhosTurnItIsNext() {
+		return GetWhosTurnItIs(GetWhosTurnItIs());
+	}
 
 	public void OnValidate() {
 	}
@@ -86,6 +120,7 @@ public class ChessGame : MonoBehaviour {
 		if (analysis == null) { analysis = FindObjectOfType<ChessAnalysis>(); }
 		GenerateAllBoards();
 		RecalculateNextUpdate();
+		chessMoves.AnnounceCurrentTurn();
 	}
 
 	public Piece GetPiece(Team team, string code, Coord coord, Board board, bool forceCreatePiece) {

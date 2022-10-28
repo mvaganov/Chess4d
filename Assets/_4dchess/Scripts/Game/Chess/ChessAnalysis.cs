@@ -56,10 +56,10 @@ public class ChessAnalysis : MonoBehaviour {
 		BoardAnalysis analysis = GetAnalysis(board);
 		analysis.RecalculatePieceMoves();
 		List<King.Check> checks = FindChecks(analysis);
-		string xfen = XFEN.ToString(board);
-		if (board.tiles.Count > 0) {
-			Debug.Log(xfen);
-		}
+		//string xfen = XFEN.ToString(board);
+		//if (board.tiles.Count > 0) {
+		//	Debug.Log(xfen);
+		//}
 		if (checks.Count > 0) {
 			Debug.Log("CHECK! " + string.Join(", ", checks));
 		}

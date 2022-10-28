@@ -7,10 +7,17 @@ public class MoveHistory : MonoBehaviour {
 	private MoveNode currentMove = new MoveNode(0, null, "game begins");
 	public MoveEventHandler onMove;
 	public MoveEventHandler onUndoMove;
+	public ChessGame game;
 
 	public MoveNode CurrentMove => currentMove;
 
 	[System.Serializable] public class MoveEventHandler : UnityEvent<MoveNode> { }
+
+	private void Awake() {
+		if (game == null) {
+			game = FindObjectOfType<ChessGame>();
+		}
+	}
 
 	public int CountMovesSinceCaptureOrPawnAdvance(Board board) {
 		int count = 0;
@@ -87,13 +94,43 @@ public class MoveHistory : MonoBehaviour {
 			//currentMove.GetTimelineBranch(doneAlready);
 			move = currentMove.PopTimeline(doneAlready);
 		}
-		Debug.Log("doing " + move + " " + move.move.GetType().Name);
+		Piece piece = move.move.pieceMoved;
+		Debug.Log(piece.name + " " + move.move.GetType().Name + " " + move);
+		AnnounceTurnOrder(move);
 		currentMove.SetAsNextTimelineBranch(move);
 		move.prev = currentMove;
 		//Debug.Log("added timeline " + currentMove.IndexOfBranch(move));
 		move.Do();
 		currentMove = move;
 		onMove?.Invoke(currentMove);
+	}
+
+	public void AnnounceCurrentTurn() {
+		AnnounceTurnOrder(currentMove);
+	}
+
+	private void AnnounceTurnOrder(MoveNode move) {
+		int whoShouldBeGoing = game.GetWhosTurnItIs();
+		if (move != null && move.move != null && move.move.pieceMoved.team.TeamIndex != whoShouldBeGoing) {
+			Piece piece = move.move.pieceMoved;
+			string message = piece.team.name + " went out of turn, it should be " +
+				game.teams[whoShouldBeGoing].name + "'s turn";
+			if (game.message != null) {
+				game.message.Text = message;
+			}
+			Debug.Log(message);
+		} else {
+			int whosNext;
+			if (move == null || move.move == null) {
+				whosNext = game.WhoStartsTheGame;
+			} else {
+				whosNext = game.GetWhosTurnItIsNext();
+			}
+			if (game.message != null) {
+				game.message.Text = game.teams[whosNext].name + "'s turn";
+			}
+		}
+
 	}
 
 	public void GoToMove(MoveNode targetMove) {
