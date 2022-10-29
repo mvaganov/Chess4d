@@ -104,6 +104,13 @@ public class King : MoveLogic {
 			return moves;
 		}
 
+		public override bool Involves(Piece piece) => partnerMove.Involves(piece) || base.Involves(piece);
+
+		public override void GetMovingPieces(HashSet<Piece> out_movingPieces) {
+			base.GetMovingPieces(out_movingPieces);
+			if (partnerMove != null) { partnerMove.GetMovingPieces(out_movingPieces); }
+		}
+
 		public override void Do() { base.Do(); partnerMove.Do(); }
 
 		public override void Undo() { partnerMove.Undo(); base.Undo(); }

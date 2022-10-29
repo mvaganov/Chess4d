@@ -30,7 +30,8 @@ public class Board : MonoBehaviour {
 		}
 	}
 
-	public int TileIndex(Coord coord) { return coord.row * BoardSize.col + coord.col; }
+	public static int TileIndex(Coord coord, Coord boardSize) => coord.row * boardSize.col + coord.col;
+	public int TileIndex(Coord coord) => TileIndex(coord, BoardSize);
 	private Coord TileCoord(int index) { return new Coord(index % BoardSize.col, index / BoardSize.col); }
 	public bool IsValid(Coord coord) {
 		return coord.x >= 0 && coord.x < BoardSize.x && coord.y >= 0 && coord.y < BoardSize.y;
@@ -60,8 +61,8 @@ public class Board : MonoBehaviour {
 			Tile tile = tiles[i];
 			Piece[] pieces = tile.GetComponentsInChildren<Piece>();
 			if (pieces != null && pieces.Length > 1) {
-				string errorMessage = ("there are "+ pieces.Length+" at "+tile+": "+
-					string.Join(", ", System.Array.ConvertAll(pieces, p=>p.name)));
+				string errorMessage = ("there are " + pieces.Length + " at " + tile + ": " +
+					string.Join(", ", System.Array.ConvertAll(pieces, p => p.name)));
 				//throw new System.Exception(errorMessage);
 				Debug.LogError(errorMessage);
 			}

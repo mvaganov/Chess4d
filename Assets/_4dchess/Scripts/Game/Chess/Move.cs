@@ -99,6 +99,14 @@ public class Move {
 		pieceMoved = other.pieceMoved;
 	}
 
+	public virtual Coord GetRelevantCoordinate() => to;
+
+	public virtual bool Involves(Piece piece) => pieceMoved == piece;
+
+	public virtual void GetMovingPieces(HashSet<Piece> out_movingPieces) {
+		if (pieceMoved != null) { out_movingPieces.Add(pieceMoved); }
+	}
+
 	public virtual void Do() { pieceMoved?.DoMove(this); }
 
 	public virtual void Undo() { pieceMoved?.UndoMove(this); }
@@ -156,6 +164,15 @@ public class Capture : Move {
 
 	public Capture(Capture other) :
 	this(other.board, other.pieceMoved, other.from, other.to, other.pieceCaptured, other.captureCoord) { }
+
+	public override Coord GetRelevantCoordinate() => captureCoord;
+
+	public override bool Involves(Piece piece) => pieceCaptured == piece || base.Involves(piece);
+
+	public override void GetMovingPieces(HashSet<Piece> out_movingPieces) {
+		base.GetMovingPieces(out_movingPieces);
+		if (pieceCaptured != null) { out_movingPieces.Add(pieceCaptured); }
+	}
 
 	public override void Do() {
 		base.Do();

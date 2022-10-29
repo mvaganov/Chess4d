@@ -106,6 +106,14 @@ public partial class Pawn {
 			}
 		}
 
+		public override bool Involves(Piece piece) => base.Involves(piece) ||
+			(moreInterestingMove != null && moreInterestingMove.Involves(piece));
+
+		public override void GetMovingPieces(HashSet<Piece> out_movingPieces) {
+			base.GetMovingPieces(out_movingPieces);
+			if (moreInterestingMove != null ) { moreInterestingMove.GetMovingPieces(out_movingPieces); }
+		}
+
 		public override void Do() {
 			MakeBasicMove();
 			PromotePieceLogic();

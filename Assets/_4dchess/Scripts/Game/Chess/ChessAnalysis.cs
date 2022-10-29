@@ -54,7 +54,7 @@ public class ChessAnalysis : MonoBehaviour {
 	public void RecalculatePieceMoves(Board board) {
 		//selectedPiece?.board.RecalculatePieceMoves();
 		BoardAnalysis analysis = GetAnalysis(board);
-		analysis.RecalculatePieceMoves();
+		analysis.RecalculatePieceMoves(board);
 		List<King.Check> checks = FindChecks(analysis);
 		//string xfen = XFEN.ToString(board);
 		//if (board.tiles.Count > 0) {

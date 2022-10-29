@@ -105,10 +105,12 @@ public class MoveHistory : MonoBehaviour {
 		onMove?.Invoke(currentMove);
 	}
 
+	// TODO make a new class for user output and put this in there
 	public void AnnounceCurrentTurn() {
 		AnnounceTurnOrder(currentMove);
 	}
 
+	// TODO make a new class for user output and put this in there
 	private void AnnounceTurnOrder(MoveNode move) {
 		int whoShouldBeGoing = game.GetWhosTurnItIs();
 		if (move != null && move.move != null && move.move.pieceMoved.team.TeamIndex != whoShouldBeGoing) {

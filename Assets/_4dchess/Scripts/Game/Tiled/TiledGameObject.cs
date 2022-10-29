@@ -61,9 +61,9 @@ public class TiledGameObject : MonoBehaviour {
 
 	public Coord GetCoord() {
 		Tile tile = GetComponentInParent<Tile>();
-		if (tile == null) { return Coord.zero; }
+		if (tile == null) { return Coord.negativeOne; }
 		Board board = tile.GetComponentInParent<Board>();
-		if (board == null) { return Coord.zero; }
+		if (board == null) { return Coord.negativeOne * 2; }
 		return board.GetCoord(tile);
 	}
 

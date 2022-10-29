@@ -102,6 +102,7 @@ public class ChessVisuals : MonoBehaviour {
 		}
 		Coord currentCoord = target.GetCoord();
 		List<Move> activityAtSquare = board.GetMovesTo(currentCoord);
+		if (activityAtSquare == null) { return; }
 		List<Move> defenders = new List<Move>();
 		Piece selectedPiece = selected as Piece;
 		//Coord selectedCoord = (selected != null) ? selected.GetCoord() : Coord.zero;

@@ -10,7 +10,7 @@ public class Piece : TiledGameObject {
 	private MoveLogic moveLogic;
 	public float jumpHeight = 0;
 	[SerializeField] private List<Move> moves;
-	private bool movesAreUpToDate;
+	private Coord movesCalculatedAt;
 	public int moveCount = 0;
 	public SpriteRenderer worldIcon;
 
@@ -19,7 +19,7 @@ public class Piece : TiledGameObject {
 	public MoveLogic MoveLogic => moveLogic;
 
 	public void MarkMovesAsInvalid() {
-		movesAreUpToDate = false;
+		movesCalculatedAt = Coord.negativeOne;
 	}
 
 	protected override void Start() {
@@ -38,7 +38,6 @@ public class Piece : TiledGameObject {
 		} else {
 			MoveInternal(move.to);
 		}
-		movesAreUpToDate = false;
 		++moveCount;
 	}
 
@@ -48,7 +47,6 @@ public class Piece : TiledGameObject {
 		} else {
 			MoveInternal(move.from);
 		}
-		movesAreUpToDate = false;
 		--moveCount;
 	}
 
@@ -92,17 +90,20 @@ public class Piece : TiledGameObject {
 
 	public void GetMoves(List<Move> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
 		if (moveLogic == null) { return; }
-		if (movesAreUpToDate) {
+		Coord here = GetCoord();
+		if (movesCalculatedAt == here) {
 			out_moves?.AddRange(moves);
 			return;
 		}
-		if (moves != null) { GetMovesForceCalculation(out_moves, moveKind); }
+		if (moves != null) { GetMovesForceCalculation(here, out_moves, moveKind); }
 	}
 
-	public void GetMovesForceCalculation(List<Move> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
+	public void GetMovesForceCalculation(Coord here, List<Move> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
 		if (moves == null) { moves = new List<Move>(); } else { moves.Clear(); }
-		moveLogic.GetMoves(moves, moveKind);
-		movesAreUpToDate = true;
+		if (here.col >= 0 && here.row >= 0) {
+			moveLogic.GetMoves(moves, moveKind);
+		}
+		movesCalculatedAt = here;
 		out_moves?.AddRange(moves);
 	}
 

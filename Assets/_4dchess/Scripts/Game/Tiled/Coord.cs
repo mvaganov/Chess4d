@@ -1,13 +1,16 @@
-using System;
 using UnityEngine;
 
 // TODO replace with pair of shorts or pair of bytes even?
 [System.Serializable] public struct Coord {
 	public Vector2Int vec2i;
 
-	public static readonly Coord zero = new Coord(0, 0);
+	public static readonly Coord up = new Coord(0, 1);
 	public static readonly Coord left = new Coord(-1, 0);
+	public static readonly Coord down = new Coord(0, -1);
 	public static readonly Coord right = new Coord(1, 0);
+	public static readonly Coord zero = new Coord(0, 0);
+	public static readonly Coord one = new Coord(1, 1);
+	public static readonly Coord negativeOne = new Coord(-1, -1);
 
 	public int x {
 		get => vec2i.x;
@@ -42,6 +45,8 @@ using UnityEngine;
 	public static Coord operator -(Coord a, Coord b) => new Coord(a.vec2i - b.vec2i);
 	public static Coord operator *(Coord a, float n) => new Coord((int)(a.vec2i.x * n), (int)(a.vec2i.y * n));
 	public override int GetHashCode() => vec2i.GetHashCode();
+	public int Area() => row * col;
+	public bool IsOutOfBounds(Coord size) => x < 0 && x >= size.x && y < 0 && y >= size.y;
 
 	public string ToString(string v) {
 		switch (v.ToLower()) {
