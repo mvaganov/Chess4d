@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoardAnalysis {
+public class BoardState {
 	private Dictionary<Coord, List<Move>> movesToLocations = new Dictionary<Coord, List<Move>>();
-	private BoardAnalysis prev;
+	private BoardState prev;
 	public string identity;
 	[SerializeField] private Coord BoardSize;
 
-	public BoardAnalysis(Board board) {
+	public BoardState(Board board) {
 		RecalculatePieceMoves(board);
 	}
 
-	public BoardAnalysis(BoardAnalysis other) {
+	public BoardState(BoardState other) {
 		prev = other;
 		identity = other.identity;
 	}
@@ -43,19 +43,30 @@ public class BoardAnalysis {
 		}
 	}
 
-	public BoardAnalysis NewAnalysisAfter(Move move) {
-		BoardAnalysis nextAnalysis = new BoardAnalysis(this);
-		Dictionary<Coord, List<Move>> movesToRemove = new Dictionary<Coord, List<Move>>();
-		HashSet<Piece> relevantPieces = new HashSet<Piece>();
-		move.GetMovingPieces(relevantPieces);
-		List<Move> foundSomeMoves = new List<Move>();
-		foreach (KeyValuePair<Coord,List<Move>> moveToLoc in movesToLocations) {
-			foreach (Piece piece in relevantPieces) {
-				foundSomeMoves.Clear();
-				GetMovesInvolving(piece, moveToLoc.Value, foundSomeMoves);
-//				AddTo(movesToRemove, moveToLoc.Key, )
-			}
-		}
+	public BoardState NewAnalysisAfter(Move move) {
+		move.DoWithoutAnimation();
+		// TODO optimize this? reuse calculations used by the base board state?
+		BoardState nextAnalysis = new BoardState(move.board); // just do the entire analysis from scratch...
+		move.UndoWithoutAnimation();
+
+//		//Dictionary<Coord, List<Move>> movesToRemove = new Dictionary<Coord, List<Move>>();
+//		HashSet<Piece> relevantPieces = new HashSet<Piece>();
+//		move.GetMovingPieces(relevantPieces);
+//		// for each relevant piece
+//			// get location of the piece before the move
+//				// if any other pieces were defending that square, mark that we need to recalculate those pieces moves
+//			// get the move list of the piece before the move
+//				// 
+//		// 
+
+//		List<Move> foundSomeMoves = new List<Move>();
+//		foreach (KeyValuePair<Coord,List<Move>> moveToLoc in movesToLocations) {
+//			foreach (Piece piece in relevantPieces) {
+//				foundSomeMoves.Clear();
+//				GetMovesInvolving(piece, moveToLoc.Value, foundSomeMoves);
+////				AddTo(movesToRemove, moveToLoc.Key, )
+//			}
+//		}
 
 		// TODO mark units that need recalculation
 		// - this moving unit

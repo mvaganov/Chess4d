@@ -12,9 +12,9 @@ public class Board : MonoBehaviour {
 	[ContextMenuItem(nameof(GenerateTiles),nameof(GenerateTiles))]
 	public Tile TilePrefab;
 	private Transform _transform;
-	private BoardAnalysis _analysis;
+	private BoardState _analysis;
 	public int halfMovesSinceCaptureOrPawnMove = 0;
-	public BoardAnalysis Analysis => (_analysis != null) ? _analysis : _analysis = game.analysis.GetAnalysis(this);
+	public BoardState Analysis => (_analysis != null) ? _analysis : _analysis = game.analysis.GetAnalysis(this);
 
 	public void Start() {
 		GenerateTilesIfMissing();

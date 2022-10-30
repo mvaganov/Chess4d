@@ -107,6 +107,14 @@ public class Move {
 		if (pieceMoved != null) { out_movingPieces.Add(pieceMoved); }
 	}
 
+	public void DoWithoutAnimation() {
+		pieceMoved.animating = false; Do(); pieceMoved.animating = true;
+	}
+
+	public void UndoWithoutAnimation() {
+		pieceMoved.animating = false; Undo(); pieceMoved.animating = true;
+	}
+
 	public virtual void Do() { pieceMoved?.DoMove(this); }
 
 	public virtual void Undo() { pieceMoved?.UndoMove(this); }

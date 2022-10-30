@@ -9,7 +9,7 @@ public class ChessAnalysis : MonoBehaviour {
 	private Piece selectedPiece;
 	[SerializeField] private MoveHistory moves;
 	private List<King> kingsInCheck = new List<King>();
-	private Dictionary<Board,BoardAnalysis> boardAnalysis = new Dictionary<Board,BoardAnalysis>();
+	private Dictionary<Board,BoardState> boardAnalysis = new Dictionary<Board,BoardState>();
 	[SerializeField] private ChessGame game;
 
 	public List<Move> CurrentPieceCurrentMoves => currentMoves;
@@ -37,9 +37,9 @@ public class ChessAnalysis : MonoBehaviour {
 		RecalculatePieceMoves(selectedPiece.board);
 	}
 
-	public BoardAnalysis GetAnalysis(Board board) {
-		if (!boardAnalysis.TryGetValue(board, out BoardAnalysis analysis)) {
-			boardAnalysis[board] = analysis = new BoardAnalysis(board);
+	public BoardState GetAnalysis(Board board) {
+		if (!boardAnalysis.TryGetValue(board, out BoardState analysis)) {
+			boardAnalysis[board] = analysis = new BoardState(board);
 		}
 		return analysis;
 	}
@@ -53,7 +53,7 @@ public class ChessAnalysis : MonoBehaviour {
 
 	public void RecalculatePieceMoves(Board board) {
 		//selectedPiece?.board.RecalculatePieceMoves();
-		BoardAnalysis analysis = GetAnalysis(board);
+		BoardState analysis = GetAnalysis(board);
 		analysis.RecalculatePieceMoves(board);
 		List<King.Check> checks = FindChecks(analysis);
 		//string xfen = XFEN.ToString(board);
@@ -65,7 +65,7 @@ public class ChessAnalysis : MonoBehaviour {
 		}
 	}
 
-	public List<King.Check> FindChecks(BoardAnalysis analysis) {
+	public List<King.Check> FindChecks(BoardState analysis) {
 		List<King.Check> checks = new List<King.Check>();
 		List<Piece> allKings = GetAllKings();
 		// check each king to see if there are unallied pieces that can capture him

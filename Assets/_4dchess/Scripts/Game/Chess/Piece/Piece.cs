@@ -13,6 +13,7 @@ public class Piece : TiledGameObject {
 	private Coord movesCalculatedAt;
 	public int moveCount = 0;
 	public SpriteRenderer worldIcon;
+	public bool animating = true;
 
 	public ChessGame Game => board.game;
 
@@ -52,11 +53,17 @@ public class Piece : TiledGameObject {
 
 	internal void MoveInternal(Coord coord) {
 		SetTile(coord);
+		if (animating) {
+			AnimateMovement();
+		}
+	}
+
+	public void AnimateMovement() {
 		if (jumpHeight == 0) {
 			LerpToLocalCenter(Vector3.zero);
-		} else {
-			JumpToLocalCenter(Vector3.zero, jumpHeight);
+			return;
 		}
+		JumpToLocalCenter(Vector3.zero, jumpHeight);
 	}
 
 	public void SetTile(Coord coord) {
