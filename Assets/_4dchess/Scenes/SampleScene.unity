@@ -704,23 +704,7 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 6666145fc60c3ea43818103bf9c0fb03, type: 2}
   start:
     vec2i: {x: 0, y: 0}
-  Pieces:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  Pieces: []
   PieceRotation: {x: 0, y: 0, z: 0}
   speed: 10
   jumpHeight: 1
@@ -1213,23 +1197,7 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 3a435a34e554e7245a5595c1e40a444a, type: 2}
   start:
     vec2i: {x: 0, y: 6}
-  Pieces:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  Pieces: []
   PieceRotation: {x: 0, y: 180, z: 0}
   speed: 10
   jumpHeight: 1
