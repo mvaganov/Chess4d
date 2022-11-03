@@ -49,6 +49,15 @@ public class BoardState {
 		BoardState nextAnalysis = new BoardState(move.board); // just do the entire analysis from scratch...
 		move.UndoWithoutAnimation();
 
+		// after fully calculating both board states, combine the new moves with the original in memory as much as possible
+		foreach(var kvp in movesToLocations) {
+			List<Move> original = kvp.Value;
+			List<Move> newMoves = nextAnalysis.movesToLocations[kvp.Key];
+			if (IsMoveListCollapsed(original, ref newMoves)) {
+				nextAnalysis.movesToLocations[kvp.Key] = original;
+			}
+		}
+
 //		//Dictionary<Coord, List<Move>> movesToRemove = new Dictionary<Coord, List<Move>>();
 //		HashSet<Piece> relevantPieces = new HashSet<Piece>();
 //		move.GetMovingPieces(relevantPieces);
@@ -74,6 +83,31 @@ public class BoardState {
 		// - 
 		// remove that unit's moves from the analysis, then recalculate
 		return nextAnalysis;
+	}
+
+	/// <summary>
+	/// tries to obviate the memory of movesB by looking for existing movesA values.
+	/// </summary>
+	/// <param name="movesA"></param>
+	/// <param name="movesB"></param>
+	/// <returns>true if both lists are identical</returns>
+	private bool IsMoveListCollapsed(List<Move> movesA, ref List<Move> movesB) {
+		bool identical = true;
+		if (movesA.Count != movesB.Count) { identical = false; }
+		int sameIndex = 0;
+		for(; sameIndex < movesB.Count; ++sameIndex) {
+			if (!movesA[sameIndex].Equals(movesB[sameIndex])) { identical = false; break; }
+			movesB[sameIndex] = movesA[sameIndex];
+		}
+		if (!identical) {
+			for(int i = sameIndex; i < movesB.Count; ++i) {
+				int identicalInA = movesA.IndexOf(movesB[i], sameIndex);
+				if (identicalInA != -1) {
+					movesB[i] = movesA[identicalInA];
+				}
+			}
+		}
+		return true;
 	}
 
 	//private static void EnsureClearLedger<T>(Coord boardSize, List<List<T>> out_ledger) {
