@@ -1,8 +1,19 @@
 using UnityEngine;
+using UnitType = System.Int16;
 
-// TODO replace with pair of shorts or pair of bytes even?
 [System.Serializable] public struct Coord {
-	public Vector2Int vec2i;
+	public InnerCoord coord;
+	[System.Serializable] public struct InnerCoord {
+		public UnitType x, y;
+		public InnerCoord(UnitType x, UnitType y) { this.x = x; this.y = y; }
+		public InnerCoord(int x, int y) { this.x = (UnitType)x; this.y = (UnitType)y; }
+		public static bool operator==(InnerCoord a, InnerCoord b) => a.x == b.x && a.y == b.y;
+		public static bool operator!=(InnerCoord a, InnerCoord b) => a.x != b.x || a.y != b.y;
+		public static InnerCoord operator+(InnerCoord a, InnerCoord b) => new InnerCoord(a.x + b.x, a.y + b.y);
+		public static InnerCoord operator-(InnerCoord a, InnerCoord b) => new InnerCoord(a.x - b.x, a.y - b.y);
+		public override bool Equals(object obj) => obj is InnerCoord a && this == a;
+		public override int GetHashCode() => x ^ y;
+	}
 
 	public static readonly Coord up = new Coord(0, 1);
 	public static readonly Coord left = new Coord(-1, 0);
@@ -13,23 +24,20 @@ using UnityEngine;
 	public static readonly Coord negativeOne = new Coord(-1, -1);
 
 	public int x {
-		get => vec2i.x;
-		set => vec2i.x = value;
+		get => coord.x;
+		set => coord.x = (UnitType)value;
 	}
 	public int y {
-		get => vec2i.y;
-		set => vec2i.y = value;
+		get => coord.y;
+		set => coord.y = (UnitType)value;
 	}
 	public int col { get => x; set => x = value; }
 	public int row { get => y; set => y = value; }
 	public int MagnitudeManhattan => System.Math.Abs(x) + System.Math.Abs(y);
 	public Coord normalized => new Coord(System.Math.Sign(x), System.Math.Sign(y));
-	public Coord(int col, int row) {
-		vec2i = new Vector2Int(col, row);
-	}
-	public Coord(Vector2Int v) {
-		vec2i = v;
-	}
+	public Coord(int col, int row) { coord = new InnerCoord(col, row); }
+	public Coord(Vector2Int v) { coord = new InnerCoord(v.x, v.y); }
+	public Coord(InnerCoord v) { coord = v; }
 	public bool Iterate(Coord limit) {
 		++col;
 		if (col >= limit.col) {
@@ -39,12 +47,12 @@ using UnityEngine;
 		return row < limit.row;
 	}
 
-	public static bool operator ==(Coord a, Coord b) => a.vec2i == b.vec2i;
-	public static bool operator !=(Coord a, Coord b) =>a.vec2i != b.vec2i;
-	public static Coord operator +(Coord a, Coord b) => new Coord(a.vec2i + b.vec2i);
-	public static Coord operator -(Coord a, Coord b) => new Coord(a.vec2i - b.vec2i);
-	public static Coord operator *(Coord a, float n) => new Coord((int)(a.vec2i.x * n), (int)(a.vec2i.y * n));
-	public override int GetHashCode() => vec2i.GetHashCode();
+	public static bool operator ==(Coord a, Coord b) => a.coord == b.coord;
+	public static bool operator !=(Coord a, Coord b) =>a.coord != b.coord;
+	public static Coord operator +(Coord a, Coord b) => new Coord(a.coord + b.coord);
+	public static Coord operator -(Coord a, Coord b) => new Coord(a.coord - b.coord);
+	public static Coord operator *(Coord a, float n) => new Coord((int)(a.coord.x * n), (int)(a.coord.y * n));
+	public override int GetHashCode() => coord.GetHashCode();
 	public int Area() => row * col;
 	public bool IsOutOfBounds(Coord size) => x < 0 && x >= size.x && y < 0 && y >= size.y;
 
