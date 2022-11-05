@@ -73,17 +73,19 @@ public class ChessAnalysis : MonoBehaviour {
 			Piece king = allKings[i];
 			Coord kingLocation = king.GetCoord();
 			List<Move> moves = analysis.GetMovesTo(kingLocation);
-			for (int m = 0; m < moves.Count; ++m) {
-				Move move = moves[m];
-				if (move.GetType() == typeof(Defend)) { continue; }
-				if (move is Pawn.Promotion pp) {
-					move = pp.moreInterestingMove;
-				}
-				Capture cap = move as Capture;
-				if (cap != null && cap.pieceCaptured == king && !cap.pieceMoved.team.IsAlliedWith(king.team)) {
-					// the current move as enabling such a capture as a Check
-					King.Check check = new King.Check(game.chessMoves.CurrentMove.move, cap);
-					checks.Add(check);
+			if (moves != null) {
+				for (int m = 0; m < moves.Count; ++m) {
+					Move move = moves[m];
+					if (move.GetType() == typeof(Defend)) { continue; }
+					if (move is Pawn.Promotion pp) {
+						move = pp.moreInterestingMove;
+					}
+					Capture cap = move as Capture;
+					if (cap != null && cap.pieceCaptured == king && !cap.pieceMoved.team.IsAlliedWith(king.team)) {
+						// the current move as enabling such a capture as a Check
+						King.Check check = new King.Check(game.chessMoves.CurrentMove.move, cap);
+						checks.Add(check);
+					}
 				}
 			}
 		}
