@@ -1609,6 +1609,72 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 3
   currentHovered: {fileID: 0}
+--- !u!1 &488578361
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 488578362}
+  - component: {fileID: 488578363}
+  m_Layer: 0
+  m_Name: Redo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &488578362
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 488578361}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1945872357}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &488578363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 488578361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92b7023f72848344bb8eb370144d37ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _keys: 20000000
+  _onKeyDown:
+    Actions:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1564371131}
+          m_TargetAssemblyTypeName: ChessGame, Assembly-CSharp
+          m_MethodName: RedoMove
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  _onKeyUp:
+    Actions:
+      m_PersistentCalls:
+        m_Calls: []
+  _trigger: 0
 --- !u!1 &538098166
 GameObject:
   m_ObjectHideFlags: 0
@@ -2543,7 +2609,7 @@ GameObject:
   - component: {fileID: 707831423}
   - component: {fileID: 707831425}
   - component: {fileID: 707831424}
-  - component: {fileID: 707831426}
+  - component: {fileID: 707831428}
   - component: {fileID: 707831427}
   m_Layer: 5
   m_Name: notes input
@@ -2612,40 +2678,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 707831422}
   m_CullTransparentMesh: 1
---- !u!114 &707831426
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 707831422}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2484cd8c2bb1bb941b983aaaa748fa2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _keys: 0d000000
-  _onKeyDown:
-    Actions:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 707831422}
-          m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-          m_MethodName: SetActive
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  _onKeyUp:
-    Actions:
-      m_PersistentCalls:
-        m_Calls: []
-  _trigger: 0
 --- !u!114 &707831427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2688,6 +2720,40 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+--- !u!114 &707831428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 707831422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92b7023f72848344bb8eb370144d37ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _keys: 1b000000
+  _onKeyDown:
+    Actions:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 707831422}
+          m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_MethodName: SetActive
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  _onKeyUp:
+    Actions:
+      m_PersistentCalls:
+        m_Calls: []
+  _trigger: 0
 --- !u!1 &740757762
 GameObject:
   m_ObjectHideFlags: 0
@@ -2999,7 +3065,7 @@ GameObject:
   m_Component:
   - component: {fileID: 839522220}
   - component: {fileID: 839522221}
-  - component: {fileID: 839522222}
+  - component: {fileID: 839522223}
   m_Layer: 0
   m_Name: MouseLook WASD
   m_TagString: Untagged
@@ -3039,7 +3105,7 @@ MonoBehaviour:
   MouseSensitivityY: -5
   eulerRotation: {x: 0, y: 0, z: 0}
   HideMouse: 1
---- !u!114 &839522222
+--- !u!114 &839522223
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3048,12 +3114,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 839522219}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cda2fccc3e46e2e4cad231424deff926, type: 3}
+  m_Script: {fileID: 11500000, guid: 67c2c7a1f62d8c64c93a0e646d5c09be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
   body: {fileID: 963194228}
-  useInputMap: 1
   axis:
   - name: Horizontal
     _increase: 6400000013010000
@@ -3067,6 +3132,7 @@ MonoBehaviour:
     _increase: 7700000011010000
     _decrease: 7300000012010000
     baseValue: 1
+  useInputMap: 1
 --- !u!1 &855139152
 GameObject:
   m_ObjectHideFlags: 0
@@ -3503,9 +3569,8 @@ GameObject:
   m_Component:
   - component: {fileID: 916499649}
   - component: {fileID: 916499650}
-  - component: {fileID: 916499651}
   m_Layer: 0
-  m_Name: Undo&Redo
+  m_Name: Undo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3535,41 +3600,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 916499648}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2484cd8c2bb1bb941b983aaaa748fa2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _keys: 20000000
-  _onKeyDown:
-    Actions:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1564371131}
-          m_TargetAssemblyTypeName: ChessGame, Assembly-CSharp
-          m_MethodName: RedoMove
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  _onKeyUp:
-    Actions:
-      m_PersistentCalls:
-        m_Calls: []
-  _trigger: 0
---- !u!114 &916499651
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 916499648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2484cd8c2bb1bb941b983aaaa748fa2a, type: 3}
+  m_Script: {fileID: 11500000, guid: 92b7023f72848344bb8eb370144d37ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _keys: 08000000
@@ -4417,7 +4448,7 @@ GameObject:
   - component: {fileID: 1030703177}
   - component: {fileID: 1030703178}
   m_Layer: 0
-  m_Name: EnableDisableMouseLook
+  m_Name: ToggleMouseLook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4447,7 +4478,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1030703176}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2484cd8c2bb1bb941b983aaaa748fa2a, type: 3}
+  m_Script: {fileID: 11500000, guid: 92b7023f72848344bb8eb370144d37ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _keys: 44010000110100001401000012010000130100001801000019010000
@@ -5164,6 +5195,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputEventEntries: []
+  inputManifest: 
 --- !u!1 &1272034078
 GameObject:
   m_ObjectHideFlags: 0
@@ -5275,7 +5307,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000014223158, y: 0}
+  m_AnchoredPosition: {x: 0.00037361178, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1286790173
@@ -8010,6 +8042,7 @@ Transform:
   - {fileID: 839522220}
   - {fileID: 483499308}
   - {fileID: 916499649}
+  - {fileID: 488578362}
   m_Father: {fileID: 1921063275}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

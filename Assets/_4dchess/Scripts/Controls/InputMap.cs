@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -12,6 +13,7 @@ public class InputMap : MonoBehaviour {
 	public Dictionary<int, InputEventDelegate> inputUpEvents = new Dictionary<int, InputEventDelegate>();
 	public List<InputEventEntry> inputEventEntries = new List<InputEventEntry>();
 	private bool _runningInGameLoop = false;
+	private bool _keyBindListingChanged = false;
 	private List<Action> adjustmentsToMakeBetweenUpdates = new List<Action>();
 	private InputEventDelegate mouseChangeListener;
 	private float lastMouseChangeX, lastMouseChangeY;
@@ -23,6 +25,9 @@ public class InputMap : MonoBehaviour {
 
 	public delegate void InputEventDelegate();
 
+	[TextArea(1,50)]
+	public string inputManifest;
+
 	[System.Serializable] public class InputEventEntry {
 		public string description;
 		public KeyCode2 keyCode;
@@ -33,6 +38,16 @@ public class InputMap : MonoBehaviour {
 		/// </summary>
 		public InputEventDelegate eventDelegate;
 		public bool processed;
+		public static int Comparer(InputEventEntry a, InputEventEntry b) {
+			int diff = a.inputType.CompareTo(b.inputType);
+			if (diff != 0) { return diff; }
+			diff = a.keyCode.CompareTo(b.keyCode);
+			if (diff != 0) { return diff; }
+			diff = a.description.CompareTo(b.description);
+			if (diff != 0) { return diff; }
+			return 0;
+		}
+		public override string ToString() { return inputType + " " + keyCode + " " + description; }
 	}
 	
 	public enum KeyPressState {
@@ -75,6 +90,7 @@ public class InputMap : MonoBehaviour {
 			AddToMap(GetMap(entry.inputType), (int)entry.keyCode, entry.action.Invoke);
 			entry.processed = true;
 		}
+		_keyBindListingChanged = true;
 	}
 
 	private Dictionary<int, InputEventDelegate> GetMap(KeyPressState inputType) {
@@ -146,7 +162,9 @@ public class InputMap : MonoBehaviour {
 		InputEventEntry entry = new InputEventEntry() {
 			keyCode = (KeyCode2)keyCode, description = description, inputType = inputType, eventDelegate = inputEvent, processed = true
 		};
+		Debug.Log("adding " + entry);
 		inputEventEntries.Add(entry);
+		_keyBindListingChanged = true;
 		return description;
 	}
 
@@ -165,6 +183,7 @@ public class InputMap : MonoBehaviour {
 				removed.Add(ie);
 				inputEventEntries.RemoveAt(i);
 				//Debug.Log("removed " + ie.description);
+				_keyBindListingChanged = true;
 			}
 		}
 		return removed;
@@ -273,6 +292,25 @@ public class InputMap : MonoBehaviour {
 		ResolveMouseDeltaCallbacks();
 		_runningInGameLoop = false;
 		ResolveChangesMadeDuringUpdate();
+		if (_keyBindListingChanged) {
+			UpdateInputManifest();
+			_keyBindListingChanged = false;
+		}
+	}
+
+	private void UpdateInputManifest() {
+		inputEventEntries.Sort(InputEventEntry.Comparer);
+		StringBuilder sb = new StringBuilder();
+		KeyPressState kpstate = KeyPressState.None;
+		for (int i = 0; i < inputEventEntries.Count; i++) {
+			InputEventEntry entry = inputEventEntries[i];
+			if (kpstate != entry.inputType) {
+				kpstate = entry.inputType;
+				sb.Append($"[{kpstate}]\n");
+			}
+			sb.Append($"  {entry.keyCode}: {entry.description}\n");
+		}
+		inputManifest = sb.ToString();
 	}
 
 	private void ResolveMouseDeltaCallbacks() {
