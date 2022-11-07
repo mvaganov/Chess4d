@@ -17,17 +17,21 @@ public class MoveNode {
 
 	public MoveNode KnownNextMove => next[0];
 
-	public List<MoveNode> PossibleFutures => next;
+	//public List<MoveNode> PossibleFutures => next;
 
 	public int IndexOfBranch(MoveNode decision) { return next.IndexOf(decision); }
 
 	public MoveNode GetTimelineBranch(int index) { return next[index]; }
 
-	public void SetAsNextTimelineBranch(MoveNode next) { this.next.Insert(0, next); }
+	public void SetAsNextTimelineBranch(MoveNode next) {
+		//Debug.Log(move+" -> "+next.move);
+		this.next.Insert(0, next);
+	}
 
 	public MoveNode PopTimeline(int index) {
 		MoveNode branch = GetTimelineBranch(index);
 		next.RemoveAt(index);
+		//Debug.Log("popping "+index+" "+move);
 		return branch;
 	}
 
@@ -40,6 +44,7 @@ public class MoveNode {
 		timestamp = System.Environment.TickCount;
 		next = new List<MoveNode>();
 		prev = null;
+		//Debug.Log("MoveNode "+move);
 	}
 
 	protected string NotesSuffix() => !string.IsNullOrEmpty(notes) ? $" {notes}" : "";

@@ -187,7 +187,10 @@ public class MoveHistory : MonoBehaviour {
 	}
 
 	public bool RedoMove() {
-		if (currentMove.FutureTimelineCount > 0) { return false; }
+		if (currentMove.FutureTimelineCount == 0) {
+			//Debug.Log("unknown future for "+currentMove.move);
+			return false;
+		}
 		currentMove = currentMove.KnownNextMove;
 		currentMove.Do();
 		onMove?.Invoke(currentMove);

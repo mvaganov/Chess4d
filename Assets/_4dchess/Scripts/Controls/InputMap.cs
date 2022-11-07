@@ -8,16 +8,20 @@ using UnityEngine.Events;
 /// maps keycodes to callback events, inspectable in the editor
 /// </summary>
 public class InputMap : MonoBehaviour {
+	// TODO make these dictionaries of InputEventEntry for better debugging and reflection.
 	public Dictionary<int, InputEventDelegate> inputDownEvents = new Dictionary<int, InputEventDelegate>();
 	public Dictionary<int, InputEventDelegate> inputHoldEvents = new Dictionary<int, InputEventDelegate>();
 	public Dictionary<int, InputEventDelegate> inputUpEvents = new Dictionary<int, InputEventDelegate>();
 	public List<InputEventEntry> inputEventEntries = new List<InputEventEntry>();
 	private bool _runningInGameLoop = false;
-	private bool _keyBindListingChanged = false;
+	private bool _inputManifestNeedsRefresh = false;
+	[SerializeField] private bool _updateInputManifestOften = false;
 	private List<Action> adjustmentsToMakeBetweenUpdates = new List<Action>();
 	private InputEventDelegate mouseChangeListener;
 	private float lastMouseChangeX, lastMouseChangeY;
-	private bool[] keyKnownToBePressed = new bool[510];
+	private bool[] trackedPressState = new bool[510];
+	private HashSet<KeyCode> beingPressed = new HashSet<KeyCode>();
+	private List<KeyCode> beingReleased = new List<KeyCode>();
 
 	public static Vector2 MouseChange => new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
 	public static float MouseChangeX => Input.GetAxis("Mouse X");
@@ -90,7 +94,7 @@ public class InputMap : MonoBehaviour {
 			AddToMap(GetMap(entry.inputType), (int)entry.keyCode, entry.action.Invoke);
 			entry.processed = true;
 		}
-		_keyBindListingChanged = true;
+		_inputManifestNeedsRefresh = true;
 	}
 
 	private Dictionary<int, InputEventDelegate> GetMap(KeyPressState inputType) {
@@ -162,9 +166,9 @@ public class InputMap : MonoBehaviour {
 		InputEventEntry entry = new InputEventEntry() {
 			keyCode = (KeyCode2)keyCode, description = description, inputType = inputType, eventDelegate = inputEvent, processed = true
 		};
-		Debug.Log("adding " + entry);
+		//Debug.Log("adding " + entry);
 		inputEventEntries.Add(entry);
-		_keyBindListingChanged = true;
+		_inputManifestNeedsRefresh = true;
 		return description;
 	}
 
@@ -183,7 +187,7 @@ public class InputMap : MonoBehaviour {
 				removed.Add(ie);
 				inputEventEntries.RemoveAt(i);
 				//Debug.Log("removed " + ie.description);
-				_keyBindListingChanged = true;
+				_inputManifestNeedsRefresh = true;
 			}
 		}
 		return removed;
@@ -199,7 +203,11 @@ public class InputMap : MonoBehaviour {
 				AddToMap(GetMap(eventType), keyCode, inputEvent);
 			}
 		} else {
-			adjustmentsToMakeBetweenUpdates.Add(() => Add(keyCode, eventType, inputEvent, description));
+			if (IsSpecialListenerCode(keyCode)) {
+				adjustmentsToMakeBetweenUpdates.Add(() => AddSpecialListener(keyCode, inputEvent));
+			} else {
+				adjustmentsToMakeBetweenUpdates.Add(() => AddToMap(GetMap(eventType), keyCode, inputEvent));
+			}
 		}
 		return desc;
 	}
@@ -261,40 +269,57 @@ public class InputMap : MonoBehaviour {
 	void Update() {
 		_runningInGameLoop = true;
 		foreach (var entry in inputDownEvents) {
-			if (Input.GetKeyDown((KeyCode)entry.Key)) {
-				if (keyKnownToBePressed[entry.Key]) {
-					Debug.LogWarning(((KeyCode)entry.Key) + " is this getting a double-press? ");
-				}
+			KeyCode k = (KeyCode)entry.Key;
+			if (Input.GetKeyDown(k)) {
+				//if (keyKnownToBePressed[entry.Key]) {
+				//	Debug.LogWarning(((KeyCode)entry.Key) + " is this getting a double-press? ");
+				//}
 				entry.Value.Invoke();
-				keyKnownToBePressed[entry.Key] = true;
+				trackedPressState[entry.Key] = true;
+				beingPressed.Add(k);
 			}
 		}
 		foreach (var entry in inputHoldEvents) {
-			if (Input.GetKey((KeyCode)entry.Key)) {
-				if (!keyKnownToBePressed[entry.Key]) {
+			KeyCode k = (KeyCode)entry.Key;
+			if (Input.GetKey(k)) {
+				if (!trackedPressState[entry.Key]) {
 					if (inputDownEvents.TryGetValue(entry.Key, out InputEventDelegate shouldHaveBeenCalledSooner)) {
 						shouldHaveBeenCalledSooner.Invoke();
 					}
-					keyKnownToBePressed[entry.Key] = true;
+					trackedPressState[entry.Key] = true;
+					beingPressed.Add(k);
 				}
 				entry.Value.Invoke();
 			}
 		}
 		foreach (var entry in inputUpEvents) {
-			if (Input.GetKeyUp((KeyCode)entry.Key) || (keyKnownToBePressed[entry.Key] && !Input.GetKey((KeyCode)entry.Key))) {
-				if (!keyKnownToBePressed[entry.Key]) {
-					Debug.LogWarning(((KeyCode)entry.Key) + " is this getting a double-release?");
-				}
+			KeyCode k = (KeyCode)entry.Key; 
+			if (Input.GetKeyUp(k)) {
+				//if (!keyKnownToBePressed[entry.Key]) {
+				//	Debug.LogWarning(((KeyCode)entry.Key) + " is this getting a double-release?");
+				//}
 				entry.Value.Invoke();
-				keyKnownToBePressed[entry.Key] = false;
+				trackedPressState[entry.Key] = false;
+				beingPressed.Remove(k);
 			}
 		}
+		beingReleased.Clear();
+		foreach(KeyCode pressed in beingPressed) {
+			if (!Input.GetKey(pressed)) {
+				if (inputUpEvents.TryGetValue((int)pressed, out InputEventDelegate shouldHaveBeenCalledSooner)) {
+					shouldHaveBeenCalledSooner.Invoke();
+				}
+				trackedPressState[(int)pressed] = false;
+				beingReleased.Add(pressed);
+			}
+		}
+		foreach (KeyCode released in beingReleased) { beingPressed.Remove(released); }
 		ResolveMouseDeltaCallbacks();
 		_runningInGameLoop = false;
 		ResolveChangesMadeDuringUpdate();
-		if (_keyBindListingChanged) {
+		if (_updateInputManifestOften && _inputManifestNeedsRefresh) {
 			UpdateInputManifest();
-			_keyBindListingChanged = false;
+			_inputManifestNeedsRefresh = false;
 		}
 	}
 
@@ -326,5 +351,13 @@ public class InputMap : MonoBehaviour {
 	public void ResolveChangesMadeDuringUpdate() {
 		adjustmentsToMakeBetweenUpdates.ForEach(a => a.Invoke());
 		adjustmentsToMakeBetweenUpdates.Clear();
+	}
+
+	public string GetInputManifest() {
+		if(_inputManifestNeedsRefresh) {
+			UpdateInputManifest();
+			_inputManifestNeedsRefresh = false;
+		}
+		return inputManifest;
 	}
 }
