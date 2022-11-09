@@ -23,10 +23,10 @@ public class KeySensitivityInputMap : KeySensitivity {
 		if (_inputMap == null) { return; }
 		for (int i = 0; i < _keys.Length; i++) {
 			if (HasKeyDownEvent) {
-				_inputMap.Add((KeyCode2)_keys[i], InputMap.KeyPressState.Down, CheckPress, PressDescription);
+				_inputMap.Add((KeyCode2)_keys[i], InputMap.KeyPressState.Press, CheckPress, PressDescription);
 			}
 			if (HasKeyUpEvent) {
-				_inputMap.Add((KeyCode2)_keys[i], InputMap.KeyPressState.Up, CheckRelease, ReleaseDescription);
+				_inputMap.Add((KeyCode2)_keys[i], InputMap.KeyPressState.Release, CheckRelease, ReleaseDescription);
 			}
 		}
 	}
@@ -35,11 +35,11 @@ public class KeySensitivityInputMap : KeySensitivity {
 		if (_inputMap == null) { return; }
 		for (int i = 0; i < _keys.Length; i++) {
 			if (HasKeyDownEvent) {
-				var down = _inputMap.Remove((KeyCode2)_keys[i], InputMap.KeyPressState.Down, PressDescription);
+				var down = _inputMap.Remove((KeyCode2)_keys[i], InputMap.KeyPressState.Press, PressDescription);
 				if (down == null || down.Count == 0) { Debug.Log("uhm... did not remove any Down"); }
 			}
 			if (HasKeyUpEvent) {
-				var up = _inputMap.Remove((KeyCode2)_keys[i], InputMap.KeyPressState.Up, ReleaseDescription);
+				var up = _inputMap.Remove((KeyCode2)_keys[i], InputMap.KeyPressState.Release, ReleaseDescription);
 				if (up == null || up.Count == 0) { Debug.Log("uhm... did not remove any uP"); }
 			}
 		}

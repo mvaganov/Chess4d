@@ -1653,6 +1653,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b7023f72848344bb8eb370144d37ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  description: 
   _keys: 20000000
   _onKeyDown:
     Actions:
@@ -2732,6 +2733,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b7023f72848344bb8eb370144d37ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  description: 
   _keys: 1b000000
   _onKeyDown:
     Actions:
@@ -3603,6 +3605,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b7023f72848344bb8eb370144d37ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  description: 
   _keys: 08000000
   _onKeyDown:
     Actions:
@@ -4481,6 +4484,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b7023f72848344bb8eb370144d37ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  description: Toggle Mouse Look
   _keys: 44010000110100001401000012010000130100001801000019010000
   _onKeyDown:
     Actions:
@@ -5195,6 +5199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputEventEntries: []
+  _updateInputManifestOften: 0
   inputManifest: 
 --- !u!1 &1272034078
 GameObject:

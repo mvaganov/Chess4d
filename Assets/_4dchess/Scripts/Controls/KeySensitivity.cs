@@ -5,6 +5,7 @@ using UnityEngine.Events;
 /// sensitivity to Unity keys
 /// </summary>
 public class KeySensitivity : MonoBehaviour {
+	[SerializeField] protected string description;
 	[SerializeField] protected KeyCode[] _keys = new KeyCode[1];
 	[SerializeField] protected KeyEvent _onKeyDown = new KeyEvent();
 	[SerializeField] protected KeyEvent _onKeyUp = new KeyEvent();

@@ -1,11 +1,10 @@
 using UnityEngine;
 
 public class AxisMovement : MonoBehaviour {
-	public float speed = 5;
-	public Transform body;
+	[SerializeField] protected float speed = 5;
+	[SerializeField] protected Transform body;
 	protected Rigidbody rb;
-
-	public KeyAxis[] axis = new KeyAxis[] {
+	[SerializeField] protected KeyAxis[] axis = new KeyAxis[] {
 		new KeyAxis("Horizontal", KeyCode.D, KeyCode.A, 1),
 		new KeyAxis("Altitude", KeyCode.Q, KeyCode.E, 1),
 		new KeyAxis("Advance", KeyCode.W, KeyCode.S, 1),

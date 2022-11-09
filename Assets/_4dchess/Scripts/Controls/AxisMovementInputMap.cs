@@ -20,27 +20,28 @@ public class AxisMovementInputMap : AxisMovement {
 		for (int a = 0; a < axis.Length; ++a) {
 			KeyAxis ax = axis[a];
 			for (int i = 0; i < ax._increase.Length; ++i) {
-				_inputMap.Add((KeyCode2)ax._increase[i], InputMap.KeyPressState.Down, CheckValue[a], GetIncreasePress(a));
-				_inputMap.Add((KeyCode2)ax._increase[i], InputMap.KeyPressState.Up, CheckValue[a], GetIncreaseRelease(a));
+				_inputMap.Add((KeyCode2)ax._increase[i], InputMap.KeyPressState.Press, CheckValue[a], GetIncreasePress(a));
+				_inputMap.Add((KeyCode2)ax._increase[i], InputMap.KeyPressState.Release, CheckValue[a], GetIncreaseRelease(a));
 			}
 			for (int i = 0; i < ax._decrease.Length; ++i) {
-				_inputMap.Add((KeyCode2)ax._decrease[i], InputMap.KeyPressState.Down, CheckValue[a], GetDecreasePress(a));
-				_inputMap.Add((KeyCode2)ax._decrease[i], InputMap.KeyPressState.Up, CheckValue[a], GetDecreaseRelease(a));
+				_inputMap.Add((KeyCode2)ax._decrease[i], InputMap.KeyPressState.Press, CheckValue[a], GetDecreasePress(a));
+				_inputMap.Add((KeyCode2)ax._decrease[i], InputMap.KeyPressState.Release, CheckValue[a], GetDecreaseRelease(a));
 			}
 		}
-		inputMapDirection = new Vector3(axis[0].Value, axis[1].Value, axis[2].Value);
+		// TODO when this AxisMovementInputMap is turned on, it should trigger one of the events above, not this code below.
+		//inputMapDirection = new Vector3(axis[0].Value, axis[1].Value, axis[2].Value);
 	}
 	private void OnDisable() {
 		if (!useInputMap || _inputMap == null) { return; }
 		for (int a = 0; a < axis.Length; ++a) {
 			KeyAxis ax = axis[a];
 			for (int i = 0; i < ax._increase.Length; ++i) {
-				_inputMap.Remove((KeyCode2)ax._increase[i], InputMap.KeyPressState.Down, GetIncreasePress(a));
-				_inputMap.Remove((KeyCode2)ax._increase[i], InputMap.KeyPressState.Up, GetIncreaseRelease(a));
+				_inputMap.Remove((KeyCode2)ax._increase[i], InputMap.KeyPressState.Press, GetIncreasePress(a));
+				_inputMap.Remove((KeyCode2)ax._increase[i], InputMap.KeyPressState.Release, GetIncreaseRelease(a));
 			}
 			for (int i = 0; i < ax._decrease.Length; ++i) {
-				_inputMap.Remove((KeyCode2)ax._decrease[i], InputMap.KeyPressState.Down, GetDecreasePress(a));
-				_inputMap.Remove((KeyCode2)ax._decrease[i], InputMap.KeyPressState.Up, GetDecreaseRelease(a));
+				_inputMap.Remove((KeyCode2)ax._decrease[i], InputMap.KeyPressState.Press, GetDecreasePress(a));
+				_inputMap.Remove((KeyCode2)ax._decrease[i], InputMap.KeyPressState.Release, GetDecreaseRelease(a));
 			}
 		}
 	}
@@ -49,9 +50,10 @@ public class AxisMovementInputMap : AxisMovement {
 	private InputMap.InputEventDelegate[] _IncreaseEvents = null;
 	private void ValueX() { inputMapDirection[0] = axis[0].Value; }
 	private void ValueY() { inputMapDirection[1] = axis[1].Value; }
-	private void ValueZ() { inputMapDirection[2] = axis[2].Value; }
+	private void ValueZ() { inputMapDirection[2] = axis[2].Value; Debug.Log("???"); }
 
 	public override void LateUpdate() {
+		Debug.Log((useInputMap && _inputMap != null)+" "+ inputMapDirection);
 		Vector3 delta = (useInputMap && _inputMap != null) ? inputMapDirection :
 			new Vector3(axis[0].Value, axis[1].Value, axis[2].Value);
 		if (delta != Vector3.zero) {
