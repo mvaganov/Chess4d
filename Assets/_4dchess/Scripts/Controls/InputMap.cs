@@ -282,13 +282,18 @@ public class InputMap : MonoBehaviour {
 		InvokeHoldEvents();
 		InvokeReleaseEvents();
 		FallbackKeyRelease();
-		ResolveMouseDeltaCallbacks();
 		_runningInGameLoop = false;
 		ResolveChangesMadeDuringUpdate();
 		if (_updateInputManifestOften && _inputManifestNeedsRefresh) {
 			UpdateInputManifest();
 			_inputManifestNeedsRefresh = false;
 		}
+	}
+
+	private void LateUpdate() {
+		_runningInGameLoop = true;
+		ResolveMouseDeltaCallbacks();
+		_runningInGameLoop = false;
 	}
 
 	//private void InvokeDelayedDelegates() {
@@ -393,8 +398,9 @@ public class InputMap : MonoBehaviour {
 
 	private void ResolveMouseDeltaCallbacks() {
 		float dx = MouseChangeX, dy = MouseChangeX;
+		// TODO find out why this does not get called regularly enough for mouse look...
 		// also call mouseChangeListener if the mouse stopped moving and it was moving last frame
-		if (dx != 0 || dy != 0 || lastMouseChangeX != dx || lastMouseChangeY != dy) {
+		if (true || dx != 0 || dy != 0 || lastMouseChangeX != dx || lastMouseChangeY != dy) {
 			mouseChangeListener?.Invoke();
 		}
 		lastMouseChangeX = dx;

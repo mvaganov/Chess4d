@@ -50,10 +50,10 @@ public class AxisMovementInputMap : AxisMovement {
 	private InputMap.InputEventDelegate[] _IncreaseEvents = null;
 	private void ValueX() { inputMapDirection[0] = axis[0].Value; }
 	private void ValueY() { inputMapDirection[1] = axis[1].Value; }
-	private void ValueZ() { inputMapDirection[2] = axis[2].Value; Debug.Log("???"); }
+	private void ValueZ() { inputMapDirection[2] = axis[2].Value; }
 
 	public override void LateUpdate() {
-		Debug.Log((useInputMap && _inputMap != null)+" "+ inputMapDirection);
+		//Debug.Log((useInputMap && _inputMap != null)+" "+ inputMapDirection);
 		Vector3 delta = (useInputMap && _inputMap != null) ? inputMapDirection :
 			new Vector3(axis[0].Value, axis[1].Value, axis[2].Value);
 		if (delta != Vector3.zero) {

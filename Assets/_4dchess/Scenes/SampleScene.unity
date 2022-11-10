@@ -3066,7 +3066,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 839522220}
-  - component: {fileID: 839522221}
+  - component: {fileID: 839522224}
   - component: {fileID: 839522223}
   m_Layer: 0
   m_Name: MouseLook WASD
@@ -3090,23 +3090,6 @@ Transform:
   m_Father: {fileID: 1945872357}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &839522221
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 839522219}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa83cecd015ee184bbad9bd188ba541b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CameraTransform: {fileID: 963194228}
-  MouseSensitivityX: 5
-  MouseSensitivityY: -5
-  eulerRotation: {x: 0, y: 0, z: 0}
-  HideMouse: 1
 --- !u!114 &839522223
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3135,6 +3118,23 @@ MonoBehaviour:
     _decrease: 7300000012010000
     baseValue: 1
   useInputMap: 1
+--- !u!114 &839522224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 839522219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2981a7f250dd30499f809d1f98a0507, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CameraTransform: {fileID: 963194228}
+  MouseSensitivityX: 5
+  MouseSensitivityY: -5
+  eulerRotation: {x: 0, y: 0, z: 0}
+  HideMouse: 1
 --- !u!1 &855139152
 GameObject:
   m_ObjectHideFlags: 0
