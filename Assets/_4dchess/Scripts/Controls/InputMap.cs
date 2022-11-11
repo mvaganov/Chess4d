@@ -203,12 +203,18 @@ public class InputMap : MonoBehaviour {
 			if (!AddSpecialListener(keyCode, inputEvent)) {
 				AddToMap(GetMap(eventType), keyCode, inputEvent);
 
-				// TODO find out if this input event should be active right now.
-				bool checkingHeld = eventType == KeyPressState.Press || eventType == KeyPressState.Hold;
-				if (trackingKeyAsPressed[keyCode] == checkingHeld) {
-					Debug.Log("pending " + eventType + ": (" + eventType + " " + ((KeyCode2)keyCode) + " " + description + ")");
-					//pendingDelegates.Add(inputEvent);
-					adjustmentsToMakeBetweenUpdates.Add(inputEvent.Invoke);
+				//// TODO find out if this input event should be active right now.
+				//bool checkingHeld = eventType == KeyPressState.Press || eventType == KeyPressState.Hold;
+				//if (trackingKeyAsPressed[keyCode] == checkingHeld) {
+				//	Debug.Log("pending " + eventType + ": (" + eventType + " " + ((KeyCode2)keyCode) + " " + description + ")");
+				//	//pendingDelegates.Add(inputEvent);
+				//	adjustmentsToMakeBetweenUpdates.Add(inputEvent.Invoke);
+				//}
+				if (eventType == KeyPressState.Press && Input.GetKey((KeyCode)keyCode)) {
+					Debug.Log("executing " + eventType + ": (" + eventType + " " + ((KeyCode2)keyCode) + " " + description + ")");
+					inputEvent.Invoke();
+				} else {
+					Debug.Log(eventType);
 				}
 			}
 		} else {
