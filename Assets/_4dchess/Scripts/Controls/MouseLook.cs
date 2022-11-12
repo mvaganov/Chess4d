@@ -33,10 +33,12 @@ public class MouseLook : MonoBehaviour {
 	}
 
 	protected virtual void LateUpdate() {
-		Vector2 pitchYaw = PitchYaw;
-		if (pitchYaw.x != 0 || pitchYaw.x != 0) {
-			eulerRotation.x += pitchYaw.x;
-			eulerRotation.y += pitchYaw.y;
+		// poll data directly, do not rely on callbacks.
+		float yaw = InputMap.MouseChangeX * MouseSensitivityX;
+		float pitch = InputMap.MouseChangeY * MouseSensitivityY;
+		if (pitch != 0 || yaw != 0) {
+			eulerRotation.x += pitch;
+			eulerRotation.y += yaw;
 			CameraTransform.rotation = Quaternion.Euler(eulerRotation);
 		}
 	}

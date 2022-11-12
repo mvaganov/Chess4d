@@ -5,6 +5,9 @@ public enum KeyCode2 {
 	Clear = 12, // 0x0000000C
 	Return = 13, // 0x0000000D
 	Pause = 19, // 0x00000013
+	/// <summary>
+	/// does not work reliably. get mouse change with <see cref="InputMap.MouseChange"/> if possible
+	/// </summary>
 	MouseChange = 20,
 	LeftControllerMove = 21,
 	RightControllerMove = 22,

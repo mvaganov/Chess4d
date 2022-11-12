@@ -24,7 +24,7 @@ public class InputMap : MonoBehaviour {
 	private HashSet<KeyCode> beingPressed = new HashSet<KeyCode>();
 	private List<KeyCode> beingReleased = new List<KeyCode>();
 
-	public static Vector2 MouseChange => new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+	public static Vector2 MouseChange => new Vector2(MouseChangeX, MouseChangeY);
 	public static float MouseChangeX => Input.GetAxis("Mouse X");
 	public static float MouseChangeY => Input.GetAxis("Mouse Y");
 
@@ -202,29 +202,26 @@ public class InputMap : MonoBehaviour {
 		if (!_runningInGameLoop) {
 			if (!AddSpecialListener(keyCode, inputEvent)) {
 				AddToMap(GetMap(eventType), keyCode, inputEvent);
-
-				//// TODO find out if this input event should be active right now.
-				//bool checkingHeld = eventType == KeyPressState.Press || eventType == KeyPressState.Hold;
-				//if (trackingKeyAsPressed[keyCode] == checkingHeld) {
-				//	Debug.Log("pending " + eventType + ": (" + eventType + " " + ((KeyCode2)keyCode) + " " + description + ")");
-				//	//pendingDelegates.Add(inputEvent);
-				//	adjustmentsToMakeBetweenUpdates.Add(inputEvent.Invoke);
-				//}
-				if (eventType == KeyPressState.Press && Input.GetKey((KeyCode)keyCode)) {
-					Debug.Log("executing " + eventType + ": (" + eventType + " " + ((KeyCode2)keyCode) + " " + description + ")");
-					inputEvent.Invoke();
-				} else {
-					Debug.Log(eventType);
-				}
 			}
 		} else {
 			if (IsSpecialListenerCode(keyCode)) {
 				adjustmentsToMakeBetweenUpdates.Add(() => AddSpecialListener(keyCode, inputEvent));
 			} else {
-				adjustmentsToMakeBetweenUpdates.Add(() => AddToMap(GetMap(eventType), keyCode, inputEvent));
+				adjustmentsToMakeBetweenUpdates.Add(() => {
+					AddToMap(GetMap(eventType), keyCode, inputEvent);
+					ExecuteOnPressIfAppropriate(keyCode, eventType, inputEvent, description);
+				});
 			}
 		}
 		return desc;
+	}
+
+	private void ExecuteOnPressIfAppropriate(int keyCode, KeyPressState eventType, InputEventDelegate inputEvent, string description) {
+		if (eventType != KeyPressState.Press || !Input.GetKey((KeyCode)keyCode)) {
+			return;
+		}
+		//Debug.Log("executing immediate: (" + eventType + " " + ((KeyCode2)keyCode) + " " + description + ")");
+		inputEvent.Invoke();
 	}
 
 	public List<InputEventEntry> Remove(KeyCode2 keyCode, KeyPressState eventType, string description = null)
@@ -284,6 +281,7 @@ public class InputMap : MonoBehaviour {
 	void Update() {
 		_runningInGameLoop = true;
 		//InvokeDelayedDelegates();
+		ResolveMouseDeltaCallbacks();
 		InvokePressEvents();
 		InvokeHoldEvents();
 		InvokeReleaseEvents();
@@ -296,12 +294,6 @@ public class InputMap : MonoBehaviour {
 		}
 	}
 
-	private void LateUpdate() {
-		_runningInGameLoop = true;
-		ResolveMouseDeltaCallbacks();
-		_runningInGameLoop = false;
-	}
-
 	//private void InvokeDelayedDelegates() {
 	//	if (pendingDelegates.Count == 0) { return; }
 	//	pendingDelegates.ForEach(d => d.Invoke());
@@ -312,13 +304,18 @@ public class InputMap : MonoBehaviour {
 		foreach (var entry in inputDownEvents) {
 			KeyCode k = (KeyCode)entry.Key;
 			if (Input.GetKeyDown(k) || (!trackingKeyAsPressed[entry.Key] && Input.GetKey(k))) {
+
 				//if (keyKnownToBePressed[entry.Key]) {
 				//	Debug.LogWarning(((KeyCode)entry.Key) + " is this getting a double-press? ");
 				//}
 				DebugLogInputEvents(entry.Key, KeyPressState.Press);
 				//Debug.Log(entry.Value.GetInvocationList().Length);
-				
+				int countDelegates = inputDownEvents[entry.Key].GetInvocationList().Length;
 				entry.Value.Invoke();
+				int newCountDelegates = entry.Value.GetInvocationList().Length;
+				if (countDelegates != newCountDelegates) {
+					Debug.Log("delegates were " + countDelegates + ", but are now " + newCountDelegates);
+				}
 				//adjustmentsToMakeBetweenUpdates.Add(entry.Value.Invoke);
 				trackingKeyAsPressed[entry.Key] = true;
 				beingPressed.Add(k);
@@ -332,7 +329,7 @@ public class InputMap : MonoBehaviour {
 		if (GetMap(keyState).TryGetValue(keyCode, out InputEventDelegate d)) {
 			count = d.GetInvocationList().Length;
 		}
-		Debug.Log("about to trigger: (" + string.Join("), (", triggered) + ") ("+count+")");
+		//Debug.Log("about to trigger: (" + string.Join("), (", triggered) + ") ("+count+")");
 	}
 
 	private void InvokeHoldEvents() {
@@ -404,9 +401,7 @@ public class InputMap : MonoBehaviour {
 
 	private void ResolveMouseDeltaCallbacks() {
 		float dx = MouseChangeX, dy = MouseChangeX;
-		// TODO find out why this does not get called regularly enough for mouse look...
-		// also call mouseChangeListener if the mouse stopped moving and it was moving last frame
-		if (true || dx != 0 || dy != 0 || lastMouseChangeX != dx || lastMouseChangeY != dy) {
+		if (dx != 0 || dy != 0 || lastMouseChangeX != dx || lastMouseChangeY != dy) {
 			mouseChangeListener?.Invoke();
 		}
 		lastMouseChangeX = dx;
