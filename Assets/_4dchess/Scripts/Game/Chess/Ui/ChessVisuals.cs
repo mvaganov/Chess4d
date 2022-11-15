@@ -84,6 +84,7 @@ public class ChessVisuals : MonoBehaviour {
 		if (!TileVisSettings.TryGetValue(someKindOfMove.GetType(), out TileVisualSpecifics setting)) {
 			setting.visualizer = specialTileAndArrows;
 			setting.color = Color.magenta;
+			Debug.Log("unknown type "+ someKindOfMove.GetType());
 		}
 		tgo = setting.visualizer.AddMark(someKindOfMove);
 		tgo.Color = setting.color;
@@ -117,7 +118,7 @@ public class ChessVisuals : MonoBehaviour {
 		//Debug.Log($" {target} {activityAtSquare.Count} {defenders.Count}");
 		for (int i = 0; i < defenders.Count; ++i) {
 			TiledGameObject tiledObject = tempDefendArrows.AddMark(defenders[i], true);
-			tiledObject.Color = Color.magenta;
+			//tiledObject.Color = Color.magenta;
 		}
 	}
 }

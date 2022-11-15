@@ -513,6 +513,66 @@ MonoBehaviour:
     Actions:
       m_PersistentCalls:
         m_Calls: []
+--- !u!1 &159124216
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 159124218}
+  - component: {fileID: 159124217}
+  - component: {fileID: 159124219}
+  m_Layer: 0
+  m_Name: <wires>
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &159124217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159124216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a004c21e58ed45740b1f89e1fb2e8947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoParentWiresToGlobalObject: 1
+  pulseConstantlyReassignedColor: 1
+  _wireMaterial: {fileID: 2100000, guid: a65a76809ea37ef4e99c260e4d3431bf, type: 2}
+--- !u!4 &159124218
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159124216}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &159124219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159124216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c511a541c6b14b5488c3da4203e0a03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &185849479
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,6 +731,7 @@ MonoBehaviour:
     prefab: {fileID: 7526894610619274311, guid: 19d3e7d9e9ec34a4b8ef809f1560b135, type: 3}
     unallocated: []
   currentMarks: []
+  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &317942651
 GameObject:
   m_ObjectHideFlags: 0
@@ -778,6 +839,7 @@ MonoBehaviour:
     prefab: {fileID: 3555410402216363709, guid: 11dde93a442e2324da2e2b5a3add5461, type: 3}
     unallocated: []
   currentMarks: []
+  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &363315618
 GameObject:
   m_ObjectHideFlags: 0
@@ -2452,6 +2514,7 @@ MonoBehaviour:
     prefab: {fileID: 3555410402216363709, guid: 89f6bac5282324e4a9848ac4f98360fe, type: 3}
     unallocated: []
   currentMarks: []
+  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &683845117
 GameObject:
   m_ObjectHideFlags: 0
@@ -3798,8 +3861,8 @@ Camera:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -4293,6 +4356,7 @@ MonoBehaviour:
     prefab: {fileID: 5368334643063520969, guid: ee7fc2330963de34c9523232a4e1c10e, type: 3}
     unallocated: []
   currentMarks: []
+  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1020223463
 GameObject:
   m_ObjectHideFlags: 0
@@ -6042,6 +6106,7 @@ MonoBehaviour:
     prefab: {fileID: 3555410402216363709, guid: 0278410512bb7464b907c2c35f5b6844, type: 3}
     unallocated: []
   currentMarks: []
+  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1404753864
 GameObject:
   m_ObjectHideFlags: 0
@@ -6936,6 +7001,7 @@ MonoBehaviour:
     prefab: {fileID: 5368334643063520969, guid: 9e1c1ca61f9ac0e4ba291824100f8bde, type: 3}
     unallocated: []
   currentMarks: []
+  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1708736130
 GameObject:
   m_ObjectHideFlags: 0
@@ -8015,6 +8081,7 @@ MonoBehaviour:
     prefab: {fileID: 3555410402216363709, guid: 00bd2f6434cbdfe41940d1091373d1fe, type: 3}
     unallocated: []
   currentMarks: []
+  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1945872356
 GameObject:
   m_ObjectHideFlags: 0

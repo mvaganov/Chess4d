@@ -228,7 +228,7 @@ namespace NonStandard {
 		/// </summary>
 		public static void SetColor(LineRenderer lineRenderer, Color color) {
 			Material m = GetMaterial(lineRenderer);
-			if (color == default) { color = Color.magenta; }
+			if (color == default) { color = Color.green; }
 			if (m.color == color && (_instance == null || _instance.pulseConstantlyReassignedColor)) {
 				long t = Math.Abs(Environment.TickCount);
 				const long duration = 500;
@@ -247,21 +247,21 @@ namespace NonStandard {
 		private static Material GetMaterial(LineRenderer lineRenderer) {
 			Material m = null;
 #if UNITY_EDITOR
-			if (!Application.isPlaying) {
-				if (lineRenderer.sharedMaterial != null) {
-					m = new Material(lineRenderer.sharedMaterial);
-					lineRenderer.sharedMaterial = m;
-				}
-			} else
+			//if (!Application.isPlaying) {
+			//	if (lineRenderer.sharedMaterial != null) {
+			//		m = new Material(lineRenderer.sharedMaterial);
+			//		lineRenderer.sharedMaterial = m;
+			//	}
+			//} else
 #endif
 			m = lineRenderer.material;
 			bool needsMaterial = m == null ||
 				(m.name.StartsWith("Default-Material") && WireMaterial.name != "Default-Material");
 			if (needsMaterial) {
 #if UNITY_EDITOR
-				if (!Application.isPlaying) {
-					lineRenderer.sharedMaterial = m = new Material(WireMaterial);
-				} else
+				//if (!Application.isPlaying) {
+				//	lineRenderer.sharedMaterial = m = new Material(WireMaterial);
+				//} else
 #endif
 				lineRenderer.material = m = WireMaterial;
 			}

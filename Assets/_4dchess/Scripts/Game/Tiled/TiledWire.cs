@@ -23,7 +23,14 @@ public class TiledWire : TiledGameObject {
 		set { DrawLine(GetCoord(), value); }
 	}
 
+	//public void SetDestination(Coord coord, Color color) {
+	//	DrawLine(GetCoord(), coord, color);
+	//}
 	public void DrawLine(Coord startCoord, Coord value) {
+		DrawLine(startCoord, value, Color.green);
+	}
+
+	public void DrawLine(Coord startCoord, Coord value, Color color) {
 		if (Wire == null) {
 			Wire = NonStandard.Wires.MakeWire();
 			Wire.transform.SetParent(transform);
@@ -55,7 +62,7 @@ public class TiledWire : TiledGameObject {
 				endAdjust /= 2;
 			}
 		}
-		Wire.Bezier(start, start + startAdjust, end + endAdjust, end, Color.magenta, destinationEnd, 1f / 16);
+		Wire.Bezier(start, start + startAdjust, end + endAdjust, end, color, destinationEnd, 1f / 16);
 		//Arrow.Arc(start, end, Vector3.up, Color.red, NonStandard.Lines.End.Arrow);
 	}
 }
