@@ -21,8 +21,8 @@ public class InputMap : MonoBehaviour {
 	private InputEventDelegate mouseChangeListener;
 	private float lastMouseChangeX, lastMouseChangeY;
 	private bool[] trackingKeyAsPressed = new bool[510];
-	private HashSet<KeyCode> beingPressed = new HashSet<KeyCode>();
-	private List<KeyCode> beingReleased = new List<KeyCode>();
+	private HashSet<KeyCode2> beingPressed = new HashSet<KeyCode2>();
+	private List<KeyCode2> beingReleased = new List<KeyCode2>();
 
 	public static Vector2 MouseChange => new Vector2(MouseChangeX, MouseChangeY);
 	public static float MouseChangeX => Input.GetAxis("Mouse X");
@@ -64,23 +64,6 @@ public class InputMap : MonoBehaviour {
 
 	[System.Serializable] public class InputEvent : UnityEvent { }
 
-	/// <summary>
-	/// keys in the KeyCode listing that are not part of any sequence
-	/// </summary>
-	private static readonly KeyCode[] _singleKeys = new KeyCode[] {
-		KeyCode.Backspace, KeyCode.Tab, KeyCode.Clear, KeyCode.Return, KeyCode.Pause, KeyCode.Escape,// 8, 9, 12, 13, 19, 27
-		// 32 to 64 are valid (space, some special punctuation, numbers)
-		// 91 to 122 are valid (more punctuation, alphabetic characters)
-		KeyCode.Delete, // 127
-		// 256 to 296 (numpad keys, arrow keys, function keys)
-		// 300 to 319 (modifier keys)
-		// 323 to 509 (mouse buttons, many joystick buttons)
-	};
-
-	private static readonly (int,int)[] _keyRanges = new (int,int)[] {
-		(32,64), (91,122), (256,296), (300,319), (323,509),
-	};
-
 	private void Awake() {
 		for(int i = 0; i < inputEventEntries.Count; ++i) {
 			InputEventEntry entry = inputEventEntries[i];
@@ -115,6 +98,9 @@ public class InputMap : MonoBehaviour {
 			case (int)KeyCode2.MouseChange:
 				mouseChangeListener += inputEvent;
 				return true;
+			case (int)KeyCode2.AnyShift:
+			case (int)KeyCode2.AnyCtrl:
+			case (int)KeyCode2.AnyAlt:
 			case (int)KeyCode2.LeftControllerMove:
 			case (int)KeyCode2.RightControllerMove:
 			case (int)KeyCode2.HMDMove:
@@ -217,7 +203,7 @@ public class InputMap : MonoBehaviour {
 	}
 
 	private void ExecuteOnPressIfAppropriate(int keyCode, KeyPressState eventType, InputEventDelegate inputEvent, string description) {
-		if (eventType != KeyPressState.Press || !Input.GetKey((KeyCode)keyCode)) {
+		if (eventType != KeyPressState.Press || !KeyCode2Extension.GetKey((KeyCode2)keyCode)) {
 			return;
 		}
 		//Debug.Log("executing immediate: (" + eventType + " " + ((KeyCode2)keyCode) + " " + description + ")");
@@ -260,22 +246,8 @@ public class InputMap : MonoBehaviour {
 	/// <returns></returns>
 	public static List<KeyCode> GetKeyCodes() {
 		List<KeyCode> keyList = new List<KeyCode>();
-		GetKeyCodes(keyList);
+		KeyCode2Extension.GetKeyCodes(keyList);
 		return keyList;
-	}
-
-	public static void GetKeyCodes(List<KeyCode> out_getKey) {
-		for(int i = 0; i < _singleKeys.Length; ++i) {
-			KeyCode key = _singleKeys[i];
-			if (Input.GetKey(key)) { out_getKey.Add(key); }
-		}
-		foreach ((int,int) range in _keyRanges) {
-			int start = range.Item1, end = range.Item2;
-			for(int i = start; i <= end; ++i) {
-				KeyCode key = (KeyCode)i;
-				if (Input.GetKey(key)) { out_getKey.Add(key); }
-			}
-		}
 	}
 
 	void Update() {
@@ -302,8 +274,8 @@ public class InputMap : MonoBehaviour {
 
 	private void InvokePressEvents() {
 		foreach (var entry in inputDownEvents) {
-			KeyCode k = (KeyCode)entry.Key;
-			if (Input.GetKeyDown(k) || (!trackingKeyAsPressed[entry.Key] && Input.GetKey(k))) {
+			KeyCode2 k = (KeyCode2)entry.Key;
+			if (KeyCode2Extension.GetKeyDown(k) || (!trackingKeyAsPressed[entry.Key] && KeyCode2Extension.GetKey(k))) {
 
 				//if (keyKnownToBePressed[entry.Key]) {
 				//	Debug.LogWarning(((KeyCode)entry.Key) + " is this getting a double-press? ");
@@ -334,8 +306,8 @@ public class InputMap : MonoBehaviour {
 
 	private void InvokeHoldEvents() {
 		foreach (var entry in inputHoldEvents) {
-			KeyCode k = (KeyCode)entry.Key;
-			if (Input.GetKey(k)) {
+			KeyCode2 k = (KeyCode2)entry.Key;
+			if (KeyCode2Extension.GetKey(k)) {
 				if (!trackingKeyAsPressed[entry.Key]) {
 					if (inputDownEvents.TryGetValue(entry.Key, out InputEventDelegate shouldHaveBeenCalledSooner)) {
 						DebugLogInputEvents(entry.Key, KeyPressState.Press);
@@ -354,8 +326,8 @@ public class InputMap : MonoBehaviour {
 
 	private void InvokeReleaseEvents() {
 		foreach (var entry in inputUpEvents) {
-			KeyCode k = (KeyCode)entry.Key;
-			if (Input.GetKeyUp(k)) {
+			KeyCode2 k = (KeyCode2)entry.Key;
+			if (KeyCode2Extension.GetKeyUp(k)) {
 				//if (!keyKnownToBePressed[entry.Key]) {
 				//	Debug.LogWarning(((KeyCode)entry.Key) + " is this getting a double-release?");
 				//}
@@ -370,8 +342,8 @@ public class InputMap : MonoBehaviour {
 
 	private void FallbackKeyRelease() {
 		beingReleased.Clear();
-		foreach (KeyCode pressed in beingPressed) {
-			if (!Input.GetKey(pressed)) {
+		foreach (KeyCode2 pressed in beingPressed) {
+			if (!KeyCode2Extension.GetKey(pressed)) {
 				if (inputUpEvents.TryGetValue((int)pressed, out InputEventDelegate shouldHaveBeenCalledSooner)) {
 					DebugLogInputEvents((int)pressed, KeyPressState.Release);
 					shouldHaveBeenCalledSooner.Invoke();
@@ -381,7 +353,7 @@ public class InputMap : MonoBehaviour {
 				beingReleased.Add(pressed);
 			}
 		}
-		foreach (KeyCode released in beingReleased) { beingPressed.Remove(released); }
+		foreach (KeyCode2 released in beingReleased) { beingPressed.Remove(released); }
 	}
 
 	private void UpdateInputManifest() {

@@ -37,14 +37,19 @@ public class MoveUi : MonoBehaviour {
 			throw new System.Exception($"{nameof(MoveUi)} should be a child of {nameof(MovesUi)}");
 		}
 		if (move == movesUi.chessMoves.CurrentMove) {
-			movesUi.Notes.SetActive(true);
-			movesUi.Notes.transform.position = movesUi.CurrentMoveUi.transform.position;
-			movesUi.notesInput.SetTextWithoutNotify(move.notes);
-			movesUi.notesInput.Select();
+			ActivateNotes();
 			return;
 		}
 		//Debug.Log($"going to {move.index} {move}");
 		movesUi.chessMoves.GoToMove(move);
 		movesUi.RebuildUi();
+	}
+
+	public void ActivateNotes() {
+		MovesUi movesUi = GetComponentInParent<MovesUi>();
+		movesUi.Notes.SetActive(true);
+		movesUi.Notes.transform.position = movesUi.CurrentMoveUi.transform.position;
+		movesUi.notesInput.SetTextWithoutNotify(move.notes);
+		movesUi.notesInput.Select();
 	}
 }
