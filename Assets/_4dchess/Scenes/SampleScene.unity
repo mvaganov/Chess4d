@@ -726,12 +726,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfe29c4540b58544d83e0d9a10e2247a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _defualtColor: {r: 0, g: 1, b: 0, a: 1}
   markPool:
     unallocatedLocation: {fileID: 1337838620}
     prefab: {fileID: 7526894610619274311, guid: 19d3e7d9e9ec34a4b8ef809f1560b135, type: 3}
     unallocated: []
   currentMarks: []
-  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &317942651
 GameObject:
   m_ObjectHideFlags: 0
@@ -834,12 +834,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfe29c4540b58544d83e0d9a10e2247a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _defualtColor: {r: 0.5019608, g: 0, b: 1, a: 1}
   markPool:
     unallocatedLocation: {fileID: 1337838620}
     prefab: {fileID: 3555410402216363709, guid: 11dde93a442e2324da2e2b5a3add5461, type: 3}
     unallocated: []
   currentMarks: []
-  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &363315618
 GameObject:
   m_ObjectHideFlags: 0
@@ -2509,12 +2509,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfe29c4540b58544d83e0d9a10e2247a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _defualtColor: {r: 1, g: 0, b: 0, a: 1}
   markPool:
     unallocatedLocation: {fileID: 1337838620}
     prefab: {fileID: 3555410402216363709, guid: 89f6bac5282324e4a9848ac4f98360fe, type: 3}
     unallocated: []
   currentMarks: []
-  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &683845117
 GameObject:
   m_ObjectHideFlags: 0
@@ -4351,12 +4351,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfe29c4540b58544d83e0d9a10e2247a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _defualtColor: {r: 0, g: 1, b: 1, a: 1}
   markPool:
     unallocatedLocation: {fileID: 1337838620}
     prefab: {fileID: 5368334643063520969, guid: ee7fc2330963de34c9523232a4e1c10e, type: 3}
     unallocated: []
   currentMarks: []
-  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1020223463
 GameObject:
   m_ObjectHideFlags: 0
@@ -6101,12 +6101,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfe29c4540b58544d83e0d9a10e2247a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _defualtColor: {r: 1, g: 1, b: 0.7529412, a: 1}
   markPool:
     unallocatedLocation: {fileID: 1337838620}
     prefab: {fileID: 3555410402216363709, guid: 0278410512bb7464b907c2c35f5b6844, type: 3}
     unallocated: []
   currentMarks: []
-  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1404753864
 GameObject:
   m_ObjectHideFlags: 0
@@ -6996,12 +6996,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfe29c4540b58544d83e0d9a10e2247a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _defualtColor: {r: 1, g: 0.5019608, b: 0, a: 1}
   markPool:
     unallocatedLocation: {fileID: 1337838620}
     prefab: {fileID: 5368334643063520969, guid: 9e1c1ca61f9ac0e4ba291824100f8bde, type: 3}
     unallocated: []
   currentMarks: []
-  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1708736130
 GameObject:
   m_ObjectHideFlags: 0
@@ -8076,12 +8076,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfe29c4540b58544d83e0d9a10e2247a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _defualtColor: {r: 1, g: 1, b: 0, a: 1}
   markPool:
     unallocatedLocation: {fileID: 1337838620}
     prefab: {fileID: 3555410402216363709, guid: 00bd2f6434cbdfe41940d1091373d1fe, type: 3}
     unallocated: []
   currentMarks: []
-  _defualtColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1945872356
 GameObject:
   m_ObjectHideFlags: 0

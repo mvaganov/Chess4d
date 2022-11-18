@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class TileVisualization : MonoBehaviour {
+	[SerializeField] private Color _defualtColor = Color.white;
 	[SerializeField] private MemoryPool<TiledGameObject> markPool = new MemoryPool<TiledGameObject>();
 	[SerializeField] private List<TiledGameObject> currentMarks = new List<TiledGameObject>();
-	[SerializeField] private Color _defualtColor = Color.white;
+
 
 	public Color DefaultColor => _defualtColor;
 
@@ -24,7 +25,7 @@ public class TileVisualization : MonoBehaviour {
 	public List<TiledGameObject> CreateMarks(IEnumerable<Move> moves, Color c) {
 		int markToColor = currentMarks.Count;
 		CreateMarks(moves, null);
-		Debug.Log("marks to color: "+(currentMarks.Count - markToColor)+" ("+c+")");
+		//Debug.Log("marks to color: "+(currentMarks.Count - markToColor)+" ("+c+")");
 		for (int i = markToColor; i < currentMarks.Count; ++i) {
 			TiledGameObject move = currentMarks[i];
 			move.Material.color = c;
@@ -45,7 +46,7 @@ public class TileVisualization : MonoBehaviour {
 	}
 
 	public TiledGameObject AddMark(Move move, bool reverse = false) {
-		TiledGameObject marker = move.MakeMark(markPool, reverse);
+		TiledGameObject marker = move.MakeMark(markPool, reverse, DefaultColor);
 		if (marker == null) { return null; }
 		currentMarks.Add(marker);
 		return marker;

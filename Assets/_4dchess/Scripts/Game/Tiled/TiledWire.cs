@@ -20,15 +20,15 @@ public class TiledWire : TiledGameObject {
 	// TODO allow setting the source as well, so that arrows can come and go.
 	public Coord Destination {
 		get { return _destinationCoord; }
-		set { DrawLine(GetCoord(), value); }
+		//set { DrawLine(GetCoord(), value); }
 	}
 
 	//public void SetDestination(Coord coord, Color color) {
 	//	DrawLine(GetCoord(), coord, color);
 	//}
-	public void DrawLine(Coord startCoord, Coord value) {
-		DrawLine(startCoord, value, Color.green);
-	}
+	//public void DrawLine(Coord startCoord, Coord value) {
+	//	DrawLine(startCoord, value, Color.green);
+	//}
 
 	public void DrawLine(Coord startCoord, Coord value, Color color) {
 		if (Wire == null) {

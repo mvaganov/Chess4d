@@ -117,7 +117,7 @@ public class King : MoveLogic {
 
 		public override string ToString() { return base.ToString() + partnerMove.ToString(); }
 
-		public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse) {
+		public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse, Color color) {
 			TiledGameObject marker = markPool.Get();
 			Coord coord = reverse ? from : to;
 			Board board = pieceMoved.board;
@@ -134,7 +134,7 @@ public class King : MoveLogic {
 				}
 			}
 			if (marker is TiledWire tw) {
-				tw.DrawLine(partnerMove.from, partnerMove.to);
+				tw.DrawLine(partnerMove.from, partnerMove.to, color);
 			}
 			return marker;
 		}

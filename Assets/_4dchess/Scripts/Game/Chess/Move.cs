@@ -144,7 +144,7 @@ public class Move {
 		return from.GetHashCode() ^ to.GetHashCode() ^ pieceMoved.GetHashCode();
 	}
 
-	public virtual TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse) {
+	public virtual TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse, Color color) {
 		TiledGameObject marker = markPool.Get();
 		Coord coord = reverse ? from : to;
 		Tile tile = pieceMoved.board.GetTile(coord);
@@ -152,7 +152,8 @@ public class Move {
 		markerTransform.SetParent(tile.transform);
 		markerTransform.localPosition = Vector3.zero;
 		if (marker is TiledWire tw) {
-			tw.Destination = reverse ? to : from;
+			//tw.Destination = reverse ? to : from;
+			tw.DrawLine(reverse ? from : to, reverse ? to : from, color);
 		}
 		return marker;
 	}
@@ -239,7 +240,7 @@ public class Capture : Move {
 	public override int GetHashCode() {
 		return base.GetHashCode() ^ captureCoord.GetHashCode() ^ pieceCaptured.GetHashCode();
 	}
-	public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse) {
+	public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse, Color color) {
 		TiledGameObject marker = markPool.Get();
 		Coord coord = reverse ? from : captureCoord;
 		Tile tile = pieceMoved.board.GetTile(coord);
@@ -250,7 +251,8 @@ public class Capture : Move {
 			marker.Label.text = $"capture";//\n[{capturable.code}]";
 		}
 		if (marker is TiledWire tw) {
-			tw.Destination = reverse ? to : from;
+			//tw.Destination = reverse ? to : from;
+			tw.DrawLine(reverse ? from : to, reverse ? to : from, color);
 		}
 		return marker;
 	}
@@ -260,8 +262,8 @@ public class Defend : Capture {
 	public Defend(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
 		: base(board, pieceMoved, from, to, pieceCaptured, fromCaptured) {
 	}
-	public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse) {
-		TiledGameObject tgo = base.MakeMark(markPool, reverse);
+	public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse, Color color) {
+		TiledGameObject tgo = base.MakeMark(markPool, reverse, color);
 		if (tgo.Label != null) {
 			tgo.Label.text = "defend";
 		}

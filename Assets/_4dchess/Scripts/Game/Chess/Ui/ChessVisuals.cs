@@ -68,7 +68,7 @@ public class ChessVisuals : MonoBehaviour {
 		defendArrows.ClearTiles();
 		specialTileAndArrows.ClearTiles();
 		Coord pieceCoord = piece.GetCoord();
-		selection.CreateMarks(new Move[] { new Move(piece.board, piece, pieceCoord, pieceCoord) }, Color.green);
+		selection.CreateMarks(new Move[] { new Move(piece.board, piece, pieceCoord, pieceCoord) }, Color.cyan);
 
 		if (analysis.CurrentPieceCurrentMoves != null) {
 			for (int i = 0; i < analysis.CurrentPieceCurrentMoves.Count; ++i) {
@@ -115,10 +115,16 @@ public class ChessVisuals : MonoBehaviour {
 			if (!showKingDefender && ChessGame.IsMyKing(piece, cap.pieceCaptured)) { continue; }
 			defenders.Add(cap);
 		}
+		Piece hoveredOver = selectedPiece;
+		if (hoveredOver == null) {
+			hoveredOver = board.GetPiece(currentCoord);
+		}
 		//Debug.Log($" {target} {activityAtSquare.Count} {defenders.Count}");
 		for (int i = 0; i < defenders.Count; ++i) {
 			TiledGameObject tiledObject = tempDefendArrows.AddMark(defenders[i], true);
-			//tiledObject.Color = Color.magenta;
+			if (hoveredOver != null && tiledObject != null && !defenders[i].pieceMoved.team.IsAlliedWith(hoveredOver.team)) {
+				tiledObject.Color = new Color(1,.5f,1);
+			}
 		}
 	}
 }

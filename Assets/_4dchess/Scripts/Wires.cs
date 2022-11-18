@@ -228,7 +228,7 @@ namespace NonStandard {
 		/// </summary>
 		public static void SetColor(LineRenderer lineRenderer, Color color) {
 			Material m = GetMaterial(lineRenderer);
-			if (color == default) { color = Color.green; }
+			if (color == default) { color = Color.magenta; }
 			if (m.color == color && (_instance == null || _instance.pulseConstantlyReassignedColor)) {
 				long t = Math.Abs(Environment.TickCount);
 				const long duration = 500;

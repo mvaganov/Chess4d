@@ -51,7 +51,7 @@ public partial class Pawn {
 			return new EnPassant(board, p, pieceLocation, nextPieceLocation, possibleTarget, otherPieceLocation);
 		}
 
-		public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse) {
+		public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse, Color color) {
 			TiledGameObject marker = markPool.Get();
 			Coord coord = reverse ? from : to;
 			Board board = pieceMoved.board;
@@ -68,7 +68,7 @@ public partial class Pawn {
 			}
 			if (marker is TiledWire tw) {
 				//tw.Destination = reverse ? to : from;
-				tw.DrawLine(from, captureCoord);
+				tw.DrawLine(reverse ? from : to, reverse ? to : from, color);
 			}
 			return marker;
 		}
