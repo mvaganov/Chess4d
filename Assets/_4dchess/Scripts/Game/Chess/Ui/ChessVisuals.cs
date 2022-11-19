@@ -15,6 +15,8 @@ public class ChessVisuals : MonoBehaviour {
 	public bool showKingDefender;
 	public bool showKingInCheck;
 	private Dictionary<System.Type, TileVisualSpecifics> _tileVisualizationSettings = null;
+	public Color threaten = new Color(1, .5f, 1);
+	public Color activeAttack = new Color(1, 0.75f, .5f);
 
 	private struct TileVisualSpecifics {
 		public Color color;
@@ -122,8 +124,12 @@ public class ChessVisuals : MonoBehaviour {
 		//Debug.Log($" {target} {activityAtSquare.Count} {defenders.Count}");
 		for (int i = 0; i < defenders.Count; ++i) {
 			TiledGameObject tiledObject = tempDefendArrows.AddMark(defenders[i], true);
-			if (hoveredOver != null && tiledObject != null && !defenders[i].pieceMoved.team.IsAlliedWith(hoveredOver.team)) {
-				tiledObject.Color = new Color(1,.5f,1);
+			if (hoveredOver != null && tiledObject != null) {
+				if (!defenders[i].pieceMoved.team.IsAlliedWith(hoveredOver.team)) {
+					tiledObject.Color = threaten;
+				} else if (defenders[i].pieceMoved == selected && board.GetPiece(currentCoord) != null) {
+					tiledObject.Color = activeAttack;
+				}
 			}
 		}
 	}
