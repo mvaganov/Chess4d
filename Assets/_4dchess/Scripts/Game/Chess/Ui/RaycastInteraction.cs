@@ -24,7 +24,7 @@ public class RaycastInteraction : MonoBehaviour {
 	}
 
 	void Update() {
-		if (EventSystem.current.currentSelectedGameObject != null) {
+		if (EventSystem.current == null || EventSystem.current.currentSelectedGameObject != null) {
 			return;
 		}
 		if (Input.GetMouseButtonUp(0)) {
