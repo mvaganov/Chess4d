@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 #if USE_INPUTSYSTEM
 using UnityEngine.InputSystem;
 using CallbackContext = InputAction.CallbackContext;
@@ -24,6 +25,7 @@ namespace NonStandard.Character {
 		public Move move;
 		public AutoMove automove;
 		public Callbacks callbacks;
+		public bool isPlayerCharacter;
 #if UNITY_EDITOR
 		private void OnValidate() {
 			UnityEditorRefreshExpectedComponents();
@@ -40,14 +42,20 @@ namespace NonStandard.Character {
 			if (callbacks == null) { callbacks = GetComponent<Callbacks>(); }
 		}
 #endif
+		public void Awake() { Init(); }
+		public void Start() { Init(); }
 		public void Init() {
 			rootTransform = transform;
 			rb = GetComponent<Rigidbody>();
 			if (move == null) { move = GetComponentInChildren<Move>(); }
+			Root controller = UserController.GetUserCharacterController().Target;
+			if (isPlayerCharacter && (controller != this || controller.move.cameraTransform == null)) {
+				TakeControlOfUserInterface();
+			}
 		}
-		public void Awake() { Init(); }
-		public void Start() { Init(); }
+
 		public Transform GetCameraTarget() { return head != null ? head : rootTransform; }
+
 		public void TakeControlOfUserInterface() {
 			UserController user = UserController.GetUserCharacterController();
 			user.RelinquishCharacter();

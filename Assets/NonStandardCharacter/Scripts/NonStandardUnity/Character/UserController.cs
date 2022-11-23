@@ -27,7 +27,7 @@ namespace NonStandard.Character {
 				Target = value.GetComponent<Root>();
 			}
 		}
-		public CharacterCamera CharacterCamera { get => _camera; set => _camera = value; }
+		public CharacterCamera CharacterCameraController { get => _camera; set => _camera = value; }
 		public Root Target {
 			get { return target; }
 			set {
@@ -85,6 +85,18 @@ namespace NonStandard.Character {
 			}
 			return target.transform;
 		}
+		public void AbsorbCharacter(Root target) {
+			this.target = target;
+			if (target.jump) {
+				EventBind.On(target.jump.OnJumpPowerProgress, this, nameof(NotifyJumpPowerProgress));
+				EventBind.On(target.jump.OnJumpCountChanged, this, nameof(NotifyJumpCountProgress));
+			}
+			if (target.move) {
+				target.move.cameraTransform = CharacterCameraController.Camera.transform;
+			}
+			CharacterCameraController.target = GetCameraTarget();
+		}
+
 #if ENABLE_INPUT_SYSTEM
 		public void SetMove(InputAction.CallbackContext context) {
 			MoveInput = context.ReadValue<Vector2>();
@@ -182,21 +194,10 @@ namespace NonStandard.Character {
 			}
 		}
 #else
+		public float mouseSensitivity = 3;
 		public void RelinquishCharacter(Root target = null) {
 			Debug.Log("disable input mapping");
 		}
-		public void AbsorbCharacter(Root target) {
-			this.target = target;
-			if (target.jump) {
-				EventBind.On(target.jump.OnJumpPowerProgress, this, nameof(NotifyJumpPowerProgress));
-				EventBind.On(target.jump.OnJumpCountChanged, this, nameof(NotifyJumpCountProgress));
-			}
-			if (target.move) {
-				target.move.cameraTransform = CharacterCamera.transform;
-			}
-			CharacterCamera.target = GetCameraTarget();
-		}
-
 		void Start() {
 			_camera = CharacterCamera.FindCameraTargettingChildOf(target.transform);
 		}
@@ -206,7 +207,7 @@ namespace NonStandard.Character {
 			MoveInput = input;
 			JumpInput = jump ? 1 : 0;
 			if (_camera != null && Input.GetMouseButton(1)) {
-				_camera.ProcessLookRotation(new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")));
+				_camera.ProcessLookRotation(new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * mouseSensitivity);
 			}
 		}
 #endif

@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 1988414674}
   - component: {fileID: 307250062951072141}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: Camera Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2153,7 +2153,7 @@ GameObject:
   - component: {fileID: 836615572271151853}
   - component: {fileID: 969677199037532339}
   m_Layer: 0
-  m_Name: EventSystem
+  m_Name: EventSystem Selector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2203,6 +2203,10 @@ PrefabInstance:
       propertyPath: abilities
       value: 
       objectReference: {fileID: 4158311897631825625}
+    - target: {fileID: 4347781871269923448, guid: 7508e324b3af6ed4f9372025d577b112, type: 3}
+      propertyPath: isPlayerCharacter
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4347781871269923450, guid: 7508e324b3af6ed4f9372025d577b112, type: 3}
       propertyPath: move.orientationTransform
       value: 

@@ -123,9 +123,9 @@ namespace NonStandard.Inputs {
 			return results.Count > 0;
 		}
 #else
-		private void Start() {
-			Debug.Log("use InputMap instead");
-		}
+		// TODO reimplement the most complicated parts of InputSystem to work with standard unity input
+		// (resolving controller inputs to varied data output, like bool for buttons, float for axis, Vector2 for joystick, ...)
+		// it's easier to just adopt the InputSystem.
 #endif
 	}
 }

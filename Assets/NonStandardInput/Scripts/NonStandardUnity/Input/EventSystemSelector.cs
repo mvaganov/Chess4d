@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace NonStandard.Inputs {
 	public class EventSystemSelector : MonoBehaviour {
@@ -7,14 +8,16 @@ namespace NonStandard.Inputs {
 #endif
 		public GameObject regularEventSystem;
 		public void Awake() {
-			GameObject prefab =
+			if (EventSystem.current == null) {
+				GameObject prefab =
 #if USE_EVENTSYSTEM
-				inputSystemEventSystem;
+					inputSystemEventSystem;
 #else
-				regularEventSystem;
+					regularEventSystem;
 #endif
-			GameObject eventSystem = Instantiate(prefab);
-			eventSystem.transform.SetParent(transform.parent, false);
+				GameObject eventSystem = Instantiate(prefab);
+				eventSystem.transform.SetParent(transform.parent, false);
+			}
 			Destroy(gameObject);
 		}
 	}

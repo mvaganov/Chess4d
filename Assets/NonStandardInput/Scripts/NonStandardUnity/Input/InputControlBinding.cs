@@ -1,22 +1,29 @@
-#if HAS_INPUTSYSTEM
+// code by michael vaganov, released to the public domain via the unlicense (https://unlicense.org/)
+#if USE_INPUTSYSTEM
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Layouts;
+using System.Linq;
 
 namespace NonStandard.Inputs {
-	public enum ControlType { Button, Vector2, Vector3, Analog, Axis, Bone, Digital, Double, Dpad, Eyes, Integer, Quaternion, Stick, Touch }
+	public enum ControlType { Button, Vector2, Vector3, Analog, Axis, Bone, Digital, Double, Dpad, Eyes, Integer, Quaternion, Stick, Touch, Key }
 
 	[Serializable]
 	public class InputControlBinding {
+		/// <summary>
+		/// used by special generated composite key input
+		/// </summary>
+		public const string CompositePrefix = "^COMPOSITE^";
 		public static Dictionary<InputAction, InputControlBinding> Active = new Dictionary<InputAction, InputControlBinding>();
 		public static Action OnActiveChange;
 
 		public string description, actionName;
 		public ControlType controlType;
 		[InputControl] public string[] bindingPaths = null;
-		public EventBind evnt;
 		public UnityInputActionEvent actionEventHandler = new UnityInputActionEvent();
 		internal const char separator = '/';
 		[Serializable] public class UnityInputActionEvent : UnityEvent<InputAction.CallbackContext> { }
@@ -27,21 +34,34 @@ namespace NonStandard.Inputs {
 				return index >= 0 ? actionName.Substring(0, index) : actionName;
 			}
 		}
+
 		public string ActionInputName {
 			get {
 				int index = actionName.IndexOf(separator);
 				return index >= 0 ? actionName.Substring(index + 1) : actionName;
 			}
 		}
-		public InputControlBinding(string d, string an, ControlType t, EventBind e, string[] c = null) {
-			description = d; actionName = an; controlType = t; evnt = e; bindingPaths = c;
+
+		public InputControlBinding(string description, string actionName, ControlType t, EventBind e, string c = null)
+			: this(description, actionName, t, e, new string[] { c }) { }
+
+		public InputControlBinding(string description, string actionName, ControlType t, EventBind e, IEnumerable<string> c = null) {
+			this.description = description; this.actionName = actionName; controlType = t;
+			bindingPaths = c != null ? c.ToArray() : null;
 			e.Bind(actionEventHandler);
 		}
+
+		public InputControlBinding(string description, string actionName, ControlType t, EventBind[] events, IEnumerable<string> c = null) {
+			this.description = description; this.actionName = actionName; controlType = t;
+			bindingPaths = c != null ? c.ToArray() : null;
+			Array.ForEach(events, e => e.Bind(actionEventHandler));
+		}
+
 		public void Bind(InputActionAsset inputActionAsset, bool enable) {
 			InputAction ia = FindAction(inputActionAsset, actionName, controlType, bindingPaths);
 			if (ia == null) {
 				string allActions = string.Join(", ", string.Join(", ", InputControlBinding.GetAllActionNames(inputActionAsset)));
-				Debug.LogWarning($"Missing {actionName} {controlType}). Did you mean one of these: [{allActions}]");
+				Debug.LogWarning($"Missing {actionName} ({controlType}). Did you mean one of these: [{allActions}]");
 				return;
 			}
 			if (enable) {
@@ -50,10 +70,10 @@ namespace NonStandard.Inputs {
 				UnbindAction(ia);
 			}
 		}
+
 		public void BindAction(InputAction ia) {
 			if (actionEventHandler != null) {
 				UnbindAction(ia);
-
 				ia.started += actionEventHandler.Invoke;
 				ia.performed += actionEventHandler.Invoke;
 				ia.canceled += actionEventHandler.Invoke;
@@ -61,6 +81,7 @@ namespace NonStandard.Inputs {
 				OnActiveChange?.Invoke();
 			}
 		}
+
 		public void UnbindAction(InputAction ia) {
 			if (actionEventHandler != null) {
 				ia.started -= actionEventHandler.Invoke;
@@ -71,15 +92,26 @@ namespace NonStandard.Inputs {
 			}
 		}
 
-		public static InputAction FindAction(InputActionAsset actionAsset, string expectedActionName, ControlType actionInputType, string[] bindingPathToCreateWithIfMissing = null) {
+		public EventBind[] GetPersistentEvents() {
+			EventBind[] events = new EventBind[actionEventHandler.GetPersistentEventCount()];
+			for (int i = 0; i < events.Length; i++) {
+				events[i] = new EventBind(actionEventHandler.GetPersistentTarget(i),
+					actionEventHandler.GetPersistentMethodName(i));
+			}
+			return events;
+		}
+
+		public static InputAction FindAction(InputActionAsset actionAsset, string expectedActionName,
+		ControlType actionInputType, IEnumerable<string> bindingPathToCreateWithIfMissing = null) {
 			string controlType = actionInputType.ToString();
-			foreach (var actionMap in actionAsset.actionMaps) {
+			foreach (InputActionMap actionMap in actionAsset.actionMaps) {
 				string n = separator + expectedActionName;
 				foreach (var action in actionMap.actions) {
 					string actionName = actionMap.name + separator + action.name;
 					if (action.name == expectedActionName || actionName == expectedActionName || actionName.Contains(n)) {
 						if (action.expectedControlType != controlType) {
-							Debug.LogWarning("found " + expectedActionName + ", but Input type is " + action.expectedControlType + ", not " + actionInputType);
+							Debug.LogWarning("found " + expectedActionName + " in " + actionAsset.name + ", but Input type is " +
+								action.expectedControlType + ", not " + actionInputType + ".");
 						} else {
 							return action;
 						}
@@ -91,7 +123,20 @@ namespace NonStandard.Inputs {
 			}
 			return null;
 		}
-		private static InputAction CreateInputActionBinding(InputActionAsset asset, string name, string controlType, string[] bindPaths) {
+
+		public static List<InputAction> GetActiveActions(InputActionMap actionMap) {
+			List<InputAction> activeActions = null;
+			foreach (var ia in actionMap.actions) {
+				if (ia.enabled) {
+					if (activeActions == null) { activeActions = new List<InputAction>(); }
+					activeActions.Add(ia);
+				}
+			}
+			return activeActions;
+		}
+
+		private static InputAction CreateInputActionBinding(InputActionAsset asset, string name, string controlType,
+		IEnumerable<string> bindPaths) {
 			//Debug.Log("MAKE IT");
 			int mapNameLimit = name.IndexOf("/");
 			string actionMapName = name.Substring(0, mapNameLimit);
@@ -106,29 +151,34 @@ namespace NonStandard.Inputs {
 			foreach (InputAction ia in actionMap.actions) { if (ia.name == actionName) { inputAct = ia; } }
 			if (inputAct == null) {
 				bool isEnabled = actionMap.enabled;
-				if (isEnabled) {
-					Debug.Log(actionMap.name + " was enabled, disabling");
+				List<InputAction> activeActions = GetActiveActions(actionMap);
+				if (isEnabled || activeActions != null) {
+					//Debug.Log(actionMap.name + " was enabled, disabling");
 					actionMap.Disable();
 				}
+				asset.Disable();
 				inputAct = actionMap.AddAction(actionName);
+				//inputAct = actionMap.AddAction(actionName, InputActionType.PassThrough);
+				asset.Enable();
 				//Debug.Log("added " + actionName);
 				inputAct.expectedControlType = controlType;
 				if (isEnabled) {
-					//Debug.Log("reenabling " + actionMap.name);
-					actionMap.Enable();
+					if (activeActions == null) {
+						//Debug.Log("reenabling " + actionMap.name);
+						actionMap.Enable();
+					} else {
+						for (int i = 0; i < activeActions.Count; ++i) {
+							activeActions[i].Enable();
+						}
+					}
 				}
-			}
-			if (bindPaths.Length == 0) {
-				//Debug.Log("no actual input for "+ name);
-				return inputAct;
 			}
 			PopulateInputActionControlBinding(actionMap, inputAct, bindPaths);
 			return inputAct;
 		}
-		public static string CompositePrefix = "^COMPOSITE^";
-		private static void PopulateInputActionControlBinding(InputActionMap actionMap, InputAction action, string[] inputPathToCreateWithIfMissing) {
-			for (int inputBindIndex = 0; inputBindIndex < inputPathToCreateWithIfMissing.Length; inputBindIndex++) {
-				string bindingString = inputPathToCreateWithIfMissing[inputBindIndex];
+
+		private static void PopulateInputActionControlBinding(InputActionMap actionMap, InputAction action, IEnumerable<string> inputPathToCreateWithIfMissing) {
+			foreach (string bindingString in inputPathToCreateWithIfMissing) {
 				if (bindingString.StartsWith(CompositePrefix)) {
 					//Debug.Log("composite logic "+ bindingString);
 					string text = bindingString.Substring(CompositePrefix.Length);
@@ -138,7 +188,7 @@ namespace NonStandard.Inputs {
 					text = text.Substring(compositeName.Length + 1);
 					//Debug.Log("text " + text);
 					string[] components = text.Split(InputBinding.Separator);
-					InputActionSetupExtensions.CompositeSyntax compSyntax = WsadBindingSyntax(actionMap, action, compositeName);
+					InputActionSetupExtensions.CompositeSyntax compSyntax = CompositeBindingSyntax(actionMap, action, compositeName);
 					for (int c = 0; c < components.Length; ++c) {
 						text = components[c];
 						//Debug.Log("text " + text);
@@ -164,20 +214,19 @@ namespace NonStandard.Inputs {
 				}
 			}
 		}
+
 		/// <summary>
-		/// uses voodoo magic to access <see cref="InputActionSetupExtensions.AddBindingInternal"/> and the internal
-		/// <see cref="InputActionSetupExtensions.CompositeSyntax"/> constructor
+		/// uses evil voodoo magic to access <see cref="InputActionSetupExtensions.AddBindingInternal"/> and the
+		/// internal <see cref="InputActionSetupExtensions.CompositeSyntax"/> constructor. Can't seem to create
+		/// composite inputs otherwise, at least in InputSystem v1.2.0 or before.
 		/// </summary>
-		/// <param name="actionMap"></param>
-		/// <param name="action"></param>
-		/// <param name="compositeName"></param>
-		/// <returns></returns>
-		private static InputActionSetupExtensions.CompositeSyntax WsadBindingSyntax(InputActionMap actionMap, InputAction action, string compositeName) {
+		private static InputActionSetupExtensions.CompositeSyntax CompositeBindingSyntax(InputActionMap actionMap, InputAction action, string compositeName) {
 			var binding = new InputBinding {
 				name = compositeName, path = "Dpad",
 				interactions = null, processors = null,
 				isComposite = true, action = action.name
 			};
+			// need a private method to add bindings to a composite input
 			MethodInfo dynMethod = typeof(InputActionSetupExtensions).GetMethod("AddBindingInternal", BindingFlags.NonPublic | BindingFlags.Static);
 			object result = null;
 			try {
@@ -191,11 +240,15 @@ namespace NonStandard.Inputs {
 			int bindingIndex = (int)result;
 			InputActionSetupExtensions.CompositeSyntax compSyntax =
 				(InputActionSetupExtensions.CompositeSyntax)typeof(InputActionSetupExtensions.CompositeSyntax).GetConstructor(
-					  BindingFlags.NonPublic | BindingFlags.Instance,
-					  null, new Type[] { typeof(InputActionMap), typeof(InputAction), typeof(int) }, null)
+						BindingFlags.NonPublic | BindingFlags.Instance,
+						null, new Type[] { typeof(InputActionMap), typeof(InputAction), typeof(int) }, null)
 				.Invoke(new object[] { actionMap, action, bindingIndex });
 			return compSyntax;
 		}
+
+		/// <summary>
+		/// get names of actions in this <see cref="InputActionAsset"/>
+		/// </summary>
 		public static IList<string> GetAllActionNames(InputActionAsset actionAsset) {
 			List<string> actionNames = new List<string>();
 			foreach (var actionMap in actionAsset.actionMaps) {
