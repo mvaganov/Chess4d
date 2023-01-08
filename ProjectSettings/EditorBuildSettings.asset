@@ -8,4 +8,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_4dchess/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  m_configObjects: {}
+  m_configObjects:
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 2b521871d6604da4484e99041fb2fff7, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 78e66e77a4c4ba94abb059679e98941b, type: 2}

@@ -618,6 +618,7 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
   scriptingDefineSymbols:
+    Standalone: NONSTANDARD_UTILITY
     WebGL: NONSTANDARD_UTILITY
   additionalCompilerArguments: {}
   platformArchitecture: {}
