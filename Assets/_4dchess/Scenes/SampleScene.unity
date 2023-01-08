@@ -5848,6 +5848,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: -17
       objectReference: {fileID: 0}
+    - target: {fileID: 405861991911988476, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
+      propertyPath: _collapseDuplicates
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 405861991911988478, guid: 647ef8744b15c7c4b87f5a132248c73c, type: 3}
       propertyPath: m_Name
       value: Log
