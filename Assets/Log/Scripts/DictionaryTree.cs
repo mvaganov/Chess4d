@@ -93,4 +93,8 @@ public class DictionaryTree<TYPE, BRANCH> : ITypedBranch, IEnumerable {
 			}
 		}
 	}
+
+	public void Clear() {
+		_branches.Clear();
+	}
 }

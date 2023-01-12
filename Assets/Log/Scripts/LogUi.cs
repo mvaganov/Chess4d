@@ -29,6 +29,13 @@ public class LogUi : MonoBehaviour {
 	};
 
 	public long TimeStart => _timeStart;
+	public bool CollapseDuplicates {
+		get => _collapseDuplicates;
+		set {
+			_collapseDuplicates = value;
+			RebuildUi();
+		}
+	}
 
 	[System.Serializable]
 	public struct MessageColor {
@@ -40,6 +47,11 @@ public class LogUi : MonoBehaviour {
 
 	private void Awake() {
 		foreach (MessageColor mc in _messageColors) { _colorDict[mc.type] = mc; }
+		Initialize();
+	}
+
+	private void Initialize() {
+		_countMessages = 0;
 		_timeStart = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
 	}
 
@@ -96,6 +108,11 @@ public class LogUi : MonoBehaviour {
 		return msg;
 	}
 
+	public void ToggleDuplicateMessageCollapse() {
+		_collapseDuplicates = !_collapseDuplicates;
+		RebuildUi();
+	}
+
 	public void RebuildUi() {
 		if (_messageTree == null) {
 			Debug.LogWarning($"need {nameof(_messageTree)} to rebuild message list");
@@ -121,6 +138,8 @@ public class LogUi : MonoBehaviour {
 		}
 	}
 
+	public void DoUiCollapsed() => CollapseDuplicates = true;
+	public void DoUiUncollapsed() => CollapseDuplicates = false;
 	private void RebuildUiCollapsed() {
 		List<LogMessageData> messagesInOrder = new List<LogMessageData>();
 		foreach (LogMessageData messageData in _messageTree) {
@@ -157,5 +176,11 @@ public class LogUi : MonoBehaviour {
 			LogMessageInstance messageInstance = messagesInOrder[i];
 			messageInstance.Ui.transform.SetParent(_messageList, false);
 		}
+	}
+
+	public void Clear() {
+		if (_messageTree != null) { _messageTree.Clear(); }
+		ClearMessageUi();
+		Initialize();
 	}
 }
