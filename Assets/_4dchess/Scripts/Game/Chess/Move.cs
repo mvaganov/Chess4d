@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveNode {
-	public Move move;
+	public IMove move;
 	public int turnIndex;
 	public int timestamp;
 	private List<MoveNode> next;
@@ -41,16 +41,16 @@ public class MoveNode {
 
 	public List<MoveNode> GetAllTimelineBranches() { return next; }
 
-	public MoveNode(int index, Move move, string notes) {
+	public MoveNode(int index, IMove move, string notes) {
 		this.move = move;
 		this.turnIndex = index;
 		timestamp = System.Environment.TickCount;
 		next = new List<MoveNode>();
 		prev = null;
 		if (move != null) {
-			List<Move> newMoves = new List<Move>();
-			move.board.game.moveNodeBeingProcessed = this;
-			boardState = move.board.Analysis.NewAnalysisAfter(move, newMoves);
+			List<IMove> newMoves = new List<IMove>();
+			move.Board.game.moveNodeBeingProcessed = this;
+			boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
 			newMoves.RemoveAll(move => move.GetType() == typeof(Defend));
 			boardState.notableMoves = newMoves;
 			Debug.Log($"{move} new moves: {string.Join(", ", newMoves.ConvertAll(m=>m.ToString()))}");
@@ -83,7 +83,7 @@ public class MoveNode {
 		return ((move != null) ? move.GetHashCode() : 0) ^ turnIndex;
 	}
 
-	public MoveNode FindMoveRecursive(Move m, HashSet<MoveNode> ignoreBranches) {
+	public MoveNode FindMoveRecursive(IMove m, HashSet<MoveNode> ignoreBranches) {
 		if (move == m) { return this; }
 		MoveNode found = null;
 		for (int i = 0; i < next.Count; ++i) {
@@ -111,9 +111,11 @@ public interface IMove {
 	public void GetMovingPieces(HashSet<Piece> out_movingPieces);
 	public void Do();
 	public void Undo();
+	public void DoWithoutAnimation();
+	public void UndoWithoutAnimation();
 }
 
-public class Move {
+public class PieceMove : IMove {
 	/// <summary>
 	/// the board must be known because pieces could conceivably move between boards and do similar moves on different boards
 	/// </summary>
@@ -121,19 +123,23 @@ public class Move {
 	public Coord from, to;
 	public Piece pieceMoved;
 
-	public Move(Board board, Piece pieceMoved, Coord from, Coord to) {
+	public Board Board => board;
+	public Piece Piece => pieceMoved;
+
+	public PieceMove(Board board, Piece pieceMoved, Coord from, Coord to) {
 		this.board = board;
 		this.from = from;
 		this.to = to;
 		this.pieceMoved = pieceMoved;
 	}
 
-	public Move(Move other) {
+	public PieceMove(PieceMove other) {
 		from = other.from;
 		to = other.to;
 		pieceMoved = other.pieceMoved;
 	}
-
+	public Piece GetPiece(int index) => Piece;
+	public int GetPieceCount() => 1;
 	public virtual Coord GetRelevantCoordinate() => to;
 
 	public virtual bool Involves(Piece piece) => pieceMoved == piece;
@@ -169,9 +175,9 @@ public class Move {
 	}
 
 	public override bool Equals(object obj) {
-		return obj.GetType() == typeof(Move) && DuckTypeEquals(obj as Move);
+		return obj.GetType() == typeof(PieceMove) && DuckTypeEquals(obj as PieceMove);
 	}
-	public virtual bool DuckTypeEquals(Move m) {
+	public virtual bool DuckTypeEquals(PieceMove m) {
 		return m.from == from && m.to == to && m.pieceMoved == pieceMoved;
 	}
 	public override int GetHashCode() {
@@ -193,7 +199,7 @@ public class Move {
 	}
 }
 
-public class Capture : Move {
+public class Capture : PieceMove {
 	public Coord captureCoord;
 	public Piece pieceCaptured;
 
@@ -328,12 +334,19 @@ public class Defend : Capture {
 	}
 }
 
-public class StartGame : Move {
-	public StartGame(Board board) : base(board, null, Coord.zero, Coord.zero) { }
-	public override Coord GetRelevantCoordinate() => Coord.zero;
-	public override bool Involves(Piece piece) => false;
-	public override void GetMovingPieces(HashSet<Piece> out_movingPieces) { }
-	public override void Do() { }
-	public override void Undo() { }
+public class StartGame : IMove {
+	Board board;
+	public Board Board => board;
+	public Piece Piece => null;
+	public StartGame(Board board) { this.board = board; }
+	public Coord GetRelevantCoordinate() => Coord.zero;
+	public bool Involves(Piece piece) => false;
+	public void GetMovingPieces(HashSet<Piece> out_movingPieces) { }
+	public void Do() { }
+	public void Undo() { }
 	public override string ToString() { return "start game"; }
+	public Piece GetPiece(int index) => null; // TODO should get all pieces?
+	public int GetPieceCount() => 0; // TODO should be the entire board?
+	public void DoWithoutAnimation() { }
+	public void UndoWithoutAnimation() { }
 }

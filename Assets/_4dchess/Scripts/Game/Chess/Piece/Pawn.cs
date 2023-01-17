@@ -15,11 +15,11 @@ public partial class Pawn : MoveLogic {
 		return p;
 	}
 
-	public override void GetMoves(List<Move> out_moves, MoveKind moveKind) {
+	public override void GetMoves(List<IMove> out_moves, MoveKind moveKind) {
 		Piece p = piece;
 		Coord coord = p.GetCoord();
 		Board board = p.board;
-		List<Move> pawnMoves = new List<Move>();
+		List<IMove> pawnMoves = new List<IMove>();
 		if (moveKind.HasFlag(MoveKind.Move)) {
 			StandardMoves(new Coord[] { direction }, 1, pawnMoves, MoveKind.Move);
 			if (piece.moveCount == 0 && pawnMoves.Count > 0) {
@@ -33,17 +33,18 @@ public partial class Pawn : MoveLogic {
 		if (moveKind.HasFlag(MoveKind.Defend) || moveKind.HasFlag(MoveKind.Attack)) {
 			StandardMoves(new Coord[] { direction + Coord.left, direction + Coord.right }, 1, pawnMoves, MoveKind.AttackDefend);
 		}
-		Move leftEP = EnPassant.GetPossible(board, p, coord, coord + direction + Coord.left, coord + Coord.left);
+		PieceMove leftEP = EnPassant.GetPossible(board, p, coord, coord + direction + Coord.left, coord + Coord.left);
 		if (leftEP != null) { pawnMoves.Add(leftEP); }
-		Move rightEP = EnPassant.GetPossible(board, p, coord, coord + direction + Coord.right, coord + Coord.right);
+		PieceMove rightEP = EnPassant.GetPossible(board, p, coord, coord + direction + Coord.right, coord + Coord.right);
 		if (rightEP != null) { pawnMoves.Add(rightEP); }
 		ReplaceAnyMoveOntoFinalSquareWithPawnPromotion(pawnMoves, board);
 		out_moves.AddRange(pawnMoves);
 	}
 
-	private void ReplaceAnyMoveOntoFinalSquareWithPawnPromotion(List<Move> out_pawnMoves, Board board) {
+	private void ReplaceAnyMoveOntoFinalSquareWithPawnPromotion(List<IMove> out_pawnMoves, Board board) {
 		for (int i = 0; i < out_pawnMoves.Count; ++i) {
-			Move m = out_pawnMoves[i];
+			IMove im = out_pawnMoves[i];
+			PieceMove m = im as PieceMove;
 			if (IsLastRow(board, m.to) && !(m is Defend) && !(m is Promotion)) {
 				out_pawnMoves[i] = new Promotion(out_pawnMoves[i]);
 			}
@@ -56,11 +57,11 @@ public partial class Pawn : MoveLogic {
 		return isValidCoord && !nextWouldBeValid;
 	}
 
-	public override void DoMove(Move move) {
+	public override void DoMove(PieceMove move) {
 		base.DoMove(move);
 	}
 
-	public override void UndoMove(Move move) {
+	public override void UndoMove(PieceMove move) {
 		base.UndoMove(move);
 	}
 }

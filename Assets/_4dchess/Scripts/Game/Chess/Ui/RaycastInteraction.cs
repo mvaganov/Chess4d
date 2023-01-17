@@ -67,7 +67,7 @@ public class RaycastInteraction : MonoBehaviour {
 	}
 
 	public void DoMoveAt(Piece selectedPiece, Coord coord) {
-		List<Move> moves = analysis.GetMovesAt(coord, MoveIsNotDefensive);
+		List<IMove> moves = analysis.GetMovesAt(coord, MoveIsNotDefensive);
 		if (coord != selectedPiece.GetCoord() && moves.Count != 0) {
 			switch (moves.Count) {
 				case 1:
@@ -76,7 +76,7 @@ public class RaycastInteraction : MonoBehaviour {
 				default:
 					Debug.Log($"TODO must disambiguate between {moves.Count} moves: [{string.Join(", ", moves)}]");
 					for (int i = 0; i < moves.Count; i++) {
-						Move m = moves[i];
+						PieceMove m = moves[i] as PieceMove;
 						Debug.Log($"{m.GetType().Name} {m.pieceMoved} {m.from} {m.to}");
 					}
 					break;
@@ -87,7 +87,7 @@ public class RaycastInteraction : MonoBehaviour {
 		}
 	}
 
-	private bool MoveIsNotDefensive(Move move) {
+	private bool MoveIsNotDefensive(IMove move) {
 		//Defend def = move as Defend;
 		//return move as Defend == null;
 		Capture cap = move as Capture;

@@ -22,7 +22,7 @@ public class MoveHistory : MonoBehaviour {
 		int count = 0;
 		MoveNode node = CurrentMove;
 		while (node != null && node.move != null) {
-			if (node.move.board == board && (node.move is Capture || (node.move is Move m
+			if (node.move.Board == board && (node.move is Capture || (node.move is PieceMove m
 			&& m.pieceMoved != null && m.pieceMoved.code == "P"))) {
 				break;
 			}
@@ -41,7 +41,7 @@ public class MoveHistory : MonoBehaviour {
 	/// <summary>
 	/// find the point in history (or alternate timelines) that a specific piece moved from 'from' to 'to'.
 	/// </summary>
-	public MoveNode FindMoveNode(Move move) {
+	public MoveNode FindMoveNode(IMove move) {
 		MoveNode n = currentMove;
 		Debug.Log("start "+n);
 		// if we're at the node we're looking for, return it now. that was easy.
@@ -89,7 +89,7 @@ public class MoveHistory : MonoBehaviour {
 		return list;
 	}
 
-	public void MakeMove(Move move, string notes) {
+	public void MakeMove(IMove move, string notes) {
 		DoThis(new MoveNode(currentMove.turnIndex + 1, move, notes));
 	}
 
@@ -99,7 +99,8 @@ public class MoveHistory : MonoBehaviour {
 			//currentMove.GetTimelineBranch(doneAlready);
 			move = currentMove.PopTimeline(doneAlready);
 		}
-		Piece piece = move.move.pieceMoved;
+		PieceMove pmove = move.move as PieceMove;
+		Piece piece = pmove.pieceMoved;
 		Debug.Log(piece.name + " " + move.move.GetType().Name + " " + move);
 		AnnounceTurnOrder(move);
 		currentMove.SetAsNextTimelineBranch(move);
@@ -118,8 +119,9 @@ public class MoveHistory : MonoBehaviour {
 	// TODO make a new class for user output and put this in there
 	private void AnnounceTurnOrder(MoveNode move) {
 		int whoShouldBeGoing = game.GetWhosTurnItIs();
-		if (move != null && move.move != null && move.move.pieceMoved.team.TeamIndex != whoShouldBeGoing) {
-			Piece piece = move.move.pieceMoved;
+		if (move != null && move.move != null && move.move is PieceMove pmove
+		&& pmove.pieceMoved.team.TeamIndex != whoShouldBeGoing) {
+			Piece piece = pmove.pieceMoved;
 			string message = piece.team.name + " went out of turn, it should be " +
 				game.teams[whoShouldBeGoing].name + "'s turn";
 			if (game.message != null) {
@@ -162,8 +164,8 @@ public class MoveHistory : MonoBehaviour {
 					currentMove = next;
 				}
 			}
-			if (currentMove.move != null && currentMove.move.pieceMoved != null) {
-				boards.Add(currentMove.move.pieceMoved.board);
+			if (currentMove.move != null && currentMove.move is PieceMove pmove && pmove.pieceMoved != null) {
+				boards.Add(pmove.pieceMoved.board);
 			}
 		} while (currentMove.turnIndex != actualIndexToTravelTo && next != null);
 		if (actualIndexToTravelTo == currentMove.turnIndex) {

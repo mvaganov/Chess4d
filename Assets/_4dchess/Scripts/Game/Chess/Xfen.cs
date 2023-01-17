@@ -125,7 +125,7 @@ public static class XFEN {
 			sb.Append((c.row < board.BoardSize.row - 1) ? "/" : " ");
 		}
 		MoveNode currentMoveNode = game.chessMoves.CurrentMove;
-		Move currentMove = currentMoveNode != null ? currentMoveNode.move : null;
+		PieceMove currentMove = (currentMoveNode != null ? currentMoveNode.move : null) as PieceMove;
 		int teamIndex = currentMove == null ? -1 : (currentMove.pieceMoved != null
 			? currentMove.pieceMoved.team.TeamIndex : -1);
 		int currentTeamMove = (teamIndex + 1) % game.teams.Count;
@@ -147,8 +147,8 @@ public static class XFEN {
 		if (!rooksCanCastle) {
 			sb.Append("-");
 		}
-		if (currentMove != null && currentMove.GetType() == typeof(Pawn.DoubleMove)) {
-			sb.Append(" ").Append(game.chessMoves.CurrentMove.move.from).Append(" ");
+		if (currentMove != null && currentMove is Pawn.DoubleMove doubleMove) {
+			sb.Append(" ").Append(doubleMove.from).Append(" ");
 		} else {
 			sb.Append(" - ");
 		}

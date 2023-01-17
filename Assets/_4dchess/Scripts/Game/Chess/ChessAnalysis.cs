@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ChessAnalysis : MonoBehaviour {
-	private List<Move> currentMoves;
-	private List<Move> validMoves;
+	private List<IMove> currentMoves;
+	private List<IMove> validMoves;
 	private Piece selectedPiece;
 	[SerializeField] private MoveHistory moves;
 	private List<King> kingsInCheck = new List<King>();
 	private Dictionary<Board,BoardState> boardAnalysis = new Dictionary<Board,BoardState>();
 	[SerializeField] private ChessGame game;
 
-	public List<Move> CurrentPieceCurrentMoves => currentMoves;
-	public List<Move> CurrentPieceValidMoves => validMoves;
+	public List<IMove> CurrentPieceCurrentMoves => currentMoves;
+	public List<IMove> CurrentPieceValidMoves => validMoves;
 
 	public Piece SelectedPiece {
 		get => selectedPiece;
@@ -72,10 +72,10 @@ public class ChessAnalysis : MonoBehaviour {
 		for (int i = 0; i < allKings.Count; ++i) {
 			Piece king = allKings[i];
 			Coord kingLocation = king.GetCoord();
-			Move[] moves = analysis.GetMovesTo(kingLocation);
+			IMove[] moves = analysis.GetMovesTo(kingLocation);
 			if (moves != null) {
 				for (int m = 0; m < moves.Length; ++m) {
-					Move move = moves[m];
+					IMove move = moves[m];
 					if (move.GetType() == typeof(Defend)) { continue; }
 					if (move is Pawn.Promotion pp) {
 						move = pp.moreInterestingMove;
@@ -105,13 +105,14 @@ public class ChessAnalysis : MonoBehaviour {
 	}
 
 	public bool IsValidMove(Coord coord) {
-		return validMoves != null && validMoves.FindIndex(m => m.to == coord) >= 0;
+		return validMoves != null && validMoves.FindIndex(im => im is PieceMove m && m.to == coord) >= 0;
 	}
 
-	public List<Move> GetMovesAt(Coord coord, Func<Move, bool> filter) {
-		List<Move> moves = new List<Move>();
+	public List<IMove> GetMovesAt(Coord coord, Func<IMove, bool> filter) {
+		List<IMove> moves = new List<IMove>();
 		for (int i = 0; i < currentMoves.Count; i++) {
-			Move move = currentMoves[i];
+			IMove imove = currentMoves[i];
+			PieceMove move = imove as PieceMove;
 			if (filter != null && !filter(move)) { continue; }
 			if (move.to == coord) {
 				moves.Add(move);
@@ -121,11 +122,11 @@ public class ChessAnalysis : MonoBehaviour {
 	}
 
 	public void SetCurrentPiece(Piece piece) {
-		if (currentMoves == null) { currentMoves = new List<Move>(); } else { currentMoves.Clear(); }
-		if (validMoves == null) { validMoves = new List<Move>(); } else { validMoves.Clear(); }
+		if (currentMoves == null) { currentMoves = new List<IMove>(); } else { currentMoves.Clear(); }
+		if (validMoves == null) { validMoves = new List<IMove>(); } else { validMoves.Clear(); }
 		selectedPiece = piece;
 		if (selectedPiece == null) { return; }
-		List<Move> pieceMoves = new List<Move>();
+		List<IMove> pieceMoves = new List<IMove>();
 		piece.GetMoves(pieceMoves);
 		for (int i = pieceMoves.Count-1; i >= 0; --i) {
 			if (pieceMoves[i] as Defend != null) {
@@ -144,7 +145,7 @@ public class ChessAnalysis : MonoBehaviour {
 		}
 	}
 
-	private bool IsValidMove(Piece piece, Move move) {
+	private bool IsValidMove(Piece piece, IMove move) {
 		if (piece == null) { return false; }
 		Capture cap = move as Capture;
 		if (cap != null && (cap.pieceCaptured == null || piece.team.IsAlliedWith(cap.pieceCaptured.team))) {

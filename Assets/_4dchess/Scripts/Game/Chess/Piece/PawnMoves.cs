@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public partial class Pawn {
-	public class DoubleMove : Move {
+	public class DoubleMove : PieceMove {
 		public DoubleMove(Board board, Piece pieceMoved, Coord from, Coord to) :
 			base(board, pieceMoved, from, to) { }
 		public override void Do() {
@@ -17,7 +17,7 @@ public partial class Pawn {
 			pieceMoved?.UndoMove(this);
 		}
 		public override bool Equals(object obj) {
-			return obj.GetType() == GetType() && DuckTypeEquals(obj as Move);
+			return obj.GetType() == GetType() && DuckTypeEquals(obj as PieceMove);
 		}
 		public override int GetHashCode() { return base.GetHashCode(); }
 	}
@@ -33,7 +33,7 @@ public partial class Pawn {
 			GetPawn(pieceMoved, nameof(EnPassant));
 			base.Undo();
 		}
-		public static Move GetPossible(Board board, Piece p, Coord pieceLocation, Coord nextPieceLocation, Coord otherPieceLocation) {
+		public static PieceMove GetPossible(Board board, Piece p, Coord pieceLocation, Coord nextPieceLocation, Coord otherPieceLocation) {
 			Tile sideTile = board.GetTile(otherPieceLocation);
 			if (sideTile == null) { return null; }
 			Piece possibleTarget = sideTile.GetPiece();
@@ -79,10 +79,10 @@ public partial class Pawn {
 		public override int GetHashCode() { return base.GetHashCode(); }
 	}
 
-	public class Promotion : Move {
+	public class Promotion : PieceMove {
 		private string selectedPieceCode = null;
 		public Piece promotedPiece;
-		public Move moreInterestingMove;
+		public IMove moreInterestingMove;
 		const int InvalidUserSelection = -1;
 		public int userSelection = InvalidUserSelection;
 		public override bool Equals(object obj) {
@@ -98,8 +98,8 @@ public partial class Pawn {
 			return base.GetHashCode() ^ (promotedPiece != null ? promotedPiece.GetHashCode() : 0);
 		}
 
-		public Promotion(Move move) : base(move) {
-			if (move.GetType() != typeof(Move)) {
+		public Promotion(IMove move) : base(move as PieceMove) {
+			if (move.GetType() != typeof(PieceMove)) {
 				moreInterestingMove = move;
 			}
 			if (move.GetType() == typeof(Defend)) {
@@ -207,7 +207,7 @@ public partial class Pawn {
 			ChessGame game = board.game;
 			MoveNode thisNode = game.chessMoves.CurrentMove;//game.chessMoves.FindMoveNode(this);
 			MoveNode parentMove = thisNode.prev;
-			Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new Move(this));
+			Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new PieceMove(this));
 			otherPromo.selectedPieceCode = code; // <-- this will force the new promotion event to skip the UI
 			string options = pieceMoved.board.game.PawnPromotionOptions;
 			//otherPromo.userSelection = options.IndexOf(code);

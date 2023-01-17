@@ -15,18 +15,18 @@ public class King : MoveLogic {
 			new Coord(-1,-1),
 	};
 
-	public override void GetMoves(List<Move> out_moves, MoveKind moveKind) {
+	public override void GetMoves(List<IMove> out_moves, MoveKind moveKind) {
 		StandardMoves(movePattern, 1, out_moves, moveKind);
 		if (piece.moveCount == 0) {
-			List<Move> castleMoves = Castle.FindMoves(this, Rook.movePattern, "R");
+			List<IMove> castleMoves = Castle.FindMoves(this, Rook.movePattern, "R");
 			out_moves.AddRange(castleMoves);
 		}
 	}
 
 	public class Check : Capture {
-		public Move triggeringMove;
+		public IMove triggeringMove;
 		public bool isMate = false;
-		public Check(Move triggeringMove, Capture threateningMove)
+		public Check(IMove triggeringMove, Capture threateningMove)
 			: base(threateningMove) {
 			this.triggeringMove = triggeringMove;
 		}
@@ -52,12 +52,12 @@ public class King : MoveLogic {
 		}
 	}
 
-	public class Castle : Move {
-		public Move partnerMove;
+	public class Castle : PieceMove {
+		public IMove partnerMove;
 
 		public Castle(Board board, Piece pieceMoved, Coord from, Coord to, Piece partner, Coord partnerFrom, Coord partnerTo)
 		: base(board, pieceMoved, from, to) {
-			partnerMove = new Move(board, partner, partnerFrom, partnerTo);
+			partnerMove = new PieceMove(board, partner, partnerFrom, partnerTo);
 		}
 		public override bool Equals(object obj) {
 			Castle c = obj as Castle;
@@ -65,14 +65,14 @@ public class King : MoveLogic {
 		}
 
 		public virtual bool DuckTypeEquals(Castle castle) {
-			return base.DuckTypeEquals(castle as Move) && (partnerMove.Equals(castle.partnerMove));
+			return base.DuckTypeEquals(castle as PieceMove) && (partnerMove.Equals(castle.partnerMove));
 		}
 		public override int GetHashCode() {
 			return base.GetHashCode() ^ partnerMove.GetHashCode();
 		}
 
-		public static List<Move> FindMoves(MoveLogic king, Coord[] movePattern, string pieceCode) {
-			List<Move> moves = new List<Move>();
+		public static List<IMove> FindMoves(MoveLogic king, Coord[] movePattern, string pieceCode) {
+			List<IMove> moves = new List<IMove>();
 			// look for rooks that have a line to the king using rook movement
 			king.StandardMoves(movePattern, 8, moves, MoveKind.Defend);
 			//Debug.Log("looking for castles " + string.Join(", ", moves));
@@ -125,8 +125,9 @@ public class King : MoveLogic {
 			Transform markerTransform = marker.transform;
 			markerTransform.SetParent(tile.transform);
 			markerTransform.localPosition = Vector3.zero;
+			PieceMove partnerPieceMove = partnerMove as PieceMove;
 			if (marker.Label != null) {
-				Piece partner = partnerMove.pieceMoved;
+				Piece partner = partnerPieceMove.pieceMoved;
 				if (partner != null) {
 					marker.Label.text = $"castle";
 				} else {
@@ -134,7 +135,7 @@ public class King : MoveLogic {
 				}
 			}
 			if (marker is TiledWire tw) {
-				tw.DrawLine(partnerMove.from, partnerMove.to, color);
+				tw.DrawLine(partnerPieceMove.from, partnerPieceMove.to, color);
 			}
 			return marker;
 		}

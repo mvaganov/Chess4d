@@ -9,7 +9,7 @@ public class Piece : TiledGameObject {
 	public Board board;
 	private MoveLogic moveLogic;
 	public float jumpHeight = 0;
-	[SerializeField] private List<Move> moves;
+	[SerializeField] private List<IMove> moves;
 	private Coord movesCalculatedAt;
 	public int moveCount = 0;
 	public SpriteRenderer worldIcon;
@@ -33,7 +33,7 @@ public class Piece : TiledGameObject {
 	}
 
 	// TODO can't move into check
-	public virtual void DoMove(Move move) {
+	public virtual void DoMove(PieceMove move) {
 		if (moveLogic != null) {
 			moveLogic.DoMove(move);
 		} else {
@@ -42,7 +42,7 @@ public class Piece : TiledGameObject {
 		++moveCount;
 	}
 
-	public virtual void UndoMove(Move move) {
+	public virtual void UndoMove(PieceMove move) {
 		if (moveLogic != null) {
 			moveLogic.UndoMove(move);
 		} else {
@@ -95,7 +95,7 @@ public class Piece : TiledGameObject {
 		MoveLogic.LerpPath(this, bezier, team.speed, true);
 	}
 
-	public void GetMoves(List<Move> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
+	public void GetMoves(List<IMove> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
 		if (moveLogic == null) { return; }
 		Coord here = GetCoord();
 		if (movesCalculatedAt == here) {
@@ -105,8 +105,8 @@ public class Piece : TiledGameObject {
 		if (moves != null) { GetMovesForceCalculation(here, out_moves, moveKind); }
 	}
 
-	public void GetMovesForceCalculation(Coord here, List<Move> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
-		if (moves == null) { moves = new List<Move>(); } else { moves.Clear(); }
+	public void GetMovesForceCalculation(Coord here, List<IMove> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
+		if (moves == null) { moves = new List<IMove>(); } else { moves.Clear(); }
 		if (here.col >= 0 && here.row >= 0) {
 			moveLogic.GetMoves(moves, moveKind);
 		}

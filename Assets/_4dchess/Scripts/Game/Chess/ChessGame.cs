@@ -47,7 +47,8 @@ public class ChessGame : MonoBehaviour {
 
 	public int WhoWentLast {
 		get {
-			Move m = chessMoves.CurrentMove != null ? chessMoves.CurrentMove.move : null;
+			IMove im = chessMoves.CurrentMove != null ? chessMoves.CurrentMove.move : null;
+			PieceMove m = im as PieceMove;
 			if (m != null && m.pieceMoved != null) {
 				return m.pieceMoved.team.TeamIndex;
 			}
@@ -55,7 +56,7 @@ public class ChessGame : MonoBehaviour {
 		}
 	}
 
-	public MoveNode FindMoveNode(Move move) {
+	public MoveNode FindMoveNode(IMove move) {
 		if (moveNodeBeingProcessed.move == move) {
 			return moveNodeBeingProcessed;
 		}

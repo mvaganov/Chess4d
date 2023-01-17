@@ -35,7 +35,7 @@ public class ChessVisuals : MonoBehaviour {
 			[typeof(Capture)] = new TileVisualSpecifics(new Color(1, 0, 0), captures),
 			[typeof(Pawn.DoubleMove)] = new TileVisualSpecifics(new Color(1, .75f, 0), moves),
 			[typeof(King.Castle)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),
-			[typeof(Move)] = new TileVisualSpecifics(new Color(1, 1, 0), moves),
+			[typeof(PieceMove)] = new TileVisualSpecifics(new Color(1, 1, 0), moves),
 			[typeof(King.Check)] = new TileVisualSpecifics(new Color(1, 0, 1), kingInCheck),
 		};
 	}
@@ -70,18 +70,18 @@ public class ChessVisuals : MonoBehaviour {
 		defendArrows.ClearTiles();
 		specialTileAndArrows.ClearTiles();
 		Coord pieceCoord = piece.GetCoord();
-		selection.CreateMarks(new Move[] { new Move(piece.board, piece, pieceCoord, pieceCoord) }, Color.cyan);
+		selection.CreateMarks(new PieceMove[] { new PieceMove(piece.board, piece, pieceCoord, pieceCoord) }, Color.cyan);
 
 		if (analysis.CurrentPieceCurrentMoves != null) {
 			for (int i = 0; i < analysis.CurrentPieceCurrentMoves.Count; ++i) {
-				Move move = analysis.CurrentPieceCurrentMoves[i];
+				IMove move = analysis.CurrentPieceCurrentMoves[i];
 				if (!showKingDefender && move is Capture cap && ChessGame.IsMyKing(piece, cap.pieceCaptured)) { continue; }
 				AddPieceSelectionVisualFor(move, piece.board);
 			}
 		}
 	}
 
-	private TiledGameObject AddPieceSelectionVisualFor(Move someKindOfMove, Board board) {
+	private TiledGameObject AddPieceSelectionVisualFor(IMove someKindOfMove, Board board) {
 		TiledGameObject tgo;
 		if (!TileVisSettings.TryGetValue(someKindOfMove.GetType(), out TileVisualSpecifics setting)) {
 			setting.visualizer = specialTileAndArrows;
@@ -104,9 +104,9 @@ public class ChessVisuals : MonoBehaviour {
 			return;
 		}
 		Coord currentCoord = target.GetCoord();
-		IList<Move> activityAtSquare = board.GetMovesTo(currentCoord);
+		IList<IMove> activityAtSquare = board.GetMovesTo(currentCoord);
 		if (activityAtSquare == null) { return; }
-		List<Move> defenders = new List<Move>();
+		List<PieceMove> defenders = new List<PieceMove>();
 		Piece selectedPiece = selected as Piece;
 		//Coord selectedCoord = (selected != null) ? selected.GetCoord() : Coord.zero;
 		Piece piece = selectedPiece;
