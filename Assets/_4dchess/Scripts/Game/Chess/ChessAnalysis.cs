@@ -72,9 +72,9 @@ public class ChessAnalysis : MonoBehaviour {
 		for (int i = 0; i < allKings.Count; ++i) {
 			Piece king = allKings[i];
 			Coord kingLocation = king.GetCoord();
-			List<Move> moves = analysis.GetMovesTo(kingLocation);
+			Move[] moves = analysis.GetMovesTo(kingLocation);
 			if (moves != null) {
-				for (int m = 0; m < moves.Count; ++m) {
+				for (int m = 0; m < moves.Length; ++m) {
 					Move move = moves[m];
 					if (move.GetType() == typeof(Defend)) { continue; }
 					if (move is Pawn.Promotion pp) {

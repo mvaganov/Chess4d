@@ -2,18 +2,42 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class BoardState {
-	private Dictionary<Coord, List<Move>> movesToLocations = new Dictionary<Coord, List<Move>>();
+	/// <summary>
+	/// using an Array of Move instead of a more mutable List because there will be many instances,
+	/// (a boardstate per move in the tree) and the vast majority of instances should be immutable,
+	/// which allows previously calculated boardstates to be referenced safely.
+	/// </summary>
+	private Dictionary<Coord, Move[]> movesToLocations = new Dictionary<Coord, Move[]>();
 	private BoardState prev;
 	public string identity;
+	public string notes;
 	[SerializeField] private Coord BoardSize;
+	/// <summary>
+	/// shows particularly notable moves. used to show what new moves are enabled by the new state
+	/// </summary>
+	public IList<Move> notableMoves;
 
 	public BoardState(Board board) {
 		RecalculatePieceMoves(board);
 	}
 
-	public BoardState(BoardState other) {
-		prev = other;
-		identity = other.identity;
+	//public BoardState(BoardState other) {
+	//	prev = other;
+	//	identity = other.identity;
+	//}
+
+	public BoardState() { }
+
+	public static BoardState Next(BoardState other) {
+		BoardState next = new BoardState();
+		next.prev = other;
+		next.identity = other.identity;
+		return next;
+	}
+
+	public static BoardState Copy(BoardState other) {
+		BoardState boardState = new BoardState();
+		return boardState;
 	}
 
 	private void Init(Board board) {
@@ -43,20 +67,12 @@ public class BoardState {
 		}
 	}
 
-	public BoardState NewAnalysisAfter(Move move) {
-		move.DoWithoutAnimation();
-		// TODO optimize this? reuse calculations used by the base board state?
-		BoardState nextAnalysis = new BoardState(move.board); // just do the entire analysis from scratch...
-		move.UndoWithoutAnimation();
-
-		// after fully calculating both board states, combine the new moves with the original in memory as much as possible
-		foreach(var kvp in movesToLocations) {
-			List<Move> original = kvp.Value;
-			List<Move> newMoves = nextAnalysis.movesToLocations[kvp.Key];
-			if (IsMoveListCollapsed(original, ref newMoves)) {
-				nextAnalysis.movesToLocations[kvp.Key] = original;
-			}
-		}
+	public BoardState NewAnalysisAfter(Move move, List<Move> totalNewMoves) {
+		move.DoWithoutAnimation(); // make move
+		BoardState nextAnalysis = new BoardState(move.board); // do entire analysis from scratch
+		// collapse common memory with previous. also note which moves are new
+		UseMemoryFromOldStateWherePossible(nextAnalysis, this, totalNewMoves);
+		move.UndoWithoutAnimation(); // unmake move, so the state stays as it should be
 
 //		//Dictionary<Coord, List<Move>> movesToRemove = new Dictionary<Coord, List<Move>>();
 //		HashSet<Piece> relevantPieces = new HashSet<Piece>();
@@ -85,29 +101,53 @@ public class BoardState {
 		return nextAnalysis;
 	}
 
+	private static void UseMemoryFromOldStateWherePossible(BoardState nextAnalysis, BoardState older, List<Move> totalNewMoves) {
+		// after fully calculating both board states, combine the new moves with the original in memory as much as possible
+		foreach (var kvp in older.movesToLocations) {
+			Move[] original = kvp.Value;
+			if (!nextAnalysis.movesToLocations.TryGetValue(kvp.Key, out Move[] newMoves)) {
+				newMoves = new Move[0];
+			}
+			if (older.IsMoveListCollapsable(original, ref newMoves)) {
+				nextAnalysis.movesToLocations[kvp.Key] = original;
+			} else {
+				if (totalNewMoves != null) {
+					for (int i = 0; i < newMoves.Length; ++i) {
+						bool moveIsActuallyNew = System.Array.IndexOf(original, newMoves[i]) < 0;
+						if (moveIsActuallyNew) {
+							totalNewMoves.Add(newMoves[i]);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	/// <summary>
 	/// tries to obviate the memory of movesB by looking for existing movesA values.
 	/// </summary>
-	/// <param name="movesA"></param>
-	/// <param name="movesB"></param>
+	/// <param name="movesA">original move list, should be considered a source of truth</param>
+	/// <param name="movesB">a new move list, should reference original if possible</param>
 	/// <returns>true if both lists are identical</returns>
-	private bool IsMoveListCollapsed(List<Move> movesA, ref List<Move> movesB) {
+	private bool IsMoveListCollapsable(Move[] movesA, ref Move[] movesB) {
+		if (movesA == movesB) { return true; }
 		bool identical = true;
-		if (movesA.Count != movesB.Count) { identical = false; }
+		if (movesA.Length != movesB.Length) { identical = false; }
 		int sameIndex = 0;
-		for(; sameIndex < movesB.Count; ++sameIndex) {
-			if (!movesA[sameIndex].Equals(movesB[sameIndex])) { identical = false; break; }
+		for(; sameIndex < movesB.Length; ++sameIndex) {
+			if (sameIndex >= movesA.Length ||
+			!movesA[sameIndex].Equals(movesB[sameIndex])) { identical = false; break; }
 			movesB[sameIndex] = movesA[sameIndex];
 		}
 		if (!identical) {
-			for(int i = sameIndex; i < movesB.Count; ++i) {
-				int identicalInA = movesA.IndexOf(movesB[i], sameIndex);
+			for(int i = sameIndex; i < movesB.Length; ++i) {
+				int identicalInA = System.Array.IndexOf(movesA, movesB[i], sameIndex);// movesA.IndexOf(movesB[i], sameIndex);
 				if (identicalInA != -1) {
 					movesB[i] = movesA[identicalInA];
 				}
 			}
 		}
-		return true;
+		return identical;
 	}
 
 	//private static void EnsureClearLedger<T>(Coord boardSize, List<List<T>> out_ledger) {
@@ -120,7 +160,7 @@ public class BoardState {
 	//	}
 	//}
 
-	private static void AddToMapping(Coord boardSize, Dictionary<Coord, List<Move>> out_ledger, List<Move> moves) {
+	private static void AddToMapping(Coord boardSize, Dictionary<Coord, Move[]> out_ledger, List<Move> moves) {
 		for (int m = 0; m < moves.Count; ++m) {
 			Move mov = moves[m];
 			Coord coord = mov.GetRelevantCoordinate();
@@ -128,11 +168,14 @@ public class BoardState {
 		}
 	}
 
-	public static void AddTo(Dictionary<Coord, List<Move>> map, Coord coord, Move move) {
-		if (!map.TryGetValue(coord, out List<Move> movesToThisTile)) {
-			map[coord] = new List<Move>() { move };
+	public static void AddTo(Dictionary<Coord, Move[]> map, Coord coord, Move move) {
+		if (!map.TryGetValue(coord, out Move[] movesToThisTile)) {
+			map[coord] = new Move[] { move };
 		} else {
-			movesToThisTile.Add(move);
+			//movesToThisTile.Add(move);
+			System.Array.Resize(ref movesToThisTile, movesToThisTile.Length + 1);
+			movesToThisTile[movesToThisTile.Length - 1] = move;
+			map[coord] = movesToThisTile;
 		}
 	}
 
@@ -144,8 +187,8 @@ public class BoardState {
 	//	}
 	//}
 
-	public List<Move> GetMovesTo(Coord coord) {
-		if (movesToLocations.TryGetValue(coord, out List<Move> moves)) {
+	public Move[] GetMovesTo(Coord coord) {
+		if (movesToLocations.TryGetValue(coord, out Move[] moves)) {
 			return moves;
 		}
 		if (prev != null) {

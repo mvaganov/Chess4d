@@ -14,6 +14,7 @@ public class Board : MonoBehaviour {
 	private Transform _transform;
 	private BoardState _analysis;
 	public int halfMovesSinceCaptureOrPawnMove = 0;
+	// TODO rename CurrentState
 	public BoardState Analysis => (_analysis != null) ? _analysis : _analysis = game.analysis.GetAnalysis(this);
 
 	public void Start() {
@@ -84,7 +85,7 @@ public class Board : MonoBehaviour {
 		return GetMoveLocation(m);
 	}
 
-	public List<Move> GetMovesTo(Coord coord) {
+	public IList<Move> GetMovesTo(Coord coord) {
 		return Analysis.GetMovesTo(coord);
 	}
 

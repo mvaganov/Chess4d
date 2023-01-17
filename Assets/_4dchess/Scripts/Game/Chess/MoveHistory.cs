@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class MoveHistory : MonoBehaviour {
-	private MoveNode currentMove = new MoveNode(0, null, "game begins");
+	private MoveNode currentMove;
 	public MoveEventHandler onMove;
 	public MoveEventHandler onUndoMove;
 	public ChessGame game;
@@ -14,16 +14,16 @@ public class MoveHistory : MonoBehaviour {
 	[System.Serializable] public class MoveEventHandler : UnityEvent<MoveNode> { }
 
 	private void Awake() {
-		if (game == null) {
-			game = FindObjectOfType<ChessGame>();
-		}
+		if (game == null) { game = FindObjectOfType<ChessGame>(); }
+		currentMove = new MoveNode(0, new StartGame(game.GameBoard), "game begins");
 	}
 
 	public int CountMovesSinceCaptureOrPawnAdvance(Board board) {
 		int count = 0;
 		MoveNode node = CurrentMove;
 		while (node != null && node.move != null) {
-			if (node.move.board == board && (node.move is Capture || (node.move is Move m && m.pieceMoved.code == "P"))) {
+			if (node.move.board == board && (node.move is Capture || (node.move is Move m
+			&& m.pieceMoved != null && m.pieceMoved.code == "P"))) {
 				break;
 			}
 			node = node.prev;
@@ -43,11 +43,13 @@ public class MoveHistory : MonoBehaviour {
 	/// </summary>
 	public MoveNode FindMoveNode(Move move) {
 		MoveNode n = currentMove;
+		Debug.Log("start "+n);
 		// if we're at the node we're looking for, return it now. that was easy.
 		if (n.move == move) { return n; }
 		// look for nodes along this node's direct history, until beginning, or a branch in the timeline is found
 		while (n.prev != null && n.prev.FutureTimelineCount > 1) {
 			n = n.prev;
+			Debug.Log("traverse " + n);
 			if (n == null) { return null; }
 			if (n.move == move) { return n; }
 		}
@@ -56,10 +58,13 @@ public class MoveHistory : MonoBehaviour {
 		branchesToIgnore.Add(n);
 		// and do a full check of the future (if it exists). if the node is in the future, get it
 		n = CurrentMove.FindMoveRecursive(move, null);
+		Debug.Log("found recursive future? " + n);
 		if (n != null) { return n; }
 		// then do the exhaustive resursive search starting from the very beginning, ignoring the searched branch
 		n = GetRoot();
-		return n.FindMoveRecursive(move, branchesToIgnore);
+		n = n.FindMoveRecursive(move, branchesToIgnore);
+		Debug.Log("found recursive past? " + n);
+		return n;
 	}
 
 	public MoveNode GetRoot() {

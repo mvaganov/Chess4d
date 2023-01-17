@@ -104,7 +104,7 @@ public class ChessVisuals : MonoBehaviour {
 			return;
 		}
 		Coord currentCoord = target.GetCoord();
-		List<Move> activityAtSquare = board.GetMovesTo(currentCoord);
+		IList<Move> activityAtSquare = board.GetMovesTo(currentCoord);
 		if (activityAtSquare == null) { return; }
 		List<Move> defenders = new List<Move>();
 		Piece selectedPiece = selected as Piece;

@@ -30,6 +30,15 @@ public class ChessGame : MonoBehaviour {
 	public Camera orthoMapCamera;
 	public List<Team> teams = new List<Team>();
 	private int _whoStartsTheGame = 0;
+	private bool _gameStarted;
+	public MoveNode moveNodeBeingProcessed;
+
+	public Board GameBoard {
+		get {
+			StartGameIfNotStartedAlready();
+			return boards[0];
+		}
+	}
 
 	public int WhoStartsTheGame {
 		get => _whoStartsTheGame;
@@ -38,12 +47,19 @@ public class ChessGame : MonoBehaviour {
 
 	public int WhoWentLast {
 		get {
-			Move m = chessMoves.CurrentMove.move;
-			if (m != null) {
+			Move m = chessMoves.CurrentMove != null ? chessMoves.CurrentMove.move : null;
+			if (m != null && m.pieceMoved != null) {
 				return m.pieceMoved.team.TeamIndex;
 			}
 			return -1;
 		}
+	}
+
+	public MoveNode FindMoveNode(Move move) {
+		if (moveNodeBeingProcessed.move == move) {
+			return moveNodeBeingProcessed;
+		}
+		return chessMoves.FindMoveNode(move);
 	}
 
 	public int GetWhosTurnItIs(int whoWentLast = -1) {
@@ -67,6 +83,8 @@ public class ChessGame : MonoBehaviour {
 	}
 
 	private void Awake() {
+		if (chessMoves == null) { chessMoves = FindObjectOfType<MoveHistory>(); }
+		if (analysis == null) { analysis = FindObjectOfType<ChessAnalysis>(); }
 		PurgeEmptyBoardSlots();
 	}
 
@@ -116,8 +134,16 @@ public class ChessGame : MonoBehaviour {
 	}
 
 	void Start() {
-		if (chessMoves == null) { chessMoves = FindObjectOfType<MoveHistory>(); }
-		if (analysis == null) { analysis = FindObjectOfType<ChessAnalysis>(); }
+		StartGameIfNotStartedAlready();
+	}
+
+	public void StartGameIfNotStartedAlready() {
+		if (_gameStarted) { return; }
+		StartGame();
+	}
+
+	public void StartGame() {
+		_gameStarted = true;
 		GenerateAllBoards();
 		RecalculateNextUpdate();
 		chessMoves.AnnounceCurrentTurn();

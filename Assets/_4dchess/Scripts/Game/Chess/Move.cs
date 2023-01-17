@@ -7,7 +7,11 @@ public class MoveNode {
 	public int timestamp;
 	private List<MoveNode> next;
 	public MoveNode prev;
-	public string notes;
+	public BoardState boardState;
+	public string Notes {
+		get => boardState != null ? boardState.notes : null;
+		set => boardState.notes = value;
+	}
 
 	public bool IsRoot => prev == null;
 
@@ -39,15 +43,23 @@ public class MoveNode {
 
 	public MoveNode(int index, Move move, string notes) {
 		this.move = move;
-		this.notes = notes;
 		this.turnIndex = index;
 		timestamp = System.Environment.TickCount;
 		next = new List<MoveNode>();
 		prev = null;
+		if (move != null) {
+			List<Move> newMoves = new List<Move>();
+			move.board.game.moveNodeBeingProcessed = this;
+			boardState = move.board.Analysis.NewAnalysisAfter(move, newMoves);
+			newMoves.RemoveAll(move => move.GetType() == typeof(Defend));
+			boardState.notableMoves = newMoves;
+			Debug.Log($"{move} new moves: {string.Join(", ", newMoves.ConvertAll(m=>m.ToString()))}");
+		}
+		this.Notes = notes;
 		//Debug.Log("MoveNode "+move);
 	}
 
-	protected string NotesSuffix() => !string.IsNullOrEmpty(notes) ? $" {notes}" : "";
+	protected string NotesSuffix() => !string.IsNullOrEmpty(Notes) ? $" {Notes}" : "";
 	
 	public virtual void Do() {
 		move?.Do();
@@ -59,7 +71,7 @@ public class MoveNode {
 
 	public override string ToString() {
 		if (move == null) {
-			return notes;
+			return Notes;
 		}
 		return $"{move}{NotesSuffix()}";
 	}
@@ -84,6 +96,23 @@ public class MoveNode {
 	}
 }
 
+/// <summary>
+/// TODO implement this.
+/// make the current Move a SingleMove class.
+/// make a multi-move, which allows board resets.
+/// </summary>
+public interface IMove {
+	public Board Board { get;}
+	public Piece Piece { get;}
+	public Piece GetPiece(int index);
+	public int GetPieceCount();
+	public Coord GetRelevantCoordinate();
+	public bool Involves(Piece piece);
+	public void GetMovingPieces(HashSet<Piece> out_movingPieces);
+	public void Do();
+	public void Undo();
+}
+
 public class Move {
 	/// <summary>
 	/// the board must be known because pieces could conceivably move between boards and do similar moves on different boards
@@ -93,6 +122,7 @@ public class Move {
 	public Piece pieceMoved;
 
 	public Move(Board board, Piece pieceMoved, Coord from, Coord to) {
+		this.board = board;
 		this.from = from;
 		this.to = to;
 		this.pieceMoved = pieceMoved;
@@ -113,11 +143,15 @@ public class Move {
 	}
 
 	public void DoWithoutAnimation() {
-		pieceMoved.animating = false; Do(); pieceMoved.animating = true;
+		if (pieceMoved != null) { pieceMoved.animating = false; }
+		Do();
+		if (pieceMoved != null) { pieceMoved.animating = true; }
 	}
 
 	public void UndoWithoutAnimation() {
-		pieceMoved.animating = false; Undo(); pieceMoved.animating = true;
+		if (pieceMoved != null) { pieceMoved.animating = false; }
+		Undo();
+		if (pieceMoved != null) { pieceMoved.animating = true; }
 	}
 
 	public virtual void Do() { pieceMoved?.DoMove(this); }
@@ -141,7 +175,7 @@ public class Move {
 		return m.from == from && m.to == to && m.pieceMoved == pieceMoved;
 	}
 	public override int GetHashCode() {
-		return from.GetHashCode() ^ to.GetHashCode() ^ pieceMoved.GetHashCode();
+		return from.GetHashCode() ^ to.GetHashCode() ^ (pieceMoved != null ? pieceMoved.GetHashCode() : 0);
 	}
 
 	public virtual TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse, Color color) {
@@ -292,4 +326,14 @@ public class Defend : Capture {
 			return "_" + base.ToString();
 		}
 	}
+}
+
+public class StartGame : Move {
+	public StartGame(Board board) : base(board, null, Coord.zero, Coord.zero) { }
+	public override Coord GetRelevantCoordinate() => Coord.zero;
+	public override bool Involves(Piece piece) => false;
+	public override void GetMovingPieces(HashSet<Piece> out_movingPieces) { }
+	public override void Do() { }
+	public override void Undo() { }
+	public override string ToString() { return "start game"; }
 }

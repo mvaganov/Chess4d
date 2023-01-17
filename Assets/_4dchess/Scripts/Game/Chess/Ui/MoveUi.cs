@@ -49,7 +49,7 @@ public class MoveUi : MonoBehaviour {
 		MovesUi movesUi = GetComponentInParent<MovesUi>();
 		movesUi.Notes.SetActive(true);
 		movesUi.Notes.transform.position = movesUi.CurrentMoveUi.transform.position;
-		movesUi.notesInput.SetTextWithoutNotify(move.notes);
+		movesUi.notesInput.SetTextWithoutNotify(move.Notes);
 		movesUi.notesInput.Select();
 	}
 }

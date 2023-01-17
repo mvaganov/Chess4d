@@ -7,8 +7,9 @@ public partial class Pawn {
 		public DoubleMove(Board board, Piece pieceMoved, Coord from, Coord to) :
 			base(board, pieceMoved, from, to) { }
 		public override void Do() {
-			MoveNode thisMove = pieceMoved.Game.chessMoves.FindMoveNode(this);
-			GetPawn(pieceMoved, nameof(DoubleMove)).didDoubleMoveOnTurn = thisMove.turnIndex;
+			MoveNode thisMove = pieceMoved.Game.FindMoveNode(this);
+			Pawn pawn = GetPawn(pieceMoved, nameof(DoubleMove));
+			pawn.didDoubleMoveOnTurn = thisMove.turnIndex;
 			pieceMoved?.DoMove(this);
 		}
 		public override void Undo() {

@@ -124,8 +124,10 @@ public static class XFEN {
 			}
 			sb.Append((c.row < board.BoardSize.row - 1) ? "/" : " ");
 		}
-		Move currentMove = game.chessMoves.CurrentMove.move;
-		int teamIndex = currentMove == null ? -1 : currentMove.pieceMoved.team.TeamIndex;
+		MoveNode currentMoveNode = game.chessMoves.CurrentMove;
+		Move currentMove = currentMoveNode != null ? currentMoveNode.move : null;
+		int teamIndex = currentMove == null ? -1 : (currentMove.pieceMoved != null
+			? currentMove.pieceMoved.team.TeamIndex : -1);
 		int currentTeamMove = (teamIndex + 1) % game.teams.Count;
 		sb.Append(game.teams[currentTeamMove].name[0]).Append(" ");
 		bool rooksCanCastle = false;
@@ -146,7 +148,7 @@ public static class XFEN {
 			sb.Append("-");
 		}
 		if (currentMove != null && currentMove.GetType() == typeof(Pawn.DoubleMove)) {
-			sb.Append(" ").Append(game.chessMoves.CurrentMove.move.pieceMoved.GetCoord()).Append(" ");
+			sb.Append(" ").Append(game.chessMoves.CurrentMove.move.from).Append(" ");
 		} else {
 			sb.Append(" - ");
 		}

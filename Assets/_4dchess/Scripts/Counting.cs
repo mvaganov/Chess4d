@@ -22,7 +22,8 @@ public class Counting {
 	// TODO long ValueFromCombination(IEnumerable<T> sequence, IList<T> options)
 	public static List<T> Combination<T>(long value, T[] options, int digits) {
 		List<T> list = new List<T>();
-		for(int i = 0; i < digits; ++i) {
+		if (value < 0) { throw new System.Exception($"can't convert {value}"); }
+		for (int i = 0; i < digits; ++i) {
 			long digit = value % options.Length;
 			value = value / options.Length;
 			list.Add(options[digit]);
@@ -48,7 +49,10 @@ public class Counting {
 	/// <param name="value"></param>
 	/// <returns></returns>
 	public static string Alpha(long value) {
+		bool isNegative = value < 0;
+		if (isNegative) { value = -value; }
 		List<char> letters = IncrementingCombination(value, chars);
+		if (isNegative) { letters.Add('-'); }
 		letters.Reverse();
 		return new string(letters.ToArray());
 	}

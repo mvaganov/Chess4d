@@ -31,9 +31,9 @@ public class MovesUi : MonoBehaviour {
 		}
 	}
 	public string CurrentNotes {
-		get => chessMoves.CurrentMove.notes;
+		get => chessMoves.CurrentMove.Notes;
 		set {
-			chessMoves.CurrentMove.notes = value;
+			chessMoves.CurrentMove.Notes = value;
 			CurrentMoveUi.RefreshElement();
 		}
 	}
@@ -119,7 +119,7 @@ public class MovesUi : MonoBehaviour {
 			ApplyToLayoutTransform(branch.transform, _transform);
 		}
 		RefreshLayouts();
-		notesInput?.SetTextWithoutNotify(chessMoves.CurrentMove.notes);
+		notesInput?.SetTextWithoutNotify(chessMoves.CurrentMove.Notes);
 		//Debug.Log(CurrentMoveUi);
 	}
 
