@@ -74,7 +74,8 @@ public class MoveNode {
 		if (move == null) {
 			return Notes;
 		}
-		return $"{move}{NotesSuffix()}";
+		string stats = boardState != null ? (" " + boardState.CalculateMoveStats().ToString()) : null;
+		return $"{move}{NotesSuffix()}{stats}";
 	}
 
 	public override bool Equals(object obj) {

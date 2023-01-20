@@ -28,6 +28,53 @@ public class BoardState {
 
 	public BoardState() { }
 
+	public struct MoveStats {
+		public int count;
+		public int added;
+		public int lost;
+		public override string ToString() {
+			return $"{count}" + (added > 0 ? $" +{added}" : "") + (lost > 0 ? $" -{lost}" : "");
+		}
+	}
+	public MoveStats CalculateMoveStats() {
+		MoveStats moveStats = new MoveStats();
+		foreach (var moveKvp in movesToLocations) {
+			moveStats.count += moveKvp.Value.Length;
+		}
+		if (prev == null) {
+			moveStats.added = moveStats.count;
+			moveStats.lost = 0;
+		} else {
+			Coord c = Coord.zero;
+			while (c.Iterate(BoardSize)) {
+				//Debug.Log(c);
+				Dictionary<Coord, IMove[]> prevMoveLocations = prev.movesToLocations;
+				movesToLocations.TryGetValue(c, out IMove[] these);
+				prevMoveLocations.TryGetValue(c, out IMove[] older);
+				if (these == older) { continue; }
+				if (these == null && older != null) {
+					moveStats.lost += older.Length;
+				} else if (older == null && these != null) {
+					moveStats.added += these.Length;
+				} else {
+					int newOnes = 0, theSame = 0;
+					for(int i = 0; i < these.Length; ++i) {
+						int index = System.Array.IndexOf(older, these[i]);
+						if (index != -1) {
+							++theSame;
+						} else {
+							++newOnes;
+						}
+					}
+					int lostOnes = older.Length - theSame;
+					moveStats.lost += lostOnes;
+					moveStats.added += newOnes;
+				}
+			}
+		}
+		return moveStats;
+	}
+
 	public static BoardState Next(BoardState other) {
 		BoardState next = new BoardState();
 		next.prev = other;
@@ -70,6 +117,7 @@ public class BoardState {
 	public BoardState NewAnalysisAfter(IMove move, List<IMove> totalNewMoves) {
 		move.DoWithoutAnimation(); // make move
 		BoardState nextAnalysis = new BoardState(move.Board); // do entire analysis from scratch
+		nextAnalysis.prev = this;
 		// collapse common memory with previous. also note which moves are new
 		UseMemoryFromOldStateWherePossible(nextAnalysis, this, totalNewMoves);
 		move.UndoWithoutAnimation(); // unmake move, so the state stays as it should be
