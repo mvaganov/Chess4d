@@ -164,6 +164,13 @@ public class BoardState {
 					for (int i = 0; i < newMoves.Length; ++i) {
 						bool moveIsActuallyNew = System.Array.IndexOf(original, newMoves[i]) < 0;
 						if (moveIsActuallyNew) {
+							// double check that it is new... we don't want false negatives.
+							string newMoveName = newMoves[i].ToString();
+							for(int j = 0; j < original.Length; ++j) {
+								if (newMoveName.Equals(original[j].ToString())) {
+									Debug.LogError("failed to recognize duplicate: "+newMoveName+" and "+ original[j]);
+								}
+							}
 							totalNewMoves.Add(newMoves[i]);
 						}
 					}
