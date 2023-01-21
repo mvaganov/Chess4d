@@ -181,7 +181,7 @@ public partial class Pawn {
 			Board board = pieceMoved.board;
 			ChessGame game = board.game;
 			MoveNode thisNode = game.chessMoves.CurrentMove;//game.chessMoves.FindMoveNode(this);
-			MoveNode parentMove = thisNode.prev;
+			MoveNode parentMove = thisNode.Prev;
 			for (int i = 0; i < parentMove.FutureTimelineCount; ++i) {
 				MoveNode possibleMove = parentMove.GetTimelineBranch(i);
 				if (possibleMove == thisNode) { continue; }
@@ -206,7 +206,7 @@ public partial class Pawn {
 			Team team = pieceMoved.team;
 			ChessGame game = board.game;
 			MoveNode thisNode = game.chessMoves.CurrentMove;//game.chessMoves.FindMoveNode(this);
-			MoveNode parentMove = thisNode.prev;
+			MoveNode parentMove = thisNode.Prev;
 			Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new PieceMove(this));
 			otherPromo.selectedPieceCode = code; // <-- this will force the new promotion event to skip the UI
 			string options = pieceMoved.board.game.PawnPromotionOptions;
@@ -214,7 +214,7 @@ public partial class Pawn {
 			otherPromo.promotedPiece = game.GetPiece(team, code, to, board, true);
 			game.chessMoves.SetCurrentMove(parentMove);
 			MoveNode alternatePromotion = new MoveNode(thisNode.turnIndex, otherPromo, "");
-			alternatePromotion.prev = game.chessMoves.CurrentMove;
+			alternatePromotion.Prev = game.chessMoves.CurrentMove;
 			game.chessMoves.CurrentMove.SetAsNextTimelineBranch(alternatePromotion);
 			game.chessMoves.RedoMove();
 		}

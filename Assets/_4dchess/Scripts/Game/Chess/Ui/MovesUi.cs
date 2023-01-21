@@ -99,7 +99,7 @@ public class MovesUi : MonoBehaviour {
 		MoveUi moveUi;
 		// insert start game move
 		moveUi = _moveUiPool.Get();//Instantiate(moveUiPrefab).GetComponent<MoveUi>();
-		moveUi.Move = moves[moves.Count - 1][0].prev;
+		moveUi.Move = moves[moves.Count - 1][0].Prev;
 		ApplyToLayoutTransform(moveUi.transform, _transform);
 		//Debug.Log($"moves {moves.Count}: [{string.Join(", ",moves.ConvertAll(l=>l.Count.ToString()))}]");
 

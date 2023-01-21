@@ -8,7 +8,7 @@ public class BoardState {
 	/// which allows previously calculated boardstates to be referenced safely.
 	/// </summary>
 	private Dictionary<Coord, IMove[]> movesToLocations = new Dictionary<Coord, IMove[]>();
-	private BoardState prev;
+	public BoardState prev;
 	public string identity;
 	public string notes;
 	[SerializeField] private Coord BoardSize;

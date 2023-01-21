@@ -7,13 +7,19 @@ public class MoveNode {
 	public int turnIndex;
 	public int timestamp;
 	private List<MoveNode> next;
-	public MoveNode prev;
+	private MoveNode prev;
 	public BoardState boardState;
 	public string Notes {
 		get => boardState != null ? boardState.notes : null;
 		set => boardState.notes = value;
 	}
-
+	public MoveNode Prev {
+		get => prev;
+		set {
+			prev = value;
+			boardState.prev = prev != null ? prev.boardState : null;
+		}
+	}
 	public bool IsRoot => prev == null;
 
 	public int BranchIndex => prev == null ? -1 : prev.next.IndexOf(this);
@@ -53,6 +59,7 @@ public class MoveNode {
 			List<IMove> newMoves = new List<IMove>();
 			move.Board.game.moveNodeBeingProcessed = this;
 			boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
+			boardState.prev = prev != null ? prev.boardState : null;
 			newMoves.RemoveAll(move => move.GetType() == typeof(Defend));
 			boardState.notableMoves = newMoves;
 			Debug.Log($"{move} new moves: {string.Join(", ", newMoves.ConvertAll(m => m.ToString()))}");

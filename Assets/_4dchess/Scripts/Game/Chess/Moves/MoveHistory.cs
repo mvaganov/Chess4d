@@ -26,7 +26,7 @@ public class MoveHistory : MonoBehaviour {
 			&& m.pieceMoved != null && m.pieceMoved.code == "P"))) {
 				break;
 			}
-			node = node.prev;
+			node = node.Prev;
 			++count;
 		}
 		count += board.halfMovesSinceCaptureOrPawnMove;
@@ -47,8 +47,8 @@ public class MoveHistory : MonoBehaviour {
 		// if we're at the node we're looking for, return it now. that was easy.
 		if (n.move == move) { return n; }
 		// look for nodes along this node's direct history, until beginning, or a branch in the timeline is found
-		while (n.prev != null && n.prev.FutureTimelineCount > 1) {
-			n = n.prev;
+		while (n.Prev != null && n.Prev.FutureTimelineCount > 1) {
+			n = n.Prev;
 			Debug.Log("traverse " + n);
 			if (n == null) { return null; }
 			if (n.move == move) { return n; }
@@ -69,8 +69,8 @@ public class MoveHistory : MonoBehaviour {
 
 	public MoveNode GetRoot() {
 		MoveNode cursor = currentMove;
-		while (cursor.prev != null) {
-			cursor = cursor.prev;
+		while (cursor.Prev != null) {
+			cursor = cursor.Prev;
 		}
 		return cursor;
 	}
@@ -84,7 +84,7 @@ public class MoveHistory : MonoBehaviour {
 		MoveNode cursor = last;
 		do {
 			list.Add(cursor.GetAllTimelineBranches());
-			cursor = cursor.prev;
+			cursor = cursor.Prev;
 		} while (cursor != null);
 		return list;
 	}
@@ -104,7 +104,7 @@ public class MoveHistory : MonoBehaviour {
 		Debug.Log(piece.name + " " + move.move.GetType().Name + " " + move);
 		AnnounceTurnOrder(move);
 		currentMove.SetAsNextTimelineBranch(move);
-		move.prev = currentMove;
+		move.Prev = currentMove;
 		//Debug.Log("added timeline " + currentMove.IndexOfBranch(move));
 		move.Do();
 		currentMove = move;
@@ -156,7 +156,7 @@ public class MoveHistory : MonoBehaviour {
 				currentMove = next;
 			} else if (currentMove.turnIndex > actualIndexToTravelTo) {
 				currentMove.Undo();
-				next = currentMove.prev;
+				next = currentMove.Prev;
 				if (next == null && actualIndexToTravelTo > 0) {
 					throw new Exception($"can't go to move before {currentMove.turnIndex} {currentMove}");
 				}
@@ -188,7 +188,7 @@ public class MoveHistory : MonoBehaviour {
 	public bool UndoMove() {
 		if (currentMove.IsRoot) { return false; }
 		currentMove.Undo();
-		currentMove = currentMove.prev;
+		currentMove = currentMove.Prev;
 		onUndoMove?.Invoke(CurrentMove);
 		return true;
 	}
