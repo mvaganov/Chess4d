@@ -70,18 +70,18 @@ public class ChessVisuals : MonoBehaviour {
 		defendArrows.ClearTiles();
 		specialTileAndArrows.ClearTiles();
 		Coord pieceCoord = piece.GetCoord();
-		selection.CreateMarks(new PieceMove[] { new PieceMove(piece.board, piece, pieceCoord, pieceCoord) }, Color.cyan);
+		selection.CreateMarks(new BasicMove[] { new BasicMove(piece.board, piece, pieceCoord, pieceCoord) }, Color.cyan);
 
 		if (analysis.CurrentPieceCurrentMoves != null) {
 			for (int i = 0; i < analysis.CurrentPieceCurrentMoves.Count; ++i) {
-				IMove move = analysis.CurrentPieceCurrentMoves[i];
+				IGameMoveBase move = analysis.CurrentPieceCurrentMoves[i];
 				if (!showKingDefender && move is Capture cap && ChessGame.IsMyKing(piece, cap.pieceCaptured)) { continue; }
 				AddPieceSelectionVisualFor(move, piece.board);
 			}
 		}
 	}
 
-	private TiledGameObject AddPieceSelectionVisualFor(IMove someKindOfMove, Board board) {
+	private TiledGameObject AddPieceSelectionVisualFor(IGameMoveBase someKindOfMove, Board board) {
 		TiledGameObject tgo;
 		if (!TileVisSettings.TryGetValue(someKindOfMove.GetType(), out TileVisualSpecifics setting)) {
 			setting.visualizer = specialTileAndArrows;
@@ -104,9 +104,9 @@ public class ChessVisuals : MonoBehaviour {
 			return;
 		}
 		Coord currentCoord = target.GetCoord();
-		IList<IMove> activityAtSquare = board.GetMovesTo(currentCoord);
+		IList<IGameMoveBase> activityAtSquare = board.GetMovesTo(currentCoord);
 		if (activityAtSquare == null) { return; }
-		List<PieceMove> defenders = new List<PieceMove>();
+		List<BasicMove> defenders = new List<BasicMove>();
 		Piece selectedPiece = selected as Piece;
 		//Coord selectedCoord = (selected != null) ? selected.GetCoord() : Coord.zero;
 		Piece piece = selectedPiece;

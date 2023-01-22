@@ -2,7 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PieceMove : IMove {
+public class PieceMove : BasicMove, IMove {
+	public PieceMove(Board board, Piece pieceMoved, Coord from, Coord to)
+		: base(board, pieceMoved, from, to) {
+	}
+	public override bool Equals(object obj) {
+		return obj.GetType() == typeof(PieceMove) && DuckTypeEquals(obj as BasicMove);
+	}
+}
+public class BasicMove : IGameMoveBase {
 	/// <summary>
 	/// the board must be known because pieces could conceivably move between boards and do similar moves on different boards
 	/// </summary>
@@ -13,14 +21,14 @@ public class PieceMove : IMove {
 	public Board Board => board;
 	public Piece Piece => pieceMoved;
 
-	public PieceMove(Board board, Piece pieceMoved, Coord from, Coord to) {
+	public BasicMove(Board board, Piece pieceMoved, Coord from, Coord to) {
 		this.board = board;
 		this.from = from;
 		this.to = to;
 		this.pieceMoved = pieceMoved;
 	}
 
-	public PieceMove(PieceMove other) {
+	public BasicMove(BasicMove other) {
 		from = other.from;
 		to = other.to;
 		pieceMoved = other.pieceMoved;
@@ -62,9 +70,9 @@ public class PieceMove : IMove {
 	}
 
 	public override bool Equals(object obj) {
-		return obj.GetType() == typeof(PieceMove) && DuckTypeEquals(obj as PieceMove);
+		return obj.GetType() == typeof(BasicMove) && DuckTypeEquals(obj as BasicMove);
 	}
-	public virtual bool DuckTypeEquals(PieceMove m) {
+	public virtual bool DuckTypeEquals(BasicMove m) {
 		return m.from == from && m.to == to && m.pieceMoved == pieceMoved;
 	}
 	public override int GetHashCode() {

@@ -15,18 +15,18 @@ public class King : MoveLogic {
 			new Coord(-1,-1),
 	};
 
-	public override void GetMoves(List<IMove> out_moves, MoveKind moveKind) {
+	public override void GetMoves(List<IGameMoveBase> out_moves, MoveKind moveKind) {
 		StandardMoves(movePattern, 1, out_moves, moveKind);
 		if (piece.moveCount == 0) {
-			List<IMove> castleMoves = Castle.FindMoves(this, Rook.movePattern, "R");
+			List<IGameMoveBase> castleMoves = Castle.FindMoves(this, Rook.movePattern, "R");
 			out_moves.AddRange(castleMoves);
 		}
 	}
 
 	public class Check : Capture {
-		public IMove triggeringMove;
+		public IGameMoveBase triggeringMove;
 		public bool isMate = false;
-		public Check(IMove triggeringMove, Capture threateningMove)
+		public Check(IGameMoveBase triggeringMove, Capture threateningMove)
 			: base(threateningMove) {
 			this.triggeringMove = triggeringMove;
 		}
@@ -53,7 +53,7 @@ public class King : MoveLogic {
 	}
 
 	public class Castle : PieceMove {
-		public IMove partnerMove;
+		public IGameMoveBase partnerMove;
 
 		public Castle(Board board, Piece pieceMoved, Coord from, Coord to, Piece partner, Coord partnerFrom, Coord partnerTo)
 		: base(board, pieceMoved, from, to) {
@@ -71,8 +71,8 @@ public class King : MoveLogic {
 			return base.GetHashCode() ^ partnerMove.GetHashCode();
 		}
 
-		public static List<IMove> FindMoves(MoveLogic king, Coord[] movePattern, string pieceCode) {
-			List<IMove> moves = new List<IMove>();
+		public static List<IGameMoveBase> FindMoves(MoveLogic king, Coord[] movePattern, string pieceCode) {
+			List<IGameMoveBase> moves = new List<IGameMoveBase>();
 			// look for rooks that have a line to the king using rook movement
 			king.StandardMoves(movePattern, 8, moves, MoveKind.Defend);
 			//Debug.Log("looking for castles " + string.Join(", ", moves));

@@ -33,7 +33,7 @@ public partial class Pawn {
 			GetPawn(pieceMoved, nameof(EnPassant));
 			base.Undo();
 		}
-		public static PieceMove GetPossible(Board board, Piece p, Coord pieceLocation, Coord nextPieceLocation, Coord otherPieceLocation) {
+		public static BasicMove GetPossible(Board board, Piece p, Coord pieceLocation, Coord nextPieceLocation, Coord otherPieceLocation) {
 			Tile sideTile = board.GetTile(otherPieceLocation);
 			if (sideTile == null) { return null; }
 			Piece possibleTarget = sideTile.GetPiece();
@@ -79,10 +79,10 @@ public partial class Pawn {
 		public override int GetHashCode() { return base.GetHashCode(); }
 	}
 
-	public class Promotion : PieceMove {
+	public class Promotion : BasicMove {
 		private string selectedPieceCode = null;
 		public Piece promotedPiece;
-		public IMove moreInterestingMove;
+		public IGameMoveBase moreInterestingMove;
 		const int InvalidUserSelection = -1;
 		public int userSelection = InvalidUserSelection;
 		public override bool Equals(object obj) {
@@ -98,7 +98,7 @@ public partial class Pawn {
 			return base.GetHashCode() ^ (promotedPiece != null ? promotedPiece.GetHashCode() : 0);
 		}
 
-		public Promotion(IMove move) : base(move as PieceMove) {
+		public Promotion(IGameMoveBase move) : base(move as BasicMove) {
 			if (move.GetType() != typeof(PieceMove)) {
 				moreInterestingMove = move;
 			}
@@ -207,7 +207,7 @@ public partial class Pawn {
 			ChessGame game = board.game;
 			MoveNode thisNode = game.chessMoves.CurrentMove;//game.chessMoves.FindMoveNode(this);
 			MoveNode parentMove = thisNode.Prev;
-			Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new PieceMove(this));
+			Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new BasicMove(this));
 			otherPromo.selectedPieceCode = code; // <-- this will force the new promotion event to skip the UI
 			string options = pieceMoved.board.game.PawnPromotionOptions;
 			//otherPromo.userSelection = options.IndexOf(code);

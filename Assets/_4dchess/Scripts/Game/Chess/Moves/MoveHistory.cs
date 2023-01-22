@@ -41,7 +41,7 @@ public class MoveHistory : MonoBehaviour {
 	/// <summary>
 	/// find the point in history (or alternate timelines) that a specific piece moved from 'from' to 'to'.
 	/// </summary>
-	public MoveNode FindMoveNode(IMove move) {
+	public MoveNode FindMoveNode(IGameMoveBase move) {
 		MoveNode n = currentMove;
 		Debug.Log("start "+n);
 		// if we're at the node we're looking for, return it now. that was easy.
@@ -89,7 +89,7 @@ public class MoveHistory : MonoBehaviour {
 		return list;
 	}
 
-	public void MakeMove(IMove move, string notes) {
+	public void MakeMove(IGameMoveBase move, string notes) {
 		DoThis(new MoveNode(currentMove.turnIndex + 1, move, notes));
 	}
 
@@ -99,7 +99,7 @@ public class MoveHistory : MonoBehaviour {
 			//currentMove.GetTimelineBranch(doneAlready);
 			move = currentMove.PopTimeline(doneAlready);
 		}
-		PieceMove pmove = move.move as PieceMove;
+		BasicMove pmove = move.move as BasicMove;
 		Piece piece = pmove.pieceMoved;
 		Debug.Log(piece.name + " " + move.move.GetType().Name + " " + move);
 		AnnounceTurnOrder(move);

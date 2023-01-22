@@ -7,7 +7,7 @@ public class BoardState {
 	/// (a boardstate per move in the tree) and the vast majority of instances should be immutable,
 	/// which allows previously calculated boardstates to be referenced safely.
 	/// </summary>
-	private Dictionary<Coord, IMove[]> movesToLocations = new Dictionary<Coord, IMove[]>();
+	private Dictionary<Coord, IGameMoveBase[]> movesToLocations = new Dictionary<Coord, IGameMoveBase[]>();
 	public BoardState prev;
 	public string identity;
 	public string notes;
@@ -15,7 +15,7 @@ public class BoardState {
 	/// <summary>
 	/// shows particularly notable moves. used to show what new moves are enabled by the new state
 	/// </summary>
-	public IList<IMove> notableMoves;
+	public IList<IGameMoveBase> notableMoves;
 
 	public BoardState(Board board) {
 		RecalculatePieceMoves(board);
@@ -48,9 +48,9 @@ public class BoardState {
 			Coord c = Coord.zero;
 			while (c.Iterate(BoardSize)) {
 				//Debug.Log(c);
-				Dictionary<Coord, IMove[]> prevMoveLocations = prev.movesToLocations;
-				movesToLocations.TryGetValue(c, out IMove[] these);
-				prevMoveLocations.TryGetValue(c, out IMove[] older);
+				Dictionary<Coord, IGameMoveBase[]> prevMoveLocations = prev.movesToLocations;
+				movesToLocations.TryGetValue(c, out IGameMoveBase[] these);
+				prevMoveLocations.TryGetValue(c, out IGameMoveBase[] older);
 				if (these == older) { continue; }
 				if (these == null && older != null) {
 					moveStats.lost += older.Length;
@@ -97,7 +97,7 @@ public class BoardState {
 	public void RecalculatePieceMoves(Board board) {
 		Init(board);
 		List<Piece> allPieces = board.GetAllPieces();
-		List<IMove> moves = new List<IMove>();
+		List<IGameMoveBase> moves = new List<IGameMoveBase>();
 		for (int i = 0; i < allPieces.Count; ++i) {
 			Piece p = allPieces[i];
 			p.GetMovesForceCalculation(p.GetCoord(), moves);
@@ -106,15 +106,15 @@ public class BoardState {
 		}
 	}
 
-	void GetMovesInvolving(Piece piece, List<IMove> sourceMoves, List<IMove> out_moves) {
+	void GetMovesInvolving(Piece piece, List<IGameMoveBase> sourceMoves, List<IGameMoveBase> out_moves) {
 		for (int i = 0; i < sourceMoves.Count; ++i) {
-			IMove move = sourceMoves[i];
+			IGameMoveBase move = sourceMoves[i];
 			if (!move.Involves(piece)) { continue; }
 			out_moves.Add(move);
 		}
 	}
 
-	public BoardState NewAnalysisAfter(IMove move, List<IMove> totalNewMoves) {
+	public BoardState NewAnalysisAfter(IGameMoveBase move, List<IGameMoveBase> totalNewMoves) {
 		move.DoWithoutAnimation(); // make move
 		BoardState nextAnalysis = new BoardState(move.Board); // do entire analysis from scratch
 		nextAnalysis.prev = this;
@@ -150,12 +150,12 @@ public class BoardState {
 	}
 
 	private static void UseMemoryFromOldStateWherePossible(BoardState nextAnalysis, BoardState older,
-	List<IMove> totalNewMoves) {
+	List<IGameMoveBase> totalNewMoves) {
 		// after fully calculating both board states, combine the new moves with the original in memory as much as possible
 		foreach (var kvp in older.movesToLocations) {
-			IMove[] original = kvp.Value;
-			if (!nextAnalysis.movesToLocations.TryGetValue(kvp.Key, out IMove[] newMoves)) {
-				newMoves = new IMove[0];
+			IGameMoveBase[] original = kvp.Value;
+			if (!nextAnalysis.movesToLocations.TryGetValue(kvp.Key, out IGameMoveBase[] newMoves)) {
+				newMoves = new IGameMoveBase[0];
 			}
 			if (older.IsMoveListCollapsable(original, ref newMoves)) {
 				nextAnalysis.movesToLocations[kvp.Key] = original;
@@ -168,7 +168,8 @@ public class BoardState {
 							string newMoveName = newMoves[i].ToString();
 							for(int j = 0; j < original.Length; ++j) {
 								if (newMoveName.Equals(original[j].ToString())) {
-									Debug.LogError("failed to recognize duplicate: "+newMoveName+" and "+ original[j]);
+									Debug.LogError("failed to recognize duplicate: "+
+										newMoveName+newMoves[i].GetType()+" and "+ original[j]+original[j].GetType()+" "+ original[j].Equals(newMoves[i]));
 								}
 							}
 							totalNewMoves.Add(newMoves[i]);
@@ -185,7 +186,7 @@ public class BoardState {
 	/// <param name="movesA">original move list, should be considered a source of truth</param>
 	/// <param name="movesB">a new move list, should reference original if possible</param>
 	/// <returns>true if both lists are identical</returns>
-	private bool IsMoveListCollapsable(IMove[] movesA, ref IMove[] movesB) {
+	private bool IsMoveListCollapsable(IGameMoveBase[] movesA, ref IGameMoveBase[] movesB) {
 		if (movesA == movesB) { return true; }
 		bool identical = true;
 		if (movesA.Length != movesB.Length) { identical = false; }
@@ -216,18 +217,18 @@ public class BoardState {
 	//	}
 	//}
 
-	private static void AddToMapping(Coord boardSize, Dictionary<Coord, IMove[]> out_ledger, 
-	List<IMove> moves) {
+	private static void AddToMapping(Coord boardSize, Dictionary<Coord, IGameMoveBase[]> out_ledger, 
+	List<IGameMoveBase> moves) {
 		for (int m = 0; m < moves.Count; ++m) {
-			IMove mov = moves[m];
+			IGameMoveBase mov = moves[m];
 			Coord coord = mov.GetRelevantCoordinate();
 			AddTo(out_ledger, coord, mov);
 		}
 	}
 
-	public static void AddTo(Dictionary<Coord, IMove[]> map, Coord coord, IMove move) {
-		if (!map.TryGetValue(coord, out IMove[] movesToThisTile)) {
-			map[coord] = new IMove[] { move };
+	public static void AddTo(Dictionary<Coord, IGameMoveBase[]> map, Coord coord, IGameMoveBase move) {
+		if (!map.TryGetValue(coord, out IGameMoveBase[] movesToThisTile)) {
+			map[coord] = new IGameMoveBase[] { move };
 		} else {
 			//movesToThisTile.Add(move);
 			System.Array.Resize(ref movesToThisTile, movesToThisTile.Length + 1);
@@ -244,8 +245,8 @@ public class BoardState {
 	//	}
 	//}
 
-	public IMove[] GetMovesTo(Coord coord) {
-		if (movesToLocations.TryGetValue(coord, out IMove[] moves)) {
+	public IGameMoveBase[] GetMovesTo(Coord coord) {
+		if (movesToLocations.TryGetValue(coord, out IGameMoveBase[] moves)) {
 			return moves;
 		}
 		if (prev != null) {

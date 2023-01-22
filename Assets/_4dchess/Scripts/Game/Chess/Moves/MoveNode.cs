@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveNode {
-	public IMove move;
+	public IGameMoveBase move;
 	public int turnIndex;
 	public int timestamp;
 	private List<MoveNode> next;
@@ -48,7 +48,7 @@ public class MoveNode {
 
 	public List<MoveNode> GetAllTimelineBranches() { return next; }
 
-	public MoveNode(int index, IMove move, string notes) {
+	public MoveNode(int index, IGameMoveBase move, string notes) {
 		Debug.Log("new node");
 		this.move = move;
 		this.turnIndex = index;
@@ -56,7 +56,7 @@ public class MoveNode {
 		next = new List<MoveNode>();
 		prev = null;
 		if (move != null) {
-			List<IMove> newMoves = new List<IMove>();
+			List<IGameMoveBase> newMoves = new List<IGameMoveBase>();
 			move.Board.game.moveNodeBeingProcessed = this;
 			boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
 			boardState.prev = prev != null ? prev.boardState : null;
@@ -93,7 +93,7 @@ public class MoveNode {
 		return ((move != null) ? move.GetHashCode() : 0) ^ turnIndex;
 	}
 
-	public MoveNode FindMoveRecursive(IMove m, HashSet<MoveNode> ignoreBranches) {
+	public MoveNode FindMoveRecursive(IGameMoveBase m, HashSet<MoveNode> ignoreBranches) {
 		if (move == m) { return this; }
 		MoveNode found = null;
 		for (int i = 0; i < next.Count; ++i) {

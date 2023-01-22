@@ -16,8 +16,8 @@ public class MoveUi : MonoBehaviour {
 	}
 
 	public void RefreshElement() {
-		PieceMove pmove = move.move as PieceMove;
-		Piece piece = pmove != null ? pmove.pieceMoved : null;
+		BasicMove bmove = move.move as BasicMove;
+		Piece piece = bmove != null ? bmove.pieceMoved : null;
 		ChessGame game;
 		if (piece != null) {
 			int teamIndex = piece.team.TeamIndex;

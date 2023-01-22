@@ -76,16 +76,16 @@ public class Board : MonoBehaviour {
 		game.analysis.RecalculatePieceMoves(this);
 	}
 
-	private Coord GetMoveLocation(PieceMove m) => m.to;
+	private Coord GetMoveLocation(BasicMove m) => m.to;
 
-	private Coord GetCaptureLocation(PieceMove m) {
+	private Coord GetCaptureLocation(BasicMove m) {
 		if (m is Capture c) {
 			return c.captureCoord;
 		}
 		return GetMoveLocation(m);
 	}
 
-	public IList<IMove> GetMovesTo(Coord coord) {
+	public IList<IGameMoveBase> GetMovesTo(Coord coord) {
 		return Analysis.GetMovesTo(coord);
 	}
 

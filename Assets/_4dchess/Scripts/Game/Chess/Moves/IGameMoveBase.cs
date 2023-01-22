@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 /// <summary>
 /// TODO implement multi-move, which allows board resets.
 /// </summary>
-public interface IMove {
+public interface IGameMoveBase {
 	public Board Board { get;}
 	public Piece Piece { get;}
 	public Piece GetPiece(int index);

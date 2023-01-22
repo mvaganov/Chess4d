@@ -36,18 +36,18 @@ public class MoveLogic : MonoBehaviour {
 	}
 
 	public virtual void StandardMoves(IEnumerable<Coord> directions, int maxSpaces,
-	List<IMove> out_moves, MoveKind moveKind) {
+	List<IGameMoveBase> out_moves, MoveKind moveKind) {
 		Piece p = piece;
 		StandardMoves(p, p.GetCoord(), directions, maxSpaces, out_moves, moveKind);
 	}
 
 	public virtual void StandardMoves(Coord position, IEnumerable<Coord> directions, int maxSpaces,
-	List<IMove> out_moves, MoveKind moveKind) {
+	List<IGameMoveBase> out_moves, MoveKind moveKind) {
 		StandardMoves(piece, position, directions, maxSpaces, out_moves, moveKind);
 	}
 
 	public static void StandardMoves(Piece self, Coord position, IEnumerable<Coord> directions, int maxSpaces,
-	List<IMove> out_moves, MoveKind moveKind) {
+	List<IGameMoveBase> out_moves, MoveKind moveKind) {
 		Board board = self.board;
 		Tile tile = self.GetTile();
 		if (tile == null) { return; }
@@ -87,13 +87,13 @@ public class MoveLogic : MonoBehaviour {
 		}
 	}
 
-	public virtual void GetMoves(List<IMove> out_moves, MoveKind moveKind) {}
+	public virtual void GetMoves(List<IGameMoveBase> out_moves, MoveKind moveKind) {}
 
-	public virtual void DoMove(PieceMove move) {
+	public virtual void DoMove(BasicMove move) {
 		piece.MoveInternal(move.to);
 	}
 
-	public virtual void UndoMove(PieceMove move) {
+	public virtual void UndoMove(BasicMove move) {
 		piece.MoveInternal(move.from);
 	}
 

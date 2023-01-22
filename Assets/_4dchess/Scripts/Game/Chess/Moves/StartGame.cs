@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StartGame : IMove {
+public class StartGame : IGameMoveBase {
 	Board board;
 	public Board Board => board;
 	public Piece Piece => null;

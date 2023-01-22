@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Capture : PieceMove {
+public class Capture : BasicMove {
 	public Coord captureCoord;
 	public Piece pieceCaptured;
 

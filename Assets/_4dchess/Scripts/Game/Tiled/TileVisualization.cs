@@ -18,11 +18,11 @@ public class TileVisualization : MonoBehaviour {
 		}
 	}
 
-	public List<TiledGameObject> CreateMarks(IEnumerable<PieceMove> moves) {
+	public List<TiledGameObject> CreateMarks(IEnumerable<BasicMove> moves) {
 		return CreateMarks(moves, DefaultColor);
 	}
 
-	public List<TiledGameObject> CreateMarks(IEnumerable<PieceMove> moves, Color c) {
+	public List<TiledGameObject> CreateMarks(IEnumerable<BasicMove> moves, Color c) {
 		int markToColor = currentMarks.Count;
 		CreateMarks(moves, null);
 		//Debug.Log("marks to color: "+(currentMarks.Count - markToColor)+" ("+c+")");
@@ -33,11 +33,11 @@ public class TileVisualization : MonoBehaviour {
 		return currentMarks;
 	}
 
-	public List<TiledGameObject> CreateMarks(IEnumerable<PieceMove> moves, Action<TiledGameObject> markProcessing) {
+	public List<TiledGameObject> CreateMarks(IEnumerable<BasicMove> moves, Action<TiledGameObject> markProcessing) {
 		//ClearTiles();
 		if (moves == null) { return currentMarks; }
 		TiledGameObject marker = null;
-		foreach (PieceMove move in moves) {
+		foreach (BasicMove move in moves) {
 			if (AddMark(move)) {
 				markProcessing?.Invoke(marker);
 			}
@@ -45,9 +45,9 @@ public class TileVisualization : MonoBehaviour {
 		return currentMarks;
 	}
 
-	public TiledGameObject AddMark(IMove move, bool reverse = false) {
-		PieceMove pmove = move as PieceMove;
-		TiledGameObject marker = pmove.MakeMark(markPool, reverse, DefaultColor);
+	public TiledGameObject AddMark(IGameMoveBase move, bool reverse = false) {
+		BasicMove bmove = move as BasicMove;
+		TiledGameObject marker = bmove.MakeMark(markPool, reverse, DefaultColor);
 		if (marker == null) { return null; }
 		currentMarks.Add(marker);
 		return marker;
