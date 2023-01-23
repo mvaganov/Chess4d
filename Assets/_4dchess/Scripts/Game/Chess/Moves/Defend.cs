@@ -14,7 +14,14 @@ public class Defend : Capture {
 		return tgo;
 	}
 	public override bool Equals(object obj) {
-		return obj.GetType() == typeof(Defend) && base.DuckTypeEquals(obj as Capture);
+		bool result = obj.GetType() == typeof(Defend) && base.DuckTypeEquals(obj as Capture);
+		//if (result == false) {
+		//	bool type = obj.GetType() == typeof(Defend);
+		//	bool duckTypeCapcture = base.DuckTypeEquals(obj as Capture);
+		//	bool BasicTypeCapcture = DuckTypeEquals(obj as BasicMove);
+		//	Debug.Log(type + " " + duckTypeCapcture + " " + BasicTypeCapcture);
+		//}
+		return result;
 	}
 	public override int GetHashCode() {
 		return base.GetHashCode();

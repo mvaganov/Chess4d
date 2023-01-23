@@ -73,7 +73,7 @@ public class BasicMove : IGameMoveBase {
 		return obj.GetType() == typeof(BasicMove) && DuckTypeEquals(obj as BasicMove);
 	}
 	public virtual bool DuckTypeEquals(BasicMove m) {
-		return m.from == from && m.to == to && m.pieceMoved == pieceMoved;
+		return m != null && m.from == from && m.to == to && m.pieceMoved == pieceMoved;
 	}
 	public override int GetHashCode() {
 		return from.GetHashCode() ^ to.GetHashCode() ^ (pieceMoved != null ? pieceMoved.GetHashCode() : 0);

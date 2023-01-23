@@ -169,7 +169,8 @@ public class BoardState {
 							for(int j = 0; j < original.Length; ++j) {
 								if (newMoveName.Equals(original[j].ToString())) {
 									Debug.LogError("failed to recognize duplicate: "+
-										newMoveName+newMoves[i].GetType()+" and "+ original[j]+original[j].GetType()+" "+ original[j].Equals(newMoves[i]));
+										newMoveName+newMoves[i].GetType()+" and "+ original[j]+original[j].GetType()+" "+
+										original[j].Equals(newMoves[i]));
 								}
 							}
 							totalNewMoves.Add(newMoves[i]);
