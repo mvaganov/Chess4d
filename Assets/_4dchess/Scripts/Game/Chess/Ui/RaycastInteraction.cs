@@ -90,7 +90,7 @@ public class RaycastInteraction : MonoBehaviour {
 	private bool MoveIsNotDefensive(IGameMoveBase move) {
 		//Defend def = move as Defend;
 		//return move as Defend == null;
-		Capture cap = move as Capture;
+		PieceMoveAttack cap = move as PieceMoveAttack;
 		if (cap == null) { return true; }
 		return !cap.isDefend;
 	}

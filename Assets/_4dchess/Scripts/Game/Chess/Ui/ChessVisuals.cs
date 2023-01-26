@@ -32,7 +32,7 @@ public class ChessVisuals : MonoBehaviour {
 		_tileVisualizationSettings = new Dictionary<System.Type, TileVisualSpecifics>() {
 			[typeof(Pawn.EnPassant)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),
 			[typeof(Defend)] = new TileVisualSpecifics(new Color(1, 1, 0), defendArrows),
-			[typeof(Capture)] = new TileVisualSpecifics(new Color(1, 0, 0), captures),
+			[typeof(PieceMoveAttack)] = new TileVisualSpecifics(new Color(1, 0, 0), captures),
 			[typeof(Pawn.DoubleMove)] = new TileVisualSpecifics(new Color(1, .75f, 0), moves),
 			[typeof(King.Castle)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),
 			[typeof(PieceMove)] = new TileVisualSpecifics(new Color(1, 1, 0), moves),
@@ -75,7 +75,7 @@ public class ChessVisuals : MonoBehaviour {
 		if (analysis.CurrentPieceCurrentMoves != null) {
 			for (int i = 0; i < analysis.CurrentPieceCurrentMoves.Count; ++i) {
 				IGameMoveBase move = analysis.CurrentPieceCurrentMoves[i];
-				if (!showKingDefender && move is Capture cap && ChessGame.IsMyKing(piece, cap.pieceCaptured)) { continue; }
+				if (!showKingDefender && move is PieceMoveAttack cap && ChessGame.IsMyKing(piece, cap.pieceCaptured)) { continue; }
 				AddPieceSelectionVisualFor(move, piece.board);
 			}
 		}
@@ -112,7 +112,7 @@ public class ChessVisuals : MonoBehaviour {
 		Piece piece = selectedPiece;
 		if (piece == null) { piece = board.GetPiece(currentCoord); }
 		for (int i = 0; i < activityAtSquare.Count; i++) {
-			Capture cap = activityAtSquare[i] as Capture;
+			PieceMoveAttack cap = activityAtSquare[i] as PieceMoveAttack;
 			if (cap == null) { continue; }
 			if (!showKingDefender && ChessGame.IsMyKing(piece, cap.pieceCaptured)) { continue; }
 			defenders.Add(cap);

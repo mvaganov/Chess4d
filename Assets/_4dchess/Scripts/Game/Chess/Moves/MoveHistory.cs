@@ -22,7 +22,7 @@ public class MoveHistory : MonoBehaviour {
 		int count = 0;
 		MoveNode node = CurrentMove;
 		while (node != null && node.move != null) {
-			if (node.move.Board == board && (node.move is Capture || (node.move is PieceMove m
+			if (node.move.Board == board && (node.move is PieceMoveAttack || (node.move is PieceMove m
 			&& m.pieceMoved != null && m.pieceMoved.code == "P"))) {
 				break;
 			}

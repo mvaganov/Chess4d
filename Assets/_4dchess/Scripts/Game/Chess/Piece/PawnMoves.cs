@@ -22,7 +22,7 @@ public partial class Pawn {
 		public override int GetHashCode() { return base.GetHashCode(); }
 	}
 
-	public class EnPassant : Capture {
+	public class EnPassant : PieceMoveAttack {
 		public EnPassant(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
 		: base(board, pieceMoved, from, to, pieceCaptured, fromCaptured) { }
 		public override void Do() {
@@ -74,7 +74,7 @@ public partial class Pawn {
 			return marker;
 		}
 		public override bool Equals(object obj) {
-			return obj.GetType() == GetType() && DuckTypeEquals(obj as Capture);
+			return obj.GetType() == GetType() && DuckTypeEquals(obj as PieceMoveAttack);
 		}
 		public override int GetHashCode() { return base.GetHashCode(); }
 	}

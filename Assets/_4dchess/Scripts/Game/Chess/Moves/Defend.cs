@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Defend : Capture {
+public class Defend : PieceMoveAttack {
 	public Defend(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
 		: base(board, pieceMoved, from, to, pieceCaptured, fromCaptured) {
 	}
@@ -14,7 +14,7 @@ public class Defend : Capture {
 		return tgo;
 	}
 	public override bool Equals(object obj) {
-		bool result = obj.GetType() == typeof(Defend) && base.DuckTypeEquals(obj as Capture);
+		bool result = obj.GetType() == typeof(Defend) && base.DuckTypeEquals(obj as PieceMoveAttack);
 		//if (result == false) {
 		//	bool type = obj.GetType() == typeof(Defend);
 		//	bool duckTypeCapcture = base.DuckTypeEquals(obj as Capture);

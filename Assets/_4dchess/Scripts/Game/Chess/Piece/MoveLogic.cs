@@ -74,7 +74,7 @@ public class MoveLogic : MonoBehaviour {
 					bool isAllies = self.team.IsAlliedWith(other.team);
 					if (!isAllies) {
 						if (moveKind.HasFlag(MoveKind.Attack)) {
-							Capture capture = new Capture(self.board, self, self.GetCoord(), cursor, other, cursor);
+							PieceMoveAttack capture = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other, cursor);
 							out_moves?.Add(capture);
 						}
 					}

@@ -80,7 +80,7 @@ public class ChessAnalysis : MonoBehaviour {
 					if (move is Pawn.Promotion pp) {
 						move = pp.moreInterestingMove;
 					}
-					Capture cap = move as Capture;
+					PieceMoveAttack cap = move as PieceMoveAttack;
 					if (cap != null && cap.pieceCaptured == king && !cap.pieceMoved.team.IsAlliedWith(king.team)) {
 						// the current move as enabling such a capture as a Check
 						King.Check check = new King.Check(game.chessMoves.CurrentMove.move, cap);
@@ -147,7 +147,7 @@ public class ChessAnalysis : MonoBehaviour {
 
 	private bool IsValidMove(Piece piece, IGameMoveBase move) {
 		if (piece == null) { return false; }
-		Capture cap = move as Capture;
+		PieceMoveAttack cap = move as PieceMoveAttack;
 		if (cap != null && (cap.pieceCaptured == null || piece.team.IsAlliedWith(cap.pieceCaptured.team))) {
 			return false;
 		}

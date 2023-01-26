@@ -23,10 +23,10 @@ public class King : MoveLogic {
 		}
 	}
 
-	public class Check : Capture {
+	public class Check : PieceMoveAttack {
 		public IGameMoveBase triggeringMove;
 		public bool isMate = false;
-		public Check(IGameMoveBase triggeringMove, Capture threateningMove)
+		public Check(IGameMoveBase triggeringMove, PieceMoveAttack threateningMove)
 			: base(threateningMove) {
 			this.triggeringMove = triggeringMove;
 		}
@@ -40,7 +40,7 @@ public class King : MoveLogic {
 		}
 
 		public virtual bool DuckTypeEquals(Check check) {
-			return base.DuckTypeEquals(check as Capture) && (triggeringMove.Equals(check.triggeringMove));
+			return base.DuckTypeEquals(check as PieceMoveAttack) && (triggeringMove.Equals(check.triggeringMove));
 		}
 
 		public override int GetHashCode() {
@@ -92,7 +92,7 @@ public class King : MoveLogic {
 				// mark the castle, which is the rook moving next to the king, and the king jumping over the rook
 				for (int i = 0; i < moves.Count; ++i) {
 					// replace the move with a castle to that target.
-					Capture cap = moves[i] as Capture;
+					PieceMoveAttack cap = moves[i] as PieceMoveAttack;
 					Piece other = cap.pieceCaptured;
 					Coord there = other.GetCoord();
 					Coord delta = there - here;
