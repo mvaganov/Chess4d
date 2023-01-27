@@ -83,7 +83,7 @@ public class King : MoveLogic {
 				for (int i = moves.Count - 1; i >= 0; --i) {
 					Defend def = moves[i] as Defend;
 					if (def == null || def.pieceCaptured == null || def.pieceCaptured.moveCount != 0
-					|| def.pieceCaptured.code != pieceCode || (def.captureCoord - here).MagnitudeManhattan < 2) {
+					|| def.pieceCaptured.code != pieceCode || (def.to/*captureCoord*/ - here).MagnitudeManhattan < 2) {
 						moves.RemoveAt(i);
 					} else {
 						Debug.Log("found a castle? " + def.pieceCaptured);

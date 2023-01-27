@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Defend : PieceMoveAttack {
-	public Defend(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
-		: base(board, pieceMoved, from, to, pieceCaptured, fromCaptured) {
+	public Defend(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured/*, Coord fromCaptured*/)
+		: base(board, pieceMoved, from, to, pieceCaptured/*, fromCaptured*/) {
 	}
 	public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse, Color color) {
 		TiledGameObject tgo = base.MakeMark(markPool, reverse, color);

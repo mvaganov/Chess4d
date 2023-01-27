@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PieceMoveAttack : BasicMove, ICapture {
-	public Coord captureCoord;
+public class PieceMoveAttack : BasicMove, IMove, ICapture {
+	//public Coord captureCoord;
 	public Piece pieceCaptured;
 
 	public bool isDefend {
@@ -13,16 +13,17 @@ public class PieceMoveAttack : BasicMove, ICapture {
 			return myTeam.IsAlliedWith(pieceCaptured.team);
 		}
 	}
-	public PieceMoveAttack(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured) :
-	base(board, pieceMoved, from, to) {
-		this.captureCoord = fromCaptured;
+	public PieceMoveAttack(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured//, Coord fromCaptured
+	) : base(board, pieceMoved, from, to) {
+		//this.captureCoord = fromCaptured;
 		this.pieceCaptured = pieceCaptured;
 	}
 
 	public PieceMoveAttack(PieceMoveAttack other) :
-	this(other.board, other.pieceMoved, other.from, other.to, other.pieceCaptured, other.captureCoord) { }
+	this(other.board, other.pieceMoved, other.from, other.to, other.pieceCaptured//, other.captureCoord
+	) { }
 
-	public override Coord GetRelevantCoordinate() => captureCoord;
+	//public override Coord GetRelevantCoordinate() => captureCoord;
 
 	public override bool Involves(Piece piece) => pieceCaptured == piece || base.Involves(piece);
 
@@ -34,22 +35,22 @@ public class PieceMoveAttack : BasicMove, ICapture {
 	public override void Do() {
 		base.Do();
 		if (pieceCaptured != null) {
-			DoCapture(pieceMoved, pieceCaptured, captureCoord);
+			DoCapture(pieceMoved, pieceCaptured, to);// captureCoord);
 		}
 	}
 
 	public override void Undo() {
 		base.Undo();
 		if (pieceCaptured != null) {
-			Uncapture(pieceMoved, pieceCaptured, captureCoord);
+			Uncapture(pieceMoved, pieceCaptured, to);//captureCoord);
 		}
 	}
 
-	private static void DoCapture(Piece attacker, Piece captured, Coord capturedLocation) {
+	protected static void DoCapture(Piece attacker, Piece captured, Coord capturedLocation) {
 		attacker.team.Capture(captured);
 	}
 
-	private static void Uncapture(Piece attacker, Piece captured, Coord capturedLocation) {
+	protected static void Uncapture(Piece attacker, Piece captured, Coord capturedLocation) {
 		Board b = attacker.board;
 		Tile tile = b.GetTile(capturedLocation);
 		captured.transform.SetParent(tile.transform);
@@ -78,14 +79,15 @@ public class PieceMoveAttack : BasicMove, ICapture {
 		return obj.GetType() == typeof(PieceMoveAttack) && DuckTypeEquals(obj as PieceMoveAttack);
 	}
 	public virtual bool DuckTypeEquals(PieceMoveAttack c) {
-		return base.DuckTypeEquals(c) && c.pieceCaptured == pieceCaptured && c.captureCoord == captureCoord;
+		return base.DuckTypeEquals(c) && c.pieceCaptured == pieceCaptured;// && c.captureCoord == captureCoord;
 	}
 	public override int GetHashCode() {
-		return base.GetHashCode() ^ captureCoord.GetHashCode() ^ pieceCaptured.GetHashCode();
+		return base.GetHashCode() ^ //captureCoord.GetHashCode() ^
+																pieceCaptured.GetHashCode();
 	}
 	public override TiledGameObject MakeMark(MemoryPool<TiledGameObject> markPool, bool reverse, Color color) {
 		TiledGameObject marker = markPool.Get();
-		Coord coord = reverse ? from : captureCoord;
+		Coord coord = reverse ? from : to;// captureCoord;
 		Tile tile = pieceMoved.board.GetTile(coord);
 		Transform markerTransform = marker.transform;
 		markerTransform.SetParent(tile.transform);

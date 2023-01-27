@@ -80,7 +80,7 @@ public class Board : MonoBehaviour {
 
 	private Coord GetCaptureLocation(BasicMove m) {
 		if (m is PieceMoveAttack c) {
-			return c.captureCoord;
+			return c.to;// captureCoord;
 		}
 		return GetMoveLocation(m);
 	}

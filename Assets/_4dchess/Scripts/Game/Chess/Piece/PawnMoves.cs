@@ -23,15 +23,29 @@ public partial class Pawn {
 	}
 
 	public class EnPassant : PieceMoveAttack {
+		public Coord captureCoord;
 		public EnPassant(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured, Coord fromCaptured)
-		: base(board, pieceMoved, from, to, pieceCaptured, fromCaptured) { }
+		: base(board, pieceMoved, from, to, pieceCaptured/*, fromCaptured*/) { captureCoord = fromCaptured; }
+		//public override void Do() {
+		//	GetPawn(pieceMoved, nameof(EnPassant));
+		//	base.Do();
+		//}
+		//public override void Undo() {
+		//	GetPawn(pieceMoved, nameof(EnPassant));
+		//	base.Undo();
+		//}
 		public override void Do() {
-			GetPawn(pieceMoved, nameof(EnPassant));
 			base.Do();
+			if (pieceCaptured != null) {
+				DoCapture(pieceMoved, pieceCaptured, captureCoord);
+			}
 		}
+
 		public override void Undo() {
-			GetPawn(pieceMoved, nameof(EnPassant));
 			base.Undo();
+			if (pieceCaptured != null) {
+				Uncapture(pieceMoved, pieceCaptured, captureCoord);
+			}
 		}
 		public static BasicMove GetPossible(Board board, Piece p, Coord pieceLocation, Coord nextPieceLocation, Coord otherPieceLocation) {
 			Tile sideTile = board.GetTile(otherPieceLocation);
@@ -76,7 +90,9 @@ public partial class Pawn {
 		public override bool Equals(object obj) {
 			return obj.GetType() == GetType() && DuckTypeEquals(obj as PieceMoveAttack);
 		}
-		public override int GetHashCode() { return base.GetHashCode(); }
+		public override int GetHashCode() {
+			return base.GetHashCode() ^ captureCoord.GetHashCode() ^ pieceCaptured.GetHashCode();
+		}
 	}
 
 	public class Promotion : BasicMove {
