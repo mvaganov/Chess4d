@@ -5,12 +5,12 @@ using UnityEngine;
 public class PieceMoveAttack : BasicMove, IMove, ICapture {
 	//public Coord captureCoord;
 	public Piece pieceCaptured;
-
-	public bool isDefend {
+	public override bool IsValid => !IsDefend;
+	public bool IsDefend {
 		get {
 			if (pieceCaptured == null) { return true; }
-			Team myTeam = pieceMoved.team;
-			return myTeam.IsAlliedWith(pieceCaptured.team);
+			Team otherTeam = pieceCaptured.team, myTeam = pieceMoved.team;
+			return myTeam.IsAlliedWith(otherTeam);
 		}
 	}
 	public PieceMoveAttack(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured//, Coord fromCaptured
@@ -69,7 +69,8 @@ public class PieceMoveAttack : BasicMove, IMove, ICapture {
 				identifier = from.ColumnId;
 			}
 			string otherIdentifier = pieceCaptured.code;
-			return $"{identifier}{from}x{otherIdentifier}{to}";
+			string actionKind = !pieceCaptured.team.IsAlliedWith(pieceMoved.team) ? "x" : "_";
+			return $"{identifier}{from}{actionKind}{otherIdentifier}{to}";
 		} else {
 			return "_" + base.ToString();
 		}

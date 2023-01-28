@@ -77,6 +77,7 @@ public class ChessAnalysis : MonoBehaviour {
 				for (int m = 0; m < moves.Length; ++m) {
 					IGameMoveBase move = moves[m];
 					if (move.GetType() == typeof(Defend)) { continue; }
+					//if (!move.IsValid) { continue; }
 					if (move is Pawn.Promotion pp) {
 						move = pp.moreInterestingMove;
 					}
@@ -132,6 +133,8 @@ public class ChessAnalysis : MonoBehaviour {
 			if (pieceMoves[i] as Defend != null) {
 				pieceMoves.RemoveAt(i);
 			}
+			//if (!pieceMoves[i].IsValid) { continue; }
+			//pieceMoves.RemoveAt(i);
 		}
 		currentMoves.AddRange(pieceMoves);
 		for (int i = 0; i < pieceMoves.Count; i++) {

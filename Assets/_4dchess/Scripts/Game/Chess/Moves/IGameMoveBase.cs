@@ -6,6 +6,10 @@ using System.Collections.Generic;
 public interface IGameMoveBase {
 	public Board Board { get;}
 	public Piece Piece { get;}
+	/// <summary>
+	/// true if this move is allowed to be made by the player
+	/// </summary>
+	public bool IsValid { get; }
 	public Piece GetPiece(int index);
 	public int GetPieceCount();
 	public Coord GetRelevantCoordinate();

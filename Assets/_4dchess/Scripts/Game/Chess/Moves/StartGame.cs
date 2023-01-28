@@ -6,6 +6,7 @@ public class StartGame : IGameMoveBase {
 	Board board;
 	public Board Board => board;
 	public Piece Piece => null;
+	public bool IsValid => false;
 	public StartGame(Board board) { this.board = board; }
 	public Coord GetRelevantCoordinate() => Coord.zero;
 	public bool Involves(Piece piece) => false;

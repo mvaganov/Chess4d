@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// TODO remove this class. replace with attacks that count as Defend.
 public class Defend : PieceMoveAttack {
 	public Defend(Board board, Piece pieceMoved, Coord from, Coord to, Piece pieceCaptured/*, Coord fromCaptured*/)
 		: base(board, pieceMoved, from, to, pieceCaptured/*, fromCaptured*/) {

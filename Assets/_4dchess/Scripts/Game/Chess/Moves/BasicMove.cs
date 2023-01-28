@@ -12,7 +12,7 @@ public class BasicMove : IGameMoveBase {
 
 	public Board Board => board;
 	public Piece Piece => pieceMoved;
-
+	public virtual bool IsValid => true;
 	public BasicMove(Board board, Piece pieceMoved, Coord from, Coord to) {
 		this.board = board;
 		this.from = from;

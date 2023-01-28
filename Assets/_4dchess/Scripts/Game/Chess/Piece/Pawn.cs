@@ -46,6 +46,7 @@ public partial class Pawn : MoveLogic {
 			IGameMoveBase im = out_pawnMoves[i];
 			BasicMove m = im as BasicMove;
 			if (IsLastRow(board, m.to) && !(m is Defend) && !(m is Promotion)) {
+			//if (IsLastRow(board, m.to) && m.IsValid && !(m is Promotion)) {
 				out_pawnMoves[i] = new Promotion(out_pawnMoves[i]);
 			}
 		}

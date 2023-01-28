@@ -68,6 +68,7 @@ public class MoveLogic : MonoBehaviour {
 				Piece other = board.GetPiece(cursor);
 				if (moveKind.HasFlag(MoveKind.Defend)) {
 					Defend defend = new Defend(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
+					//PieceMoveAttack defend = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
 					out_moves?.Add(defend);
 				}
 				if (other != null) {

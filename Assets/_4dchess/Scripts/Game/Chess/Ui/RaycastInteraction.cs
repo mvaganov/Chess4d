@@ -67,7 +67,7 @@ public class RaycastInteraction : MonoBehaviour {
 	}
 
 	public void DoMoveAt(Piece selectedPiece, Coord coord) {
-		List<IGameMoveBase> moves = analysis.GetMovesAt(coord, MoveIsNotDefensive);
+		List<IGameMoveBase> moves = analysis.GetMovesAt(coord, MoveIsValid);
 		if (coord != selectedPiece.GetCoord() && moves.Count != 0) {
 			switch (moves.Count) {
 				case 1:
@@ -87,12 +87,13 @@ public class RaycastInteraction : MonoBehaviour {
 		}
 	}
 
-	private bool MoveIsNotDefensive(IGameMoveBase move) {
+	private bool MoveIsValid(IGameMoveBase move) {
+		return move.IsValid;
 		//Defend def = move as Defend;
 		//return move as Defend == null;
-		PieceMoveAttack cap = move as PieceMoveAttack;
-		if (cap == null) { return true; }
-		return !cap.isDefend;
+		//PieceMoveAttack cap = move as PieceMoveAttack;
+		//if (cap == null) { return true; }
+		//return !cap.isDefend;
 	}
 
 	private void ColorAccentHovered(TiledGameObject hoveredObject) {
