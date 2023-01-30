@@ -31,7 +31,7 @@ public class ChessVisuals : MonoBehaviour {
 		get => (_tileVisualizationSettings != null) ? _tileVisualizationSettings :
 		_tileVisualizationSettings = new Dictionary<System.Type, TileVisualSpecifics>() {
 			[typeof(Pawn.EnPassant)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),
-			[typeof(Defend)] = new TileVisualSpecifics(new Color(1, 1, 0), defendArrows),
+			//[typeof(Defend)] = new TileVisualSpecifics(new Color(1, 1, 0), defendArrows),
 			[typeof(PieceMoveAttack)] = new TileVisualSpecifics(new Color(1, 0, 0), captures),
 			[typeof(Pawn.DoubleMove)] = new TileVisualSpecifics(new Color(1, .75f, 0), moves),
 			[typeof(King.Castle)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),

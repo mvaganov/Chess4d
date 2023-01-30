@@ -60,8 +60,8 @@ public class MoveNode {
 			move.Board.game.moveNodeBeingProcessed = this;
 			boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
 			boardState.prev = prev != null ? prev.boardState : null;
-			newMoves.RemoveAll(move => move.GetType() == typeof(Defend));
-			//newMoves.RemoveAll(move => !move.IsValid);
+			//newMoves.RemoveAll(move => move.GetType() == typeof(Defend));
+			newMoves.RemoveAll(move => !move.IsValid);
 			boardState.notableMoves = newMoves;
 			Debug.Log($"{move} new moves: {string.Join(", ", newMoves.ConvertAll(m => m.ToString()))}");
 		}

@@ -118,8 +118,8 @@ public partial class Pawn {
 			if (move.GetType() != typeof(PieceMove)) {
 				moreInterestingMove = move;
 			}
-			if (move.GetType() == typeof(Defend)) {
-			//if (!move.IsValid) {
+			//if (move.GetType() == typeof(Defend)) {
+			if (!move.IsValid) {
 				throw new System.Exception("this should not upgrade to a promotion...");
 			}
 		}

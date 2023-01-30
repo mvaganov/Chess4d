@@ -74,7 +74,7 @@ public class RaycastInteraction : MonoBehaviour {
 					game.chessMoves.MakeMove(moves[0], "");
 					break;
 				default:
-					Debug.Log($"TODO must disambiguate between {moves.Count} moves: [{string.Join(", ", moves)}]");
+					Debug.Log($"TODO must disambiguate between {moves.Count} moves: [{string.Join(", ", moves.ConvertAll(m => m.ToString()+"{"+m.GetType().Name+"}"))}]");
 					for (int i = 0; i < moves.Count; i++) {
 						BasicMove m = moves[i] as BasicMove;
 						Debug.Log($"{m.GetType().Name} {m.pieceMoved} {m.from} {m.to}");

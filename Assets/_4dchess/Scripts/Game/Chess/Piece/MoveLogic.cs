@@ -66,17 +66,19 @@ public class MoveLogic : MonoBehaviour {
 					break;
 				}
 				Piece other = board.GetPiece(cursor);
-				if (moveKind.HasFlag(MoveKind.Defend)) {
-					Defend defend = new Defend(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
-					//PieceMoveAttack defend = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
-					out_moves?.Add(defend);
-				}
 				if (other != null) {
 					bool isAllies = self.team.IsAlliedWith(other.team);
 					if (!isAllies) {
 						if (moveKind.HasFlag(MoveKind.Attack)) {
 							PieceMoveAttack capture = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
 							out_moves?.Add(capture);
+						}
+					}
+					if (isAllies) {
+						if (moveKind.HasFlag(MoveKind.Defend)) {
+							//Defend defend = new Defend(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
+							PieceMoveAttack defend = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
+							out_moves?.Add(defend);
 						}
 					}
 					break;
