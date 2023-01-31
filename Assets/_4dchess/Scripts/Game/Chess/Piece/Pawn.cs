@@ -5,7 +5,7 @@ public partial class Pawn : MoveLogic {
 	private int didDoubleMoveOnTurn = InvalidTurn;
 	private Coord direction;
 
-	private void Start() {
+	public override void Initialize() {
 		direction = team.pawnDirection;
 	}
 
@@ -21,7 +21,10 @@ public partial class Pawn : MoveLogic {
 		Board board = p.board;
 		List<IGameMoveBase> pawnMoves = new List<IGameMoveBase>();
 		if (moveKind.HasFlag(MoveKind.Move)) {
-			StandardMoves(new Coord[] { direction }, 1, pawnMoves, MoveKind.Move);
+			//StandardMoves(new Coord[] { direction }, 1, pawnMoves, MoveKind.Move);
+			if(board.GetPiece(coord + direction) == null) {
+				pawnMoves.Add(new PieceMove(board, p, coord, coord+direction));
+			}
 			if (piece.moveCount == 0 && pawnMoves.Count > 0) {
 				Coord rushedMove = coord + direction * 2;
 				Tile tile = board.GetTile(rushedMove);

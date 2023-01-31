@@ -33,40 +33,64 @@ public class BoardState {
 		public int added;
 		public int lost;
 		public override string ToString() {
+			//string newmoves = newMoves != null ? string.Join(", ", newMoves) : "";
 			return $"{count}" + (added > 0 ? $" +{added}" : "") + (lost > 0 ? $" -{lost}" : "");
+			//+ $" new : {newmoves}";
 		}
+		public List<IGameMoveBase> allMoves;
+		public List<IGameMoveBase> newMoves;
 	}
 	public MoveStats CalculateMoveStats() {
 		MoveStats moveStats = new MoveStats();
+		moveStats.allMoves = new List<IGameMoveBase>();
+		moveStats.newMoves = new List<IGameMoveBase>();
 		foreach (var moveKvp in movesToLocations) {
-			moveStats.count += moveKvp.Value.Length;
+			moveStats.count += CountValidMoves(moveKvp.Value, null);//moveKvp.Value.Length;
 		}
 		if (prev == null) {
 			moveStats.added = moveStats.count;
 			moveStats.lost = 0;
+			foreach (var moveKvp in movesToLocations) {
+				CountValidMoves(moveKvp.Value, moveStats.allMoves);
+			}
 		} else {
 			Coord c = Coord.zero;
 			while (c.Iterate(BoardSize)) {
-				//Debug.Log(c);
 				Dictionary<Coord, IGameMoveBase[]> prevMoveLocations = prev.movesToLocations;
 				movesToLocations.TryGetValue(c, out IGameMoveBase[] these);
 				prevMoveLocations.TryGetValue(c, out IGameMoveBase[] older);
 				if (these == older) { continue; }
 				if (these == null && older != null) {
-					moveStats.lost += older.Length;
+					moveStats.lost += CountValidMoves(older, moveStats.allMoves);// older.Length;
 				} else if (older == null && these != null) {
-					moveStats.added += these.Length;
+					moveStats.added += CountValidMoves(these, moveStats.allMoves);// these.Length;
+					CountValidMoves(these, moveStats.newMoves);
+					//Debug.Log(string.Join(", ", System.Array.ConvertAll(these, m => m.ToString())));
 				} else {
+					List<IGameMoveBase> newOnesThisSquare = new List<IGameMoveBase>();
 					int newOnes = 0, theSame = 0;
 					for(int i = 0; i < these.Length; ++i) {
+						if (!these[i].IsValid) { continue; }
 						int index = System.Array.IndexOf(older, these[i]);
+						moveStats.allMoves.Add(these[i]);
 						if (index != -1) {
 							++theSame;
 						} else {
 							++newOnes;
+							moveStats.newMoves.Add(these[i]);
+							newOnesThisSquare.Add(these[i]);
 						}
 					}
-					int lostOnes = older.Length - theSame;
+					//Debug.Log("~~~SQ " + c +
+					//	"\n" + string.Join(", ", System.Array.ConvertAll(these, m => m.ToString())) +
+					//	"--" + string.Join(", ", System.Array.ConvertAll(older, m => m.ToString())) +
+					//	"\n{" + string.Join(", ", newOnesThisSquare.ConvertAll(m => m.ToString())) + "}");
+					int lostOnes = 0;// older.Length - theSame;
+					for(int i = 0; i < older.Length; ++i) {
+						if (!older[i].IsValid) { continue; }
+						int index = System.Array.IndexOf(these, older[i]);
+						if (index < 0) { ++lostOnes; }
+					}
 					moveStats.lost += lostOnes;
 					moveStats.added += newOnes;
 				}
@@ -75,6 +99,16 @@ public class BoardState {
 		return moveStats;
 	}
 
+	public int CountValidMoves(IList<IGameMoveBase> moves, List<IGameMoveBase> allValidMoves) {
+		int count = 0;
+		for(int i = 0; i < moves.Count; ++i) {
+			if (moves[i].IsValid) {
+				if (allValidMoves != null) { allValidMoves.Add(moves[i]); }
+				++count;
+			}
+		}
+		return count;
+	}
 	public static BoardState Next(BoardState other) {
 		BoardState next = new BoardState();
 		next.prev = other;

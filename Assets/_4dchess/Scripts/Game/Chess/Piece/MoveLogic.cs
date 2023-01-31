@@ -19,12 +19,14 @@ public class MoveLogic : MonoBehaviour {
 	public Piece piece => GetComponent<Piece>();
 	public Team team => GetComponent<Piece>().team;
 
-	public void Awake() {
+	public virtual void Awake() {
 		if (!PieceHasCorrectLogic()) {
 			piece.RefreshMoveLogic();
 			PieceHasCorrectLogic();
 		}
 	}
+
+	public virtual void Initialize() { }
 
 	private bool PieceHasCorrectLogic() {
 		Piece p = piece;
@@ -82,6 +84,11 @@ public class MoveLogic : MonoBehaviour {
 						}
 					}
 					break;
+				} else {
+					if (moveKind.HasFlag(MoveKind.Move) || moveKind.HasFlag(MoveKind.MoveAttack) || moveKind.HasFlag(MoveKind.Defend)) {
+						PieceMoveAttack move = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other);
+						out_moves?.Add(move);
+					}
 				}
 				if (moveKind.HasFlag(MoveKind.Move)) {
 					out_moves?.Add(new PieceMove(self.board, self, position, cursor));
