@@ -7,7 +7,6 @@ public class TileVisualization : MonoBehaviour {
 	[SerializeField] private MemoryPool<TiledGameObject> markPool = new MemoryPool<TiledGameObject>();
 	[SerializeField] private List<TiledGameObject> currentMarks = new List<TiledGameObject>();
 
-
 	public Color DefaultColor => _defualtColor;
 
 	public void ClearTiles() {
