@@ -8,8 +8,10 @@ public class MoveHistory : MonoBehaviour {
 	public MoveEventHandler onMove;
 	public MoveEventHandler onUndoMove;
 	public ChessGame game;
+	private ChessVisuals chessVis;
 
 	public MoveNode CurrentMove => currentMove;
+	private ChessVisuals ChessVisuals => chessVis != null ? chessVis : chessVis = FindObjectOfType<ChessVisuals>();
 
 	[System.Serializable] public class MoveEventHandler : UnityEvent<MoveNode> { }
 
@@ -91,6 +93,7 @@ public class MoveHistory : MonoBehaviour {
 
 	public void MakeMove(IGameMoveBase move, string notes) {
 		DoThis(new MoveNode(currentMove.turnIndex + 1, move, notes));
+		ChessVisuals.GenerateHints(currentMove);
 	}
 
 	public void DoThis(MoveNode move) {
@@ -99,9 +102,9 @@ public class MoveHistory : MonoBehaviour {
 			//currentMove.GetTimelineBranch(doneAlready);
 			move = currentMove.PopTimeline(doneAlready);
 		}
-		BasicMove pmove = move.move as BasicMove;
-		Piece piece = pmove.pieceMoved;
-		Debug.Log(piece.name + " " + move.move.GetType().Name + " " + move);
+		//BasicMove pmove = move.move as BasicMove;
+		//Piece piece = pmove.pieceMoved;
+		//Debug.Log(piece.name + " " + move.move.GetType().Name + " " + move);
 		AnnounceTurnOrder(move);
 		currentMove.SetAsNextTimelineBranch(move);
 		move.Prev = currentMove;

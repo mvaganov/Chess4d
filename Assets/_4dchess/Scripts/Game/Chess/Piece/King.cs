@@ -81,7 +81,6 @@ public class King : MoveLogic {
 				Coord here = self.GetCoord();
 				// get the ones sort of far away that haven't moved
 				for (int i = moves.Count - 1; i >= 0; --i) {
-					//Defend def = moves[i] as Defend;
 					PieceMoveAttack def = moves[i] as PieceMoveAttack;
 					if (def == null || def.pieceCaptured == null || def.pieceCaptured.moveCount != 0
 					|| def.pieceCaptured.code != pieceCode || (def.to/*captureCoord*/ - here).MagnitudeManhattan < 2) {

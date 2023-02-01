@@ -61,7 +61,6 @@ public class RaycastInteraction : MonoBehaviour {
 		Piece selectedPiece = analysis.SelectedPiece;
 		if (selectedPiece != null) {
 			DoMoveAt(selectedPiece, coord);
-			visuals.defendArrows.ClearTiles();
 			currentHovered = null;
 		}
 	}
@@ -89,11 +88,6 @@ public class RaycastInteraction : MonoBehaviour {
 
 	private bool MoveIsValid(IGameMoveBase move) {
 		return move.IsValid;
-		//Defend def = move as Defend;
-		//return move as Defend == null;
-		//PieceMoveAttack cap = move as PieceMoveAttack;
-		//if (cap == null) { return true; }
-		//return !cap.isDefend;
 	}
 
 	private void ColorAccentHovered(TiledGameObject hoveredObject) {

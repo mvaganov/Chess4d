@@ -7,8 +7,8 @@ public class ChessVisuals : MonoBehaviour {
 	public TileVisualization moves;
 	public TileVisualization captures;
 	public TileVisualization selection;
+	public TileVisualization hintArrows;
 	public TileVisualization kingInCheck;
-	public TileVisualization defendArrows;
 	public TileVisualization tempDefendArrows;
 	public TileVisualization specialTileAndArrows;
 	public TiledGameObject selected;
@@ -17,6 +17,10 @@ public class ChessVisuals : MonoBehaviour {
 	private Dictionary<System.Type, TileVisualSpecifics> _tileVisualizationSettings = null;
 	public Color threaten = new Color(1, .5f, 1);
 	public Color activeAttack = new Color(1, 0.75f, .5f);
+	private List<GameObject> hints;
+	TileVisualSpecifics _hintSetting;
+	private TileVisualSpecifics HintSetting => _hintSetting.visualizer != null ? _hintSetting
+		: _hintSetting = new TileVisualSpecifics(new Color(.5f, .5f, .5f), hintArrows);
 
 	private struct TileVisualSpecifics {
 		public Color color;
@@ -31,7 +35,6 @@ public class ChessVisuals : MonoBehaviour {
 		get => (_tileVisualizationSettings != null) ? _tileVisualizationSettings :
 		_tileVisualizationSettings = new Dictionary<System.Type, TileVisualSpecifics>() {
 			[typeof(Pawn.EnPassant)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),
-			//[typeof(Defend)] = new TileVisualSpecifics(new Color(1, 1, 0), defendArrows),
 			[typeof(PieceMoveAttack)] = new TileVisualSpecifics(new Color(1, 0, 0), captures),
 			[typeof(Pawn.DoubleMove)] = new TileVisualSpecifics(new Color(1, .75f, 0), moves),
 			[typeof(King.Castle)] = new TileVisualSpecifics(new Color(1, .5f, 0), specialTileAndArrows),
@@ -45,7 +48,6 @@ public class ChessVisuals : MonoBehaviour {
 		if (captures == null) { Debug.LogWarning($"missing value for {nameof(captures)}"); }
 		if (selection == null) { Debug.LogWarning($"missing value for {nameof(selection)}"); }
 		if (kingInCheck == null) { Debug.LogWarning($"missing value for {nameof(kingInCheck)}"); }
-		if (defendArrows == null) { Debug.LogWarning($"missing value for {nameof(defendArrows)}"); }
 		if (tempDefendArrows == null) { Debug.LogWarning($"missing value for {nameof(tempDefendArrows)}"); }
 		if (specialTileAndArrows == null) { Debug.LogWarning($"missing value for {nameof(specialTileAndArrows)}"); }
 	}
@@ -54,7 +56,6 @@ public class ChessVisuals : MonoBehaviour {
 		if (selected == null) { return; }
 		selected.ResetColor();
 		specialTileAndArrows.ClearTiles();
-		defendArrows.ClearTiles();
 		selection.ClearTiles();
 		captures.ClearTiles();
 		moves.ClearTiles();
@@ -67,7 +68,6 @@ public class ChessVisuals : MonoBehaviour {
 		moves.ClearTiles();
 		captures.ClearTiles();
 		selection.ClearTiles();
-		defendArrows.ClearTiles();
 		specialTileAndArrows.ClearTiles();
 		Coord pieceCoord = piece.GetCoord();
 		selection.CreateMarks(new BasicMove[] { new BasicMove(piece.board, piece, pieceCoord, pieceCoord) }, Color.cyan);
@@ -76,12 +76,12 @@ public class ChessVisuals : MonoBehaviour {
 			for (int i = 0; i < analysis.CurrentPieceCurrentMoves.Count; ++i) {
 				IGameMoveBase move = analysis.CurrentPieceCurrentMoves[i];
 				if (!showKingDefender && move is PieceMoveAttack cap && ChessGame.IsMyKing(piece, cap.pieceCaptured)) { continue; }
-				AddPieceSelectionVisualFor(move, piece.board);
+				AddPieceSelectionVisualFor(move);
 			}
 		}
 	}
 
-	private TiledGameObject AddPieceSelectionVisualFor(IGameMoveBase someKindOfMove, Board board) {
+	public TiledGameObject AddPieceSelectionVisualFor(IGameMoveBase someKindOfMove) {
 		TiledGameObject tgo;
 		if (!TileVisSettings.TryGetValue(someKindOfMove.GetType(), out TileVisualSpecifics setting)) {
 			setting.visualizer = specialTileAndArrows;
@@ -89,6 +89,14 @@ public class ChessVisuals : MonoBehaviour {
 			Debug.Log("unknown type "+ someKindOfMove.GetType());
 		}
 		tgo = setting.visualizer.AddMark(someKindOfMove);
+		tgo.Color = setting.color;
+		return tgo;
+	}
+
+	public TiledGameObject AddHintVisualFor(IGameMoveBase someKindOfMove) {
+		TiledGameObject tgo;
+		TileVisualSpecifics setting = HintSetting;
+		tgo = setting.visualizer.AddMark(someKindOfMove, false);
 		tgo.Color = setting.color;
 		return tgo;
 	}
@@ -130,6 +138,19 @@ public class ChessVisuals : MonoBehaviour {
 				} else if (defenders[i].pieceMoved == selected && board.GetPiece(currentCoord) != null) {
 					tiledObject.Color = activeAttack;
 				}
+			}
+		}
+	}
+
+	public void GenerateHints(MoveNode node) {
+		hintArrows.ClearTiles();
+		IList<IGameMoveBase> moves = node.boardState.notableMoves;
+		if (hints == null) { hints = new List<GameObject>(); }
+		for (int i = 0; i < moves.Count; ++i) {
+			TiledGameObject tgo = AddHintVisualFor(moves[i]);
+			if (tgo is TiledWire tw) {
+				tw.Wire.LineRenderer.startWidth /= 4;
+				tw.Wire.LineRenderer.endWidth /= 4;
 			}
 		}
 	}
