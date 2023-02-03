@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class BoardState {
@@ -155,34 +156,22 @@ public class BoardState {
 		// collapse common memory with previous. also note which moves are new
 		UseMemoryFromOldStateWherePossible(nextAnalysis, this, totalNewMoves);
 		move.UndoWithoutAnimation(); // unmake move, so the state stays as it should be
-
-//		//Dictionary<Coord, List<Move>> movesToRemove = new Dictionary<Coord, List<Move>>();
-//		HashSet<Piece> relevantPieces = new HashSet<Piece>();
-//		move.GetMovingPieces(relevantPieces);
-//		// for each relevant piece
-//			// get location of the piece before the move
-//				// if any other pieces were defending that square, mark that we need to recalculate those pieces moves
-//			// get the move list of the piece before the move
-//				// 
-//		// 
-
-//		List<Move> foundSomeMoves = new List<Move>();
-//		foreach (KeyValuePair<Coord,List<Move>> moveToLoc in movesToLocations) {
-//			foreach (Piece piece in relevantPieces) {
-//				foundSomeMoves.Clear();
-//				GetMovesInvolving(piece, moveToLoc.Value, foundSomeMoves);
-////				AddTo(movesToRemove, moveToLoc.Key, )
-//			}
-//		}
-
-		// TODO mark units that need recalculation
-		// - this moving unit
-		// - units defending this moving unit
-		// - 
-		// remove that unit's moves from the analysis, then recalculate
 		return nextAnalysis;
 	}
 
+	// TODO replace the Tasks with Coroutines. those will work better with Unity.
+	public async Task<BoardState> NewAnalysisAfterAsync(IGameMoveBase move, List<IGameMoveBase> totalNewMoves) {
+		move.DoWithoutAnimation(); // make move
+		BoardState nextAnalysis = new BoardState(move.Board); // do entire analysis from scratch
+		nextAnalysis.prev = this;
+		// collapse common memory with previous. also note which moves are new
+		UseMemoryFromOldStateWherePossible(nextAnalysis, this, totalNewMoves);
+		//await Task.Run(() => { }); // <-- stops warning. remove after UseMemoryFromOldStateWherePossible is async
+		move.UndoWithoutAnimation(); // unmake move, so the state stays as it should be
+		return nextAnalysis;
+	}
+
+	// TODO make this an asyncronous awaitable Task
 	private static void UseMemoryFromOldStateWherePossible(BoardState nextAnalysis, BoardState older,
 	List<IGameMoveBase> totalNewMoves) {
 		// after fully calculating both board states, combine the new moves with the original in memory as much as possible

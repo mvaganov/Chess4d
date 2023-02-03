@@ -94,6 +94,7 @@ public class MoveHistory : MonoBehaviour {
 	public void MakeMove(IGameMoveBase move, string notes) {
 		DoThis(new MoveNode(currentMove.turnIndex + 1, move, notes));
 		ChessVisuals.GenerateHints(currentMove);
+		// TODO check if one of the latest moves is check for either king
 	}
 
 	public void DoThis(MoveNode move) {

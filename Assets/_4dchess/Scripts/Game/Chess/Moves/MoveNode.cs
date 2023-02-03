@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class MoveNode {
@@ -9,6 +10,8 @@ public class MoveNode {
 	private List<MoveNode> next;
 	private MoveNode prev;
 	public BoardState boardState;
+	public Task calculationTask;
+
 	public string Notes {
 		get => boardState != null ? boardState.notes : null;
 		set => boardState.notes = value;
@@ -55,17 +58,26 @@ public class MoveNode {
 		timestamp = System.Environment.TickCount;
 		next = new List<MoveNode>();
 		prev = null;
-		if (move != null) {
-			List<IGameMoveBase> newMoves = new List<IGameMoveBase>();
-			move.Board.game.moveNodeBeingProcessed = this;
-			boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
-			boardState.prev = prev != null ? prev.boardState : null;
-			newMoves.RemoveAll(move => !move.IsValid);
-			boardState.notableMoves = newMoves;
-			//Debug.Log($"{move} new moves: {string.Join(", ", newMoves.ConvertAll(m => m.ToString()))}");
+		Task<BoardState> calculationResult = Calculate();
+		while (!calculationResult.IsCompleted) {
+			Debug.Log("calculating");
 		}
 		this.Notes = notes;
-		//Debug.Log("MoveNode "+move);
+	}
+
+	// TODO make this properly asynchronous
+	private async Task<BoardState> Calculate() {
+		if (move == null) { return null; }
+		List<IGameMoveBase> newMoves = new List<IGameMoveBase>();
+		move.Board.game.moveNodeBeingProcessed = this;
+		boardState = await move.Board.Analysis.NewAnalysisAfterAsync(move, newMoves);
+		//yield return null;
+		boardState.prev = prev != null ? prev.boardState : null;
+		newMoves.RemoveAll(move => !move.IsValid);
+		//yield return null;
+		boardState.notableMoves = newMoves;
+		//Debug.Log($"{move} new moves: {string.Join(", ", newMoves.ConvertAll(m => m.ToString()))}");
+		return boardState;
 	}
 
 	protected string NotesSuffix() => !string.IsNullOrEmpty(Notes) ? $" {Notes}" : "";
