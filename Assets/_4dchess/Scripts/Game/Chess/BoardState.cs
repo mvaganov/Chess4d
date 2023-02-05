@@ -159,19 +159,7 @@ public class BoardState {
 		return nextAnalysis;
 	}
 
-	// TODO replace the Tasks with Coroutines. those will work better with Unity.
-	public async Task<BoardState> NewAnalysisAfterAsync(IGameMoveBase move, List<IGameMoveBase> totalNewMoves) {
-		move.DoWithoutAnimation(); // make move
-		BoardState nextAnalysis = new BoardState(move.Board); // do entire analysis from scratch
-		nextAnalysis.prev = this;
-		// collapse common memory with previous. also note which moves are new
-		UseMemoryFromOldStateWherePossible(nextAnalysis, this, totalNewMoves);
-		//await Task.Run(() => { }); // <-- stops warning. remove after UseMemoryFromOldStateWherePossible is async
-		move.UndoWithoutAnimation(); // unmake move, so the state stays as it should be
-		return nextAnalysis;
-	}
-
-	// TODO make this an asyncronous awaitable Task
+	// TODO make this a coroutine
 	private static void UseMemoryFromOldStateWherePossible(BoardState nextAnalysis, BoardState older,
 	List<IGameMoveBase> totalNewMoves) {
 		// after fully calculating both board states, combine the new moves with the original in memory as much as possible
@@ -180,26 +168,33 @@ public class BoardState {
 			if (!nextAnalysis.movesToLocations.TryGetValue(kvp.Key, out IGameMoveBase[] newMoves)) {
 				newMoves = new IGameMoveBase[0];
 			}
-			if (older.IsMoveListCollapsable(original, ref newMoves)) {
+			if (CanFullyCollapseNewMovesIntoOriginal(original, ref newMoves)) {
 				nextAnalysis.movesToLocations[kvp.Key] = original;
 			} else {
-				if (totalNewMoves != null) {
-					for (int i = 0; i < newMoves.Length; ++i) {
-						bool moveIsActuallyNew = System.Array.IndexOf(original, newMoves[i]) < 0;
-						if (moveIsActuallyNew) {
-							// double check that it is new... we don't want false negatives.
-							string newMoveName = newMoves[i].ToString();
-							for(int j = 0; j < original.Length; ++j) {
-								if (newMoveName.Equals(original[j].ToString())) {
-									Debug.LogError("failed to recognize duplicate: "+
-										newMoveName+newMoves[i].GetType()+" and "+ original[j]+original[j].GetType()+" "+
-										original[j].Equals(newMoves[i]));
-								}
-							}
-							totalNewMoves.Add(newMoves[i]);
-						}
-					}
-				}
+				AddToTotalNewMoves(totalNewMoves, original, newMoves);
+			}
+		}
+	}
+	private static void AddToTotalNewMoves(List<IGameMoveBase> totalNewMoves, IGameMoveBase[] original, IList<IGameMoveBase> newMoves) {
+		if (totalNewMoves == null) {
+			return;
+		}
+		for (int i = 0; i < newMoves.Count; ++i) {
+			bool moveIsActuallyNew = System.Array.IndexOf(original, newMoves[i]) < 0;
+			if (moveIsActuallyNew) {
+				// double check that it is new... we don't want false negatives.
+				StrictNameCheck(newMoves[i], original);
+				totalNewMoves.Add(newMoves[i]);
+			}
+		}
+	}
+	private static void StrictNameCheck(IGameMoveBase newMove, IList<IGameMoveBase> moves) {
+		string newMoveName = newMove.ToString();
+		for (int j = 0; j < moves.Count; ++j) {
+			if (newMoveName.Equals(moves[j].ToString())) {
+				Debug.LogError("failed to recognize duplicate: " +
+					newMoveName + newMove.GetType() + " and " + moves[j] + moves[j].GetType() + " " +
+					moves[j].Equals(newMove));
 			}
 		}
 	}
@@ -210,7 +205,7 @@ public class BoardState {
 	/// <param name="movesA">original move list, should be considered a source of truth</param>
 	/// <param name="movesB">a new move list, should reference original if possible</param>
 	/// <returns>true if both lists are identical</returns>
-	private bool IsMoveListCollapsable(IGameMoveBase[] movesA, ref IGameMoveBase[] movesB) {
+	private static bool CanFullyCollapseNewMovesIntoOriginal(IGameMoveBase[] movesA, ref IGameMoveBase[] movesB) {
 		if (movesA == movesB) { return true; }
 		bool identical = true;
 		if (movesA.Length != movesB.Length) { identical = false; }

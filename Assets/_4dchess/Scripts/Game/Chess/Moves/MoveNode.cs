@@ -58,19 +58,16 @@ public class MoveNode {
 		timestamp = System.Environment.TickCount;
 		next = new List<MoveNode>();
 		prev = null;
-		Task<BoardState> calculationResult = Calculate();
-		while (!calculationResult.IsCompleted) {
-			Debug.Log("calculating");
-		}
+		Calculate();
 		this.Notes = notes;
 	}
 
 	// TODO make this properly asynchronous
-	private async Task<BoardState> Calculate() {
+	private BoardState Calculate() {
 		if (move == null) { return null; }
 		List<IGameMoveBase> newMoves = new List<IGameMoveBase>();
 		move.Board.game.moveNodeBeingProcessed = this;
-		boardState = await move.Board.Analysis.NewAnalysisAfterAsync(move, newMoves);
+		boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
 		//yield return null;
 		boardState.prev = prev != null ? prev.boardState : null;
 		newMoves.RemoveAll(move => !move.IsValid);
