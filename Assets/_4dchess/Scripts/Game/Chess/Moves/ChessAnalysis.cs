@@ -37,9 +37,9 @@ public class ChessAnalysis : MonoBehaviour {
 		RecalculatePieceMoves(selectedPiece.board);
 	}
 
-	public BoardState GetAnalysis(Board board) {
+	public BoardState GetAnalysis(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
 		if (!boardAnalysis.TryGetValue(board, out BoardState analysis)) {
-			boardAnalysis[board] = analysis = new BoardState(board);
+			boardAnalysis[board] = analysis = new BoardState(board, moveThatPromptedThisBoardState);
 		}
 		return analysis;
 	}
@@ -52,9 +52,10 @@ public class ChessAnalysis : MonoBehaviour {
 	}
 
 	public void RecalculatePieceMoves(Board board) {
+		IGameMoveBase currentMove = board.game.chessMoves.CurrentMove;
 		//selectedPiece?.board.RecalculatePieceMoves();
-		BoardState analysis = GetAnalysis(board);
-		analysis.RecalculatePieceMoves(board);
+		BoardState analysis = GetAnalysis(board, currentMove);
+		analysis.RecalculatePieceMoves(board, currentMove);
 		List<King.Check> checks = FindChecks(analysis);
 		//string xfen = XFEN.ToString(board);
 		//if (board.tiles.Count > 0) {
@@ -83,7 +84,7 @@ public class ChessAnalysis : MonoBehaviour {
 					PieceMoveAttack cap = move as PieceMoveAttack;
 					if (cap != null && cap.pieceCaptured == king && !cap.pieceMoved.team.IsAlliedWith(king.team)) {
 						// the current move as enabling such a capture as a Check
-						King.Check check = new King.Check(game.chessMoves.CurrentMove.move, cap);
+						King.Check check = new King.Check(game.chessMoves.CurrentMove, cap);
 						checks.Add(check);
 					}
 				}

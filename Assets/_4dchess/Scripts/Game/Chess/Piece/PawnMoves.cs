@@ -59,9 +59,9 @@ public partial class Pawn {
 			if (possibleTarget.moveCount != 1 || (pawn = possibleTarget.GetComponent<Pawn>()) == null) {
 				return null;
 			}
-			bool onlyJustNowDidDoubleMove = pawn.didDoubleMoveOnTurn == board.game.chessMoves.CurrentMove.turnIndex;
+			bool onlyJustNowDidDoubleMove = pawn.didDoubleMoveOnTurn == board.game.chessMoves.CurrentMoveNode.turnIndex;
 			UnityEngine.Debug.Log("en passant " + sideTile.GetCoord() + " just double moved? " + onlyJustNowDidDoubleMove +
-				"  " + pawn.didDoubleMoveOnTurn + " " + board.game.chessMoves.CurrentMove.turnIndex);
+				"  " + pawn.didDoubleMoveOnTurn + " " + board.game.chessMoves.CurrentMoveNode.turnIndex);
 			if (!onlyJustNowDidDoubleMove) return null;
 			return new EnPassant(board, p, pieceLocation, nextPieceLocation, possibleTarget, otherPieceLocation);
 		}
@@ -196,7 +196,7 @@ public partial class Pawn {
 		private bool RedoPreviouslyDonePromotion(string code) {
 			Board board = pieceMoved.board;
 			ChessGame game = board.game;
-			MoveNode thisNode = game.chessMoves.CurrentMove;//game.chessMoves.FindMoveNode(this);
+			MoveNode thisNode = game.chessMoves.CurrentMoveNode;//game.chessMoves.FindMoveNode(this);
 			MoveNode parentMove = thisNode.Prev;
 			for (int i = 0; i < parentMove.FutureTimelineCount; ++i) {
 				MoveNode possibleMove = parentMove.GetTimelineBranch(i);
@@ -221,7 +221,7 @@ public partial class Pawn {
 			Board board = pieceMoved.board;
 			Team team = pieceMoved.team;
 			ChessGame game = board.game;
-			MoveNode thisNode = game.chessMoves.CurrentMove;//game.chessMoves.FindMoveNode(this);
+			MoveNode thisNode = game.chessMoves.CurrentMoveNode;//game.chessMoves.FindMoveNode(this);
 			MoveNode parentMove = thisNode.Prev;
 			Promotion otherPromo = new Promotion(moreInterestingMove != null ? moreInterestingMove : new BasicMove(this));
 			otherPromo.selectedPieceCode = code; // <-- this will force the new promotion event to skip the UI
@@ -230,8 +230,8 @@ public partial class Pawn {
 			otherPromo.promotedPiece = game.GetPiece(team, code, to, board, true);
 			game.chessMoves.SetCurrentMove(parentMove);
 			MoveNode alternatePromotion = new MoveNode(thisNode.turnIndex, otherPromo, "");
-			alternatePromotion.Prev = game.chessMoves.CurrentMove;
-			game.chessMoves.CurrentMove.SetAsNextTimelineBranch(alternatePromotion);
+			alternatePromotion.Prev = game.chessMoves.CurrentMoveNode;
+			game.chessMoves.CurrentMoveNode.SetAsNextTimelineBranch(alternatePromotion);
 			game.chessMoves.RedoMove();
 		}
 

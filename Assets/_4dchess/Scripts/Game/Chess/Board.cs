@@ -15,7 +15,8 @@ public class Board : MonoBehaviour {
 	private BoardState _analysis;
 	public int halfMovesSinceCaptureOrPawnMove = 0;
 	// TODO rename CurrentState
-	public BoardState Analysis => (_analysis != null) ? _analysis : _analysis = game.analysis.GetAnalysis(this);
+	public BoardState Analysis => (_analysis != null) ? _analysis
+		: _analysis = game.analysis.GetAnalysis(this, game.chessMoves.CurrentMove);
 
 	public void Start() {
 		GenerateTilesIfMissing();

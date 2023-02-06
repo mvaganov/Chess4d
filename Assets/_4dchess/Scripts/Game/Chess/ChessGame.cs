@@ -47,7 +47,7 @@ public class ChessGame : MonoBehaviour {
 
 	public int WhoWentLast {
 		get {
-			IGameMoveBase im = chessMoves.CurrentMove != null ? chessMoves.CurrentMove.move : null;
+			IGameMoveBase im = chessMoves.CurrentMove;
 			BasicMove m = im as BasicMove;
 			if (m != null && m.pieceMoved != null) {
 				return m.pieceMoved.team.TeamIndex;

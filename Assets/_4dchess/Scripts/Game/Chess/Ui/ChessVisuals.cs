@@ -97,7 +97,7 @@ public class ChessVisuals : MonoBehaviour {
 		TiledGameObject tgo;
 		TileVisualSpecifics setting = HintSetting;
 		tgo = setting.visualizer.AddMark(someKindOfMove, false);
-		tgo.Color = setting.color;
+		tgo.Color = someKindOfMove is King.Check ? threaten : setting.color;
 		return tgo;
 	}
 

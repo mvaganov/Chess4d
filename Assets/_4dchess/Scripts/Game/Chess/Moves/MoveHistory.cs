@@ -4,25 +4,26 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class MoveHistory : MonoBehaviour {
-	private MoveNode currentMove;
+	private MoveNode currentMoveNode;
 	public MoveEventHandler onMove;
 	public MoveEventHandler onUndoMove;
 	public ChessGame game;
 	private ChessVisuals chessVis;
 
-	public MoveNode CurrentMove => currentMove;
+	public MoveNode CurrentMoveNode => currentMoveNode;
+	public IGameMoveBase CurrentMove => CurrentMoveNode != null ? CurrentMoveNode.move : null;
 	private ChessVisuals ChessVisuals => chessVis != null ? chessVis : chessVis = FindObjectOfType<ChessVisuals>();
 
 	[System.Serializable] public class MoveEventHandler : UnityEvent<MoveNode> { }
 
 	private void Awake() {
 		if (game == null) { game = FindObjectOfType<ChessGame>(); }
-		currentMove = new MoveNode(0, new StartGame(game.GameBoard), "game begins");
+		currentMoveNode = new MoveNode(0, new StartGame(game.GameBoard), "game begins");
 	}
 
 	public int CountMovesSinceCaptureOrPawnAdvance(Board board) {
 		int count = 0;
-		MoveNode node = CurrentMove;
+		MoveNode node = CurrentMoveNode;
 		while (node != null && node.move != null) {
 			if (node.move.Board == board && (node.move is PieceMoveAttack || (node.move is PieceMove m
 			&& m.pieceMoved != null && m.pieceMoved.code == "P"))) {
@@ -37,14 +38,14 @@ public class MoveHistory : MonoBehaviour {
 
 
 	public void SetCurrentMove(MoveNode moveNode) {
-		currentMove = moveNode;
+		currentMoveNode = moveNode;
 	}
 
 	/// <summary>
 	/// find the point in history (or alternate timelines) that a specific piece moved from 'from' to 'to'.
 	/// </summary>
 	public MoveNode FindMoveNode(IGameMoveBase move) {
-		MoveNode n = currentMove;
+		MoveNode n = currentMoveNode;
 		Debug.Log("start "+n);
 		// if we're at the node we're looking for, return it now. that was easy.
 		if (n.move == move) { return n; }
@@ -59,7 +60,7 @@ public class MoveHistory : MonoBehaviour {
 		// count this branch as fully ignored
 		branchesToIgnore.Add(n);
 		// and do a full check of the future (if it exists). if the node is in the future, get it
-		n = CurrentMove.FindMoveRecursive(move, null);
+		n = CurrentMoveNode.FindMoveRecursive(move, null);
 		Debug.Log("found recursive future? " + n);
 		if (n != null) { return n; }
 		// then do the exhaustive resursive search starting from the very beginning, ignoring the searched branch
@@ -70,7 +71,7 @@ public class MoveHistory : MonoBehaviour {
 	}
 
 	public MoveNode GetRoot() {
-		MoveNode cursor = currentMove;
+		MoveNode cursor = currentMoveNode;
 		while (cursor.Prev != null) {
 			cursor = cursor.Prev;
 		}
@@ -79,7 +80,7 @@ public class MoveHistory : MonoBehaviour {
 
 	public List<List<MoveNode>> GetMoveList() {
 		List<List<MoveNode>> list = new List<List<MoveNode>>();
-		MoveNode last = currentMove;
+		MoveNode last = currentMoveNode;
 		while (last.FutureTimelineCount > 0) {
 			last = last.KnownNextMove;
 		}
@@ -92,32 +93,32 @@ public class MoveHistory : MonoBehaviour {
 	}
 
 	public void MakeMove(IGameMoveBase move, string notes) {
-		DoThis(new MoveNode(currentMove.turnIndex + 1, move, notes));
-		ChessVisuals.GenerateHints(currentMove);
+		DoThis(new MoveNode(currentMoveNode.turnIndex + 1, move, notes));
+		ChessVisuals.GenerateHints(currentMoveNode);
 		// TODO check if one of the latest moves is check for either king
 	}
 
 	public void DoThis(MoveNode move) {
-		int doneAlready = currentMove.IndexOfBranch(move);
+		int doneAlready = currentMoveNode.IndexOfBranch(move);
 		if (doneAlready >= 0) {
 			//currentMove.GetTimelineBranch(doneAlready);
-			move = currentMove.PopTimeline(doneAlready);
+			move = currentMoveNode.PopTimeline(doneAlready);
 		}
 		//BasicMove pmove = move.move as BasicMove;
 		//Piece piece = pmove.pieceMoved;
 		//Debug.Log(piece.name + " " + move.move.GetType().Name + " " + move);
 		AnnounceTurnOrder(move);
-		currentMove.SetAsNextTimelineBranch(move);
-		move.Prev = currentMove;
+		currentMoveNode.SetAsNextTimelineBranch(move);
+		move.Prev = currentMoveNode;
 		//Debug.Log("added timeline " + currentMove.IndexOfBranch(move));
 		move.Do();
-		currentMove = move;
-		onMove?.Invoke(currentMove);
+		currentMoveNode = move;
+		onMove?.Invoke(currentMoveNode);
 	}
 
 	// TODO make a new class for user output and put this in there
 	public void AnnounceCurrentTurn() {
-		AnnounceTurnOrder(currentMove);
+		AnnounceTurnOrder(currentMoveNode);
 	}
 
 	// TODO make a new class for user output and put this in there
@@ -151,37 +152,37 @@ public class MoveHistory : MonoBehaviour {
 		MoveNode next = null;
 		HashSet<Board> boards = new HashSet<Board>();
 		do {
-			if (currentMove.turnIndex < actualIndexToTravelTo) {
-				next = currentMove.FutureTimelineCount > 0 ? currentMove.KnownNextMove : null;
+			if (currentMoveNode.turnIndex < actualIndexToTravelTo) {
+				next = currentMoveNode.FutureTimelineCount > 0 ? currentMoveNode.KnownNextMove : null;
 				if (next == null) {
-					throw new Exception($"can't go to next[0] after {currentMove.turnIndex} {currentMove}");
+					throw new Exception($"can't go to next[0] after {currentMoveNode.turnIndex} {currentMoveNode}");
 				}
 				next.Do();
-				currentMove = next;
-			} else if (currentMove.turnIndex > actualIndexToTravelTo) {
-				currentMove.Undo();
-				next = currentMove.Prev;
+				currentMoveNode = next;
+			} else if (currentMoveNode.turnIndex > actualIndexToTravelTo) {
+				currentMoveNode.Undo();
+				next = currentMoveNode.Prev;
 				if (next == null && actualIndexToTravelTo > 0) {
-					throw new Exception($"can't go to move before {currentMove.turnIndex} {currentMove}");
+					throw new Exception($"can't go to move before {currentMoveNode.turnIndex} {currentMoveNode}");
 				}
 				if (next != null) {
-					currentMove = next;
+					currentMoveNode = next;
 				}
 			}
-			if (currentMove.move != null && currentMove.move is PieceMove pmove && pmove.pieceMoved != null) {
+			if (currentMoveNode.move != null && currentMoveNode.move is PieceMove pmove && pmove.pieceMoved != null) {
 				boards.Add(pmove.pieceMoved.board);
 			}
-		} while (currentMove.turnIndex != actualIndexToTravelTo && next != null);
-		if (actualIndexToTravelTo == currentMove.turnIndex) {
-			next = currentMove.FutureTimelineCount > targetMove.BranchIndex
-				? currentMove.GetTimelineBranch(targetMove.BranchIndex) : null;
+		} while (currentMoveNode.turnIndex != actualIndexToTravelTo && next != null);
+		if (actualIndexToTravelTo == currentMoveNode.turnIndex) {
+			next = currentMoveNode.FutureTimelineCount > targetMove.BranchIndex
+				? currentMoveNode.GetTimelineBranch(targetMove.BranchIndex) : null;
 			if (next == null) {
-				throw new Exception($"can't go to next[{targetMove.BranchIndex}] after {currentMove.turnIndex} {currentMove}");
+				throw new Exception($"can't go to next[{targetMove.BranchIndex}] after {currentMoveNode.turnIndex} {currentMoveNode}");
 			}
-			currentMove.PopTimeline(targetMove.BranchIndex);
-			currentMove.SetAsNextTimelineBranch(next);
+			currentMoveNode.PopTimeline(targetMove.BranchIndex);
+			currentMoveNode.SetAsNextTimelineBranch(next);
 			next.Do();
-			currentMove = next;
+			currentMoveNode = next;
 		}
 		// TODO refresh UI, like chessVisuals.ResetPieceSelectionVisuals();
 		foreach (Board board in boards) {
@@ -190,21 +191,21 @@ public class MoveHistory : MonoBehaviour {
 	}
 
 	public bool UndoMove() {
-		if (currentMove.IsRoot) { return false; }
-		currentMove.Undo();
-		currentMove = currentMove.Prev;
-		onUndoMove?.Invoke(CurrentMove);
+		if (currentMoveNode.IsRoot) { return false; }
+		currentMoveNode.Undo();
+		currentMoveNode = currentMoveNode.Prev;
+		onUndoMove?.Invoke(CurrentMoveNode);
 		return true;
 	}
 
 	public bool RedoMove() {
-		if (currentMove.FutureTimelineCount == 0) {
+		if (currentMoveNode.FutureTimelineCount == 0) {
 			//Debug.Log("unknown future for "+currentMove.move);
 			return false;
 		}
-		currentMove = currentMove.KnownNextMove;
-		currentMove.Do();
-		onMove?.Invoke(currentMove);
+		currentMoveNode = currentMoveNode.KnownNextMove;
+		currentMoveNode.Do();
+		onMove?.Invoke(currentMoveNode);
 		return true;
 	}
 }

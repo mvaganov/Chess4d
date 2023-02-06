@@ -31,15 +31,15 @@ public class MovesUi : MonoBehaviour {
 		}
 	}
 	public string CurrentNotes {
-		get => chessMoves.CurrentMove.Notes;
+		get => chessMoves.CurrentMoveNode.Notes;
 		set {
-			chessMoves.CurrentMove.Notes = value;
+			chessMoves.CurrentMoveNode.Notes = value;
 			CurrentMoveUi.RefreshElement();
 		}
 	}
 	public MoveUi CurrentMoveUi {
 		get {
-			MoveNode current = chessMoves.CurrentMove;
+			MoveNode current = chessMoves.CurrentMoveNode;
 			return Find(m => m.move == current);
 		}
 	}
@@ -119,7 +119,7 @@ public class MovesUi : MonoBehaviour {
 			ApplyToLayoutTransform(branch.transform, _transform);
 		}
 		RefreshLayouts();
-		notesInput?.SetTextWithoutNotify(chessMoves.CurrentMove.Notes);
+		notesInput?.SetTextWithoutNotify(chessMoves.CurrentMoveNode.Notes);
 		//Debug.Log(CurrentMoveUi);
 	}
 

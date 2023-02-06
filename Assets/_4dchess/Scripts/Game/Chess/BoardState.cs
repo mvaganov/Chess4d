@@ -18,8 +18,8 @@ public class BoardState {
 	/// </summary>
 	public IList<IGameMoveBase> notableMoves;
 
-	public BoardState(Board board) {
-		RecalculatePieceMoves(board);
+	public BoardState(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
+		RecalculatePieceMoves(board, moveThatPromptedThisBoardState);
 	}
 
 	//public BoardState(BoardState other) {
@@ -129,16 +129,32 @@ public class BoardState {
 		//EnsureClearLedger(BoardSize, movesToLocation);
 	}
 
-	public void RecalculatePieceMoves(Board board) {
+	public void RecalculatePieceMoves(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
 		Init(board);
 		List<Piece> allPieces = board.GetAllPieces();
 		List<IGameMoveBase> moves = new List<IGameMoveBase>();
 		for (int i = 0; i < allPieces.Count; ++i) {
 			Piece p = allPieces[i];
 			p.GetMovesForceCalculation(p.GetCoord(), moves);
+			// TODO determine if the move is Check. if so, mark it appropriately
+			UpdatecheckMoves(moveThatPromptedThisBoardState, moves);
 			AddToMapping(BoardSize, movesToLocations, moves);
 			moves.Clear();
 		}
+	}
+
+	int UpdatecheckMoves(IGameMoveBase triggeringMove, List<IGameMoveBase> moves) {
+		if (triggeringMove == null) { return 0; }
+		int count = 0;
+		for(int i = 0; i < moves.Count; ++i) {
+			if (moves[i] is ICapture && moves[i] is PieceMoveAttack capture && capture.pieceCaptured != null
+			&& capture.pieceCaptured.code.ToLower() == "k" && !capture.IsDefend) {
+				moves[i] = new King.Check(triggeringMove, capture);
+				++count;
+				Debug.Log("CHECK! "+moves[i]);
+			}
+		}
+		return count;
 	}
 
 	void GetMovesInvolving(Piece piece, List<IGameMoveBase> sourceMoves, List<IGameMoveBase> out_moves) {
@@ -151,7 +167,7 @@ public class BoardState {
 
 	public BoardState NewAnalysisAfter(IGameMoveBase move, List<IGameMoveBase> totalNewMoves) {
 		move.DoWithoutAnimation(); // make move
-		BoardState nextAnalysis = new BoardState(move.Board); // do entire analysis from scratch
+		BoardState nextAnalysis = new BoardState(move.Board, move); // do entire analysis from scratch
 		nextAnalysis.prev = this;
 		// collapse common memory with previous. also note which moves are new
 		UseMemoryFromOldStateWherePossible(nextAnalysis, this, totalNewMoves);

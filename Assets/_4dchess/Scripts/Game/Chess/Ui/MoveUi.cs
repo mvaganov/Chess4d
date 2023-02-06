@@ -26,7 +26,7 @@ public class MoveUi : MonoBehaviour {
 		} else {
 			game = FindObjectOfType<ChessGame>();
 		}
-		if (move == game.chessMoves.CurrentMove) {
+		if (move == game.chessMoves.CurrentMoveNode) {
 			activeMarker.SetActive(true);
 		}
 		label.text = move.ToString();
@@ -37,7 +37,7 @@ public class MoveUi : MonoBehaviour {
 		if (movesUi == null) {
 			throw new System.Exception($"{nameof(MoveUi)} should be a child of {nameof(MovesUi)}");
 		}
-		if (move == movesUi.chessMoves.CurrentMove) {
+		if (move == movesUi.chessMoves.CurrentMoveNode) {
 			ActivateNotes();
 			return;
 		}

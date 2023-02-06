@@ -124,7 +124,7 @@ public static class XFEN {
 			}
 			sb.Append((c.row < board.BoardSize.row - 1) ? "/" : " ");
 		}
-		MoveNode currentMoveNode = game.chessMoves.CurrentMove;
+		MoveNode currentMoveNode = game.chessMoves.CurrentMoveNode;
 		BasicMove currentMove = (currentMoveNode != null ? currentMoveNode.move : null) as BasicMove;
 		int teamIndex = currentMove == null ? -1 : (currentMove.pieceMoved != null
 			? currentMove.pieceMoved.team.TeamIndex : -1);
