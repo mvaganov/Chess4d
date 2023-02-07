@@ -29,6 +29,12 @@ public class King : MoveLogic {
 		public Check(IGameMoveBase triggeringMove, PieceMoveAttack threateningMove)
 			: base(threateningMove) {
 			this.triggeringMove = triggeringMove;
+			if (!(threateningMove.pieceCaptured.MoveLogic is King)) {
+				throw new System.Exception($"{nameof(Check)} must target {nameof(King)}, not {threateningMove} (from {triggeringMove})");
+			}
+			if (triggeringMove.Piece.team == pieceCaptured.team) {
+				Debug.Log("ILLEGAL MOVE! cannot put self in check.");
+			}
 		}
 
 		public override void Do() { triggeringMove.Do(); }

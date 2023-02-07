@@ -9,6 +9,7 @@ public class BoardState {
 	/// which allows previously calculated boardstates to be referenced safely.
 	/// </summary>
 	private Dictionary<Coord, IGameMoveBase[]> movesToLocations = new Dictionary<Coord, IGameMoveBase[]>();
+	private List<King.Check> checks = null;
 	public BoardState prev;
 	public string identity;
 	public string notes;
@@ -41,6 +42,15 @@ public class BoardState {
 		public List<IGameMoveBase> allMoves;
 		public List<IGameMoveBase> newMoves;
 	}
+
+	public King.Check GetCheck(Team team) {
+		if (checks == null) { return null; }
+		for(int i = 0; i < checks.Count; ++i) {
+			if (checks[i].pieceCaptured.team == team) { return checks[i]; }
+		}
+		return null;
+	}
+
 	public MoveStats CalculateMoveStats() {
 		MoveStats moveStats = new MoveStats();
 		moveStats.allMoves = new List<IGameMoveBase>();
@@ -133,25 +143,28 @@ public class BoardState {
 		Init(board);
 		List<Piece> allPieces = board.GetAllPieces();
 		List<IGameMoveBase> moves = new List<IGameMoveBase>();
+		if (checks != null) { checks.Clear(); }
 		for (int i = 0; i < allPieces.Count; ++i) {
 			Piece p = allPieces[i];
 			p.GetMovesForceCalculation(p.GetCoord(), moves);
-			// TODO determine if the move is Check. if so, mark it appropriately
-			UpdatecheckMoves(moveThatPromptedThisBoardState, moves);
+			UpdateCheckMoves(moveThatPromptedThisBoardState, moves);
 			AddToMapping(BoardSize, movesToLocations, moves);
 			moves.Clear();
 		}
 	}
 
-	int UpdatecheckMoves(IGameMoveBase triggeringMove, List<IGameMoveBase> moves) {
+	int UpdateCheckMoves(IGameMoveBase triggeringMove, List<IGameMoveBase> moves) {
 		if (triggeringMove == null) { return 0; }
 		int count = 0;
 		for(int i = 0; i < moves.Count; ++i) {
 			if (moves[i] is ICapture && moves[i] is PieceMoveAttack capture && capture.pieceCaptured != null
 			&& capture.pieceCaptured.code.ToLower() == "k" && !capture.IsDefend) {
-				moves[i] = new King.Check(triggeringMove, capture);
+				King.Check check = new King.Check(triggeringMove, capture);
+				moves[i] = check;
 				++count;
-				Debug.Log("CHECK! "+moves[i]);
+				Debug.Log("CHECK! " + moves[i]);
+				if (checks == null) { checks = new List<King.Check>(); }
+				checks.Add(check);
 			}
 		}
 		return count;
