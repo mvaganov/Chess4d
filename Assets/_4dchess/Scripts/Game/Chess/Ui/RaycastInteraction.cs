@@ -60,6 +60,10 @@ public class RaycastInteraction : MonoBehaviour {
 		Coord coord = currentHovered.GetCoord();
 		Piece selectedPiece = analysis.SelectedPiece;
 		if (selectedPiece != null) {
+			if (game.RespectTurnOrder && selectedPiece.team != game.TeamWhoseTurnItIs) {
+				Debug.Log($"not {selectedPiece.team}'s turn");
+				return;
+			}
 			DoMoveAt(selectedPiece, coord);
 			currentHovered = null;
 		}

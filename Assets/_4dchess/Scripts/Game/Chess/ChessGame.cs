@@ -31,7 +31,10 @@ public class ChessGame : MonoBehaviour {
 	public List<Team> teams = new List<Team>();
 	private int _whoStartsTheGame = 0;
 	private bool _gameStarted;
+	public bool RespectTurnOrder = true;
 	public MoveNode moveNodeBeingProcessed;
+
+	public Team TeamWhoseTurnItIs => teams[GetWhosTurnItIs()];
 
 	public Board GameBoard {
 		get {
