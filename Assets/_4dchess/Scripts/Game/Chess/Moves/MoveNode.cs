@@ -9,7 +9,7 @@ public class MoveNode {
 	public int timestamp;
 	private List<MoveNode> next;
 	private MoveNode prev;
-	public BoardState boardState;
+	public GameState boardState;
 	public Task calculationTask;
 
 	public string Notes {
@@ -63,7 +63,7 @@ public class MoveNode {
 	}
 
 	// TODO make this properly asynchronous
-	private BoardState Calculate() {
+	private GameState Calculate() {
 		if (move == null) { return null; }
 		List<IGameMoveBase> newMoves = new List<IGameMoveBase>();
 		move.Board.game.moveNodeBeingProcessed = this;

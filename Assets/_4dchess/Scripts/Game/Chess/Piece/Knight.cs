@@ -11,7 +11,7 @@ public class Knight : MoveLogic {
 		new Coord(-1,-2),
 		new Coord(-2,-1),
 	};
-	public override void GetMoves(List<IGameMoveBase> out_moves, MoveKind moveKind) {
-		StandardMoves(movePattern, 1, out_moves, moveKind);
+	public override void GetMoves(GameState state, List<IGameMoveBase> out_moves, MoveKind moveKind) {
+		StandardMoves(state, movePattern, 1, out_moves, moveKind);
 	}
 }

@@ -7,7 +7,7 @@ public class Bishop : MoveLogic {
 			new Coord(+1,-1),
 			new Coord(-1,-1),
 	};
-	public override void GetMoves(List<IGameMoveBase> out_moves, MoveKind moveKind) {
-		StandardMoves(movePattern, 8, out_moves, moveKind);
+	public override void GetMoves(GameState state, List<IGameMoveBase> out_moves, MoveKind moveKind) {
+		StandardMoves(state, movePattern, 8, out_moves, moveKind);
 	}
 }

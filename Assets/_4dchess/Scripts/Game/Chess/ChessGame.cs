@@ -34,6 +34,7 @@ public class ChessGame : MonoBehaviour {
 	public bool RespectTurnOrder = true;
 	public MoveNode moveNodeBeingProcessed;
 
+	public GameState CurrentGameState => chessMoves.CurrentMoveNode.boardState;
 	public Team TeamWhoseTurnItIs => teams[GetWhosTurnItIs()];
 
 	public Board GameBoard {
@@ -215,8 +216,8 @@ public class ChessGame : MonoBehaviour {
 		things.Clear();
 	}
 
-	public static bool IsMoveCapture(Piece piece, Coord move, out Piece capturedPiece) {
-		capturedPiece = piece.board.GetPiece(move);
+	public static bool IsMoveCapture(GameState state, Piece piece, Coord move, out Piece capturedPiece) {
+		capturedPiece = state.GetPieceAt(move);//piece.board.GetPiece(move);
 		return capturedPiece != null && capturedPiece.team != piece.team;
 	}
 

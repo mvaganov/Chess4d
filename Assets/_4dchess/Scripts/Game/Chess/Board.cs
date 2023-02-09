@@ -12,10 +12,10 @@ public class Board : MonoBehaviour {
 	[ContextMenuItem(nameof(GenerateTiles),nameof(GenerateTiles))]
 	public Tile TilePrefab;
 	private Transform _transform;
-	private BoardState _analysis;
+	private GameState _analysis;
 	public int halfMovesSinceCaptureOrPawnMove = 0;
 	// TODO rename CurrentState
-	public BoardState Analysis => (_analysis != null) ? _analysis
+	public GameState Analysis => (_analysis != null) ? _analysis
 		: _analysis = game.analysis.GetAnalysis(this, game.chessMoves.CurrentMove);
 
 	public void Start() {
@@ -45,9 +45,7 @@ public class Board : MonoBehaviour {
 		return tiles[index];
 	}
 
-	public Piece GetPiece(Coord coord) {
-		return GetTile(coord).GetPiece();
-	}
+	public Piece GetPieceOnBoard(Coord coord) => GetTile(coord).GetPiece();
 
 	public void SetPiece(Piece piece, Coord coord) {
 		Transform t = piece.transform;
@@ -148,7 +146,7 @@ public class Board : MonoBehaviour {
 		tiles.RemoveAt(i);
 	}
 
-	public string ToXfen() { return XFEN.ToString(this); }
+	//public string ToXfen() { return XFEN.ToString(this); }
 
 	public void LoadXfen(string xfen, IList<Team> teams) { XFEN.FromString(this, teams, xfen); }
 

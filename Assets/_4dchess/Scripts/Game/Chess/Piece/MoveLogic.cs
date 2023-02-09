@@ -37,18 +37,18 @@ public class MoveLogic : MonoBehaviour {
 		return true;
 	}
 
-	public virtual void StandardMoves(IEnumerable<Coord> directions, int maxSpaces,
+	public virtual void StandardMoves(GameState state, IEnumerable<Coord> directions, int maxSpaces,
 	List<IGameMoveBase> out_moves, MoveKind moveKind) {
 		Piece p = piece;
-		StandardMoves(p, p.GetCoord(), directions, maxSpaces, out_moves, moveKind);
+		StandardMoves(state, p, p.GetCoord(), directions, maxSpaces, out_moves, moveKind);
 	}
 
-	public virtual void StandardMoves(Coord position, IEnumerable<Coord> directions, int maxSpaces,
+	public virtual void StandardMoves(GameState state, Coord position, IEnumerable<Coord> directions, int maxSpaces,
 	List<IGameMoveBase> out_moves, MoveKind moveKind) {
-		StandardMoves(piece, position, directions, maxSpaces, out_moves, moveKind);
+		StandardMoves(state, piece, position, directions, maxSpaces, out_moves, moveKind);
 	}
 
-	public static void StandardMoves(Piece self, Coord position, IEnumerable<Coord> directions, int maxSpaces,
+	public static void StandardMoves(GameState state, Piece self, Coord position, IEnumerable<Coord> directions, int maxSpaces,
 	List<IGameMoveBase> out_moves, MoveKind moveKind) {
 		Board board = self.board;
 		Tile tile = self.GetTile();
@@ -67,7 +67,7 @@ public class MoveLogic : MonoBehaviour {
 				if (!board.IsValid(cursor)) {
 					break;
 				}
-				Piece other = board.GetPiece(cursor);
+				Piece other = state.GetPieceAt(cursor);//board.GetPiece(cursor);
 				if (other != null) {
 					bool isAllies = self.team.IsAlliedWith(other.team);
 					if (!isAllies) {
@@ -96,7 +96,7 @@ public class MoveLogic : MonoBehaviour {
 		}
 	}
 
-	public virtual void GetMoves(List<IGameMoveBase> out_moves, MoveKind moveKind) {}
+	public virtual void GetMoves(GameState state, List<IGameMoveBase> out_moves, MoveKind moveKind) {}
 
 	public virtual void DoMove(BasicMove move) {
 		piece.MoveInternal(move.to);

@@ -15,14 +15,15 @@ public partial class Pawn : MoveLogic {
 		return p;
 	}
 
-	public override void GetMoves(List<IGameMoveBase> out_moves, MoveKind moveKind) {
+	public override void GetMoves(GameState state, List<IGameMoveBase> out_moves, MoveKind moveKind) {
 		Piece p = piece;
 		Coord coord = p.GetCoord();
 		Board board = p.board;
 		List<IGameMoveBase> pawnMoves = new List<IGameMoveBase>();
 		if (moveKind.HasFlag(MoveKind.Move)) {
 			//StandardMoves(new Coord[] { direction }, 1, pawnMoves, MoveKind.Move);
-			if(board.GetPiece(coord + direction) == null) {
+			//if(board.GetPiece(coord + direction) == null) {
+			if (state.GetPieceAt(coord + direction) == null) {
 				pawnMoves.Add(new PieceMove(board, p, coord, coord+direction));
 			}
 			if (piece.moveCount == 0 && pawnMoves.Count > 0) {
@@ -34,7 +35,7 @@ public partial class Pawn : MoveLogic {
 			}
 		}
 		if (moveKind.HasFlag(MoveKind.Defend) || moveKind.HasFlag(MoveKind.Attack)) {
-			StandardMoves(new Coord[] { direction + Coord.left, direction + Coord.right }, 1, pawnMoves, MoveKind.AttackDefend);
+			StandardMoves(state, new Coord[] { direction + Coord.left, direction + Coord.right }, 1, pawnMoves, MoveKind.AttackDefend);
 		}
 		BasicMove leftEP = EnPassant.GetPossible(board, p, coord, coord + direction + Coord.left, coord + Coord.left);
 		if (leftEP != null) { pawnMoves.Add(leftEP); }

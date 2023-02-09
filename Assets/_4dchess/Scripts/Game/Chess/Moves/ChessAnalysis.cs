@@ -9,7 +9,7 @@ public class ChessAnalysis : MonoBehaviour {
 	private Piece selectedPiece;
 	[SerializeField] private MoveHistory moves;
 	private List<King> kingsInCheck = new List<King>();
-	private Dictionary<Board,BoardState> boardAnalysis = new Dictionary<Board,BoardState>();
+	private Dictionary<Board,GameState> boardAnalysis = new Dictionary<Board,GameState>();
 	[SerializeField] private ChessGame game;
 
 	public List<IGameMoveBase> CurrentPieceCurrentMoves => currentMoves;
@@ -37,9 +37,9 @@ public class ChessAnalysis : MonoBehaviour {
 		RecalculatePieceMoves(selectedPiece.board);
 	}
 
-	public BoardState GetAnalysis(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
-		if (!boardAnalysis.TryGetValue(board, out BoardState analysis)) {
-			boardAnalysis[board] = analysis = new BoardState(board, moveThatPromptedThisBoardState);
+	public GameState GetAnalysis(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
+		if (!boardAnalysis.TryGetValue(board, out GameState analysis)) {
+			boardAnalysis[board] = analysis = new GameState(board, moveThatPromptedThisBoardState);
 		}
 		return analysis;
 	}
@@ -54,7 +54,7 @@ public class ChessAnalysis : MonoBehaviour {
 	public void RecalculatePieceMoves(Board board) {
 		IGameMoveBase currentMove = board.game.chessMoves.CurrentMove;
 		//selectedPiece?.board.RecalculatePieceMoves();
-		BoardState analysis = GetAnalysis(board, currentMove);
+		GameState analysis = GetAnalysis(board, currentMove);
 		analysis.RecalculatePieceMoves(board, currentMove);
 		List<King.Check> checks = FindChecks(analysis);
 		//string xfen = XFEN.ToString(board);
@@ -66,7 +66,7 @@ public class ChessAnalysis : MonoBehaviour {
 		}
 	}
 
-	public List<King.Check> FindChecks(BoardState analysis) {
+	public List<King.Check> FindChecks(GameState analysis) {
 		List<King.Check> checks = new List<King.Check>();
 		List<Piece> allKings = GetAllKings();
 		// check each king to see if there are unallied pieces that can capture him
@@ -122,13 +122,13 @@ public class ChessAnalysis : MonoBehaviour {
 		return moves;
 	}
 
-	public void SetCurrentPiece(Piece piece) {
+	public void SetCurrentPiece(GameState currentState, Piece piece) {
 		if (currentMoves == null) { currentMoves = new List<IGameMoveBase>(); } else { currentMoves.Clear(); }
 		if (validMoves == null) { validMoves = new List<IGameMoveBase>(); } else { validMoves.Clear(); }
 		selectedPiece = piece;
 		if (selectedPiece == null) { return; }
 		List<IGameMoveBase> pieceMoves = new List<IGameMoveBase>();
-		piece.GetMoves(pieceMoves);
+		piece.GetMoves(currentState, pieceMoves);
 		for (int i = pieceMoves.Count-1; i >= 0; --i) {
 			if (!pieceMoves[i].IsValid) { pieceMoves.RemoveAt(i); }
 		}

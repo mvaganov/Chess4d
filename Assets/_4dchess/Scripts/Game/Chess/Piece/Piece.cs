@@ -95,20 +95,20 @@ public class Piece : TiledGameObject {
 		MoveLogic.LerpPath(this, bezier, team.speed, true);
 	}
 
-	public void GetMoves(List<IGameMoveBase> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
+	public void GetMoves(GameState state, List<IGameMoveBase> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
 		if (moveLogic == null) { return; }
 		Coord here = GetCoord();
 		if (movesCalculatedAt == here) {
 			out_moves?.AddRange(moves);
 			return;
 		}
-		if (moves != null) { GetMovesForceCalculation(here, out_moves, moveKind); }
+		if (moves != null) { GetMovesForceCalculation(state, here, out_moves, moveKind); }
 	}
 
-	public void GetMovesForceCalculation(Coord here, List<IGameMoveBase> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
+	public void GetMovesForceCalculation(GameState state, Coord here, List<IGameMoveBase> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
 		if (moves == null) { moves = new List<IGameMoveBase>(); } else { moves.Clear(); }
 		if (here.col >= 0 && here.row >= 0) {
-			moveLogic.GetMoves(moves, moveKind);
+			moveLogic.GetMoves(state, moves, moveKind);
 		}
 		movesCalculatedAt = here;
 		out_moves?.AddRange(moves);

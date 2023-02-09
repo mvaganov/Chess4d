@@ -101,7 +101,7 @@ public class ChessVisuals : MonoBehaviour {
 		return tgo;
 	}
 
-	public void DrawSquareDefenders(TiledGameObject target) {
+	public void DrawSquareDefenders(GameState state, TiledGameObject target) {
 		if (tempDefendArrows == null) { return; }
 		tempDefendArrows.ClearTiles();
 		if (target == null) { return; }
@@ -118,7 +118,7 @@ public class ChessVisuals : MonoBehaviour {
 		Piece selectedPiece = selected as Piece;
 		//Coord selectedCoord = (selected != null) ? selected.GetCoord() : Coord.zero;
 		Piece piece = selectedPiece;
-		if (piece == null) { piece = board.GetPiece(currentCoord); }
+		if (piece == null) { piece = state.GetPieceAt(currentCoord); }//board.GetPiece(currentCoord); }
 		for (int i = 0; i < activityAtSquare.Count; i++) {
 			PieceMoveAttack cap = activityAtSquare[i] as PieceMoveAttack;
 			if (cap == null) { continue; }
@@ -127,7 +127,7 @@ public class ChessVisuals : MonoBehaviour {
 		}
 		Piece hoveredOver = selectedPiece;
 		if (hoveredOver == null) {
-			hoveredOver = board.GetPiece(currentCoord);
+			hoveredOver = state.GetPieceAt(currentCoord);//board.GetPiece(currentCoord);
 		}
 		//Debug.Log($" {target} {activityAtSquare.Count} {defenders.Count}");
 		for (int i = 0; i < defenders.Count; ++i) {
@@ -135,7 +135,8 @@ public class ChessVisuals : MonoBehaviour {
 			if (hoveredOver != null && tiledObject != null) {
 				if (!defenders[i].pieceMoved.team.IsAlliedWith(hoveredOver.team)) {
 					tiledObject.Color = threaten;
-				} else if (defenders[i].pieceMoved == selected && board.GetPiece(currentCoord) != null) {
+				} else if (defenders[i].pieceMoved == selected //&& board.GetPiece(currentCoord) != null) {
+				&& state.GetPieceAt(currentCoord) != null) {
 					tiledObject.Color = activeAttack;
 				}
 			}

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class BoardState {
+public class GameState {
 	/// <summary>
 	/// using an Array of Move instead of a more mutable List because there will be many instances,
 	/// (a boardstate per move in the tree) and the vast majority of instances should be immutable,
@@ -10,16 +10,21 @@ public class BoardState {
 	/// </summary>
 	private Dictionary<Coord, IGameMoveBase[]> movesToLocations = new Dictionary<Coord, IGameMoveBase[]>();
 	private List<King.Check> checks = null;
-	public BoardState prev;
-	public string identity;
+	public GameState prev;
+	private string _identity;
 	public string notes;
-	[SerializeField] private Coord BoardSize;
+	public IGameMoveBase TriggeringMove;
+	[SerializeField] public Coord BoardSize { get; private set; }
 	/// <summary>
 	/// shows particularly notable moves. used to show what new moves are enabled by the new state
 	/// </summary>
 	public IList<IGameMoveBase> notableMoves;
+	public Dictionary<Coord, Piece[]> piecesOnBoard = new Dictionary<Coord, Piece[]>();
 
-	public BoardState(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
+	public string Identity => _identity != null ? _identity : _identity = XFEN.ToString(this);
+
+	public GameState(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
+		TriggeringMove = moveThatPromptedThisBoardState;
 		RecalculatePieceMoves(board, moveThatPromptedThisBoardState);
 	}
 
@@ -28,7 +33,9 @@ public class BoardState {
 	//	identity = other.identity;
 	//}
 
-	public BoardState() { }
+	public GameState(IGameMoveBase moveThatPromptedThisBoardState) {
+		TriggeringMove = moveThatPromptedThisBoardState;
+	}
 
 	public struct MoveStats {
 		public int count;
@@ -41,6 +48,36 @@ public class BoardState {
 		}
 		public List<IGameMoveBase> allMoves;
 		public List<IGameMoveBase> newMoves;
+	}
+
+	public Piece GetPieceAt(Coord coord) {
+		if (piecesOnBoard.TryGetValue(coord, out Piece[] pieces)) {
+			if (pieces.Length != 1) { throw new System.Exception($"{pieces.Length} pieces at {coord}"); }
+			return pieces[0];
+		}
+		return null;
+	}
+
+	private void GeneratePiecesOnBoardTable(Board board) {
+		piecesOnBoard.Clear();
+		List<Team> teams = board.game.teams;
+		for (int t = 0; t < teams.Count; ++t) {
+			List<Piece> pieces = teams[t].Pieces;
+			for (int i = 0; i < pieces.Count; ++i) {
+				AddPieceToBoardState(pieces[i]);
+			}
+		}
+	}
+
+	private bool AddPieceToBoardState(Piece piece) {
+		if (!piece.TryGetCoord(out Coord coord)) { return false; }
+		if (piecesOnBoard.TryGetValue(coord, out Piece[] pieces) && pieces.Length > 0) {
+			if (pieces[0] == piece) {
+				Debug.LogWarning($"{piece}@{coord} already");
+			} else throw new System.Exception($"can't place {piece}@{coord}, {pieces[0].MoveLogic} is already there");
+		}
+		piecesOnBoard[coord] = new Piece[] { piece };
+		return true;
 	}
 
 	public King.Check GetCheck(Team team) {
@@ -120,22 +157,23 @@ public class BoardState {
 		}
 		return count;
 	}
-	public static BoardState Next(BoardState other) {
-		BoardState next = new BoardState();
-		next.prev = other;
-		next.identity = other.identity;
-		return next;
-	}
+	//public static GameState Next(GameState other) {
+	//	GameState next = new GameState();
+	//	next.prev = other;
+	//	//next.identity = other.identity;
+	//	return next;
+	//}
 
-	public static BoardState Copy(BoardState other) {
-		BoardState boardState = new BoardState();
-		return boardState;
-	}
+	//public static GameState Copy(GameState other) {
+	//	GameState boardState = new GameState();
+	//	return boardState;
+	//}
 
 	private void Init(Board board) {
 		BoardSize = board.BoardSize;
-		identity = board.ToXfen();
+		//identity = board.ToXfen();
 		movesToLocations.Clear();
+		GeneratePiecesOnBoardTable(board);
 		//EnsureClearLedger(BoardSize, movesToLocation);
 	}
 
@@ -146,7 +184,7 @@ public class BoardState {
 		if (checks != null) { checks.Clear(); }
 		for (int i = 0; i < allPieces.Count; ++i) {
 			Piece p = allPieces[i];
-			p.GetMovesForceCalculation(p.GetCoord(), moves);
+			p.GetMovesForceCalculation(this, p.GetCoord(), moves);
 			UpdateCheckMoves(moveThatPromptedThisBoardState, moves);
 			AddToMapping(BoardSize, movesToLocations, moves);
 			moves.Clear();
@@ -178,9 +216,9 @@ public class BoardState {
 		}
 	}
 
-	public BoardState NewAnalysisAfter(IGameMoveBase move, List<IGameMoveBase> totalNewMoves) {
+	public GameState NewAnalysisAfter(IGameMoveBase move, List<IGameMoveBase> totalNewMoves) {
 		move.DoWithoutAnimation(); // make move
-		BoardState nextAnalysis = new BoardState(move.Board, move); // do entire analysis from scratch
+		GameState nextAnalysis = new GameState(move.Board, move); // do entire analysis from scratch
 		nextAnalysis.prev = this;
 		// collapse common memory with previous. also note which moves are new
 		UseMemoryFromOldStateWherePossible(nextAnalysis, this, totalNewMoves);
@@ -189,7 +227,7 @@ public class BoardState {
 	}
 
 	// TODO make this a coroutine
-	private static void UseMemoryFromOldStateWherePossible(BoardState nextAnalysis, BoardState older,
+	private static void UseMemoryFromOldStateWherePossible(GameState nextAnalysis, GameState older,
 	List<IGameMoveBase> totalNewMoves) {
 		// after fully calculating both board states, combine the new moves with the original in memory as much as possible
 		foreach (var kvp in older.movesToLocations) {

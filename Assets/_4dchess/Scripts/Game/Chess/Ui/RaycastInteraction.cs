@@ -11,6 +11,8 @@ public class RaycastInteraction : MonoBehaviour {
 	public Gradient hoveredColor;
 	public TiledGameObject currentHovered;
 
+	public GameState CurrentGameState => game.chessMoves.CurrentMoveNode.boardState;
+
 	public Camera RaycastCamera {
 		get => _cam;
 		set => _cam = value;
@@ -27,9 +29,10 @@ public class RaycastInteraction : MonoBehaviour {
 		if (EventSystem.current == null || EventSystem.current.currentSelectedGameObject != null) {
 			return;
 		}
+		GameState state = CurrentGameState;
 		if (Input.GetMouseButtonUp(0)) {
 			Click();
-			RefreshVisuals(currentHovered);
+			RefreshVisuals(state, currentHovered);
 		}
 		Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
 		if (Physics.Raycast(ray, out RaycastHit rh)) {
@@ -37,20 +40,21 @@ public class RaycastInteraction : MonoBehaviour {
 				PlaceRayHitMarker(rh);
 			}
 			ColorAccentHovered(rh.collider.GetComponent<TiledGameObject>());
-			visuals.DrawSquareDefenders(currentHovered);
+			visuals.DrawSquareDefenders(state, currentHovered);
 		} else {
 			ClearHoverAccent();
-			visuals.DrawSquareDefenders(null);
+			visuals.DrawSquareDefenders(state, null);
 		}
 	}
 
-	public void RefreshVisuals(TiledGameObject tiledGameObjet) {
+	public void RefreshVisuals(GameState state, TiledGameObject tiledGameObjet) {
 		visuals.ClearPreviousSelectionVisuals();
 		visuals.selected = tiledGameObjet;
 		Board currentPiecesBoard = currentHovered != null ? currentHovered.GetBoard() : null;
-		Piece piece = currentPiecesBoard != null ? currentPiecesBoard.GetPiece(currentHovered.GetCoord()) : null;
+		Piece piece = currentPiecesBoard != null ?//currentPiecesBoard.GetPiece(currentHovered.GetCoord())
+			state.GetPieceAt(currentHovered.GetCoord()) : null;
 		//Debug.Log("selecting " + piece);
-		analysis.SetCurrentPiece(piece);
+		analysis.SetCurrentPiece(state, piece);
 		visuals.ResetPieceSelectionVisuals(analysis);
 	}
 

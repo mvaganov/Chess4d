@@ -102,15 +102,16 @@ public static class XFEN {
 	public static char ConvertPieceToLetter(Piece p) {
 		return pieceBinaryCodeToLetterMap[ConvertPieceToCode(p)];
 	}
-	public static string ToString(Board board) {
-		ChessGame game = board.game;
+
+	public static string ToString(GameState state) {
 		System.Text.StringBuilder sb = new System.Text.StringBuilder();
 		int emptySquares;
 		Coord c = Coord.zero;
-		for (c.row = 0; c.row < board.BoardSize.row; ++c.row) {
+		Coord size = state.BoardSize;
+		for (c.row = 0; c.row < size.row; ++c.row) {
 			emptySquares = 0;
-			for (c.col = 0; c.col < board.BoardSize.col; ++c.col) {
-				Piece p = board.GetPiece(c);
+			for (c.col = 0; c.col < size.col; ++c.col) {
+				Piece p = state.GetPieceAt(c);
 				if (p == null) {
 					++emptySquares;
 				} else {
@@ -122,10 +123,12 @@ public static class XFEN {
 					sb.Append(ch);
 				}
 			}
-			sb.Append((c.row < board.BoardSize.row - 1) ? "/" : " ");
+			sb.Append((c.row < size.row - 1) ? "/" : " ");
 		}
-		MoveNode currentMoveNode = game.chessMoves.CurrentMoveNode;
-		BasicMove currentMove = (currentMoveNode != null ? currentMoveNode.move : null) as BasicMove;
+		IGameMoveBase currentMoveBase = state.TriggeringMove;
+		BasicMove currentMove = currentMoveBase as BasicMove;
+		ChessGame game = currentMove.Board.game;
+		Board board = currentMove.Board;
 		int teamIndex = currentMove == null ? -1 : (currentMove.pieceMoved != null
 			? currentMove.pieceMoved.team.TeamIndex : -1);
 		int currentTeamMove = (teamIndex + 1) % game.teams.Count;
@@ -156,6 +159,7 @@ public static class XFEN {
 		sb.Append(halfMoves % 2).Append(" ").Append(halfMoves / 2);
 		return sb.ToString();
 	}
+	// TODO also generate GameState
 	public static void FromString(Board board, IList<Team> teams, string xfen) {
 		board.GenerateTilesIfMissing();
 		board.ReclaimPieces();
