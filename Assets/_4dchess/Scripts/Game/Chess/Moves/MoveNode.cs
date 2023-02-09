@@ -52,7 +52,7 @@ public class MoveNode {
 	public List<MoveNode> GetAllTimelineBranches() { return next; }
 
 	public MoveNode(int index, IGameMoveBase move, string notes) {
-		Debug.Log("new node");
+		//Debug.Log("new node");
 		this.move = move;
 		this.turnIndex = index;
 		timestamp = System.Environment.TickCount;
