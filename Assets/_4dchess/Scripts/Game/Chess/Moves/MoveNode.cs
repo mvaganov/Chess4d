@@ -11,10 +11,11 @@ public class MoveNode {
 	private MoveNode prev;
 	public GameState boardState;
 	public Task calculationTask;
+	private string _notes;
 
 	public string Notes {
-		get => boardState != null ? boardState.notes : null;
-		set => boardState.notes = value;
+		get => _notes;
+		set => _notes = value;
 	}
 	public MoveNode Prev {
 		get => prev;
@@ -51,15 +52,15 @@ public class MoveNode {
 
 	public List<MoveNode> GetAllTimelineBranches() { return next; }
 
-	public MoveNode(int index, IGameMoveBase move, string notes) {
+	public MoveNode(int turnIndex, IGameMoveBase move, string notes) {
 		//Debug.Log("new node");
 		this.move = move;
-		this.turnIndex = index;
+		this.Notes = notes;
+		this.turnIndex = turnIndex;
 		timestamp = System.Environment.TickCount;
 		next = new List<MoveNode>();
 		prev = null;
 		Calculate();
-		this.Notes = notes;
 	}
 
 	// TODO make this properly asynchronous
@@ -92,11 +93,12 @@ public class MoveNode {
 			return Notes;
 		}
 		string stats = boardState != null ? (" " + boardState.CalculateMoveStats().ToString()) : null;
-		return $"{move}{NotesSuffix()}{stats}";
+		return $"{move} {NotesSuffix()}{stats}";
 	}
 
 	public override bool Equals(object obj) {
-		return obj is MoveNode mn && mn.turnIndex == turnIndex && mn.move.Equals(move);
+		return obj is MoveNode mn && turnIndex == mn.turnIndex
+			&& (move == mn.move || (move != null && move.Equals(mn.move)));
 	}
 	public override int GetHashCode() {
 		return ((move != null) ? move.GetHashCode() : 0) ^ turnIndex;

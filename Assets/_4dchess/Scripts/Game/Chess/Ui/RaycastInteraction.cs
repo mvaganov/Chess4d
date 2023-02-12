@@ -68,9 +68,30 @@ public class RaycastInteraction : MonoBehaviour {
 				Debug.Log($"not {selectedPiece.team}'s turn");
 				return;
 			}
-			DoMoveAt(selectedPiece, coord);
+			IGameMoveBase moveSelected = GetMoveAt(selectedPiece, coord);
+			if (moveSelected != null) {
+				game.chessMoves.MakeMove(moveSelected, "");
+			}
+			//DoMoveAt(selectedPiece, coord);
 			currentHovered = null;
 		}
+	}
+
+	public IGameMoveBase GetMoveAt(Piece selectedPiece, Coord coord) {
+		List<IGameMoveBase> moves = analysis.GetMovesAt(coord, MoveIsValid);
+		if (coord != selectedPiece.GetCoord() && moves.Count != 0) {
+			switch (moves.Count) {
+				case 1: return moves[0];
+				default:
+					Debug.Log($"TODO must disambiguate between {moves.Count} moves: [{string.Join(", ", moves.ConvertAll(m => m.ToString() + "{" + m.GetType().Name + "}"))}]");
+					for (int i = 0; i < moves.Count; i++) {
+						BasicMove m = moves[i] as BasicMove;
+						Debug.Log($"{m.GetType().Name} {m.pieceMoved} {m.from} {m.to}");
+					}
+					return null;
+			}
+		}
+		return null;
 	}
 
 	public void DoMoveAt(Piece selectedPiece, Coord coord) {

@@ -6784,6 +6784,7 @@ GameObject:
   - component: {fileID: 1564371131}
   - component: {fileID: 1564371133}
   - component: {fileID: 1564371134}
+  - component: {fileID: 1564371135}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -6854,6 +6855,7 @@ MonoBehaviour:
   teams:
   - {fileID: 317942652}
   - {fileID: 416099385}
+  RespectTurnOrder: 1
 --- !u!4 &1564371132
 Transform:
   m_ObjectHideFlags: 0
@@ -6913,7 +6915,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  game: {fileID: 0}
+  game: {fileID: 1564371131}
 --- !u!114 &1564371134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6928,6 +6930,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moves: {fileID: 1564371133}
   game: {fileID: 1564371131}
+--- !u!114 &1564371135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564371130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cedd67f28a3a1384ea293badd344c4c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1566739768
 GameObject:
   m_ObjectHideFlags: 0
@@ -8053,7 +8067,6 @@ MonoBehaviour:
   selection: {fileID: 242245484}
   hintArrows: {fileID: 1819759021}
   kingInCheck: {fileID: 646440728}
-  defendArrows: {fileID: 1933217765}
   tempDefendArrows: {fileID: 1355893368}
   specialTileAndArrows: {fileID: 328888930}
   selected: {fileID: 0}

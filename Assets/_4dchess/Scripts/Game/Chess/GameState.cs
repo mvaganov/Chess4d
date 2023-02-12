@@ -12,7 +12,7 @@ public class GameState {
 	private List<King.Check> checks = null;
 	public GameState prev;
 	private string _identity;
-	public string notes;
+	//public string notes;
 	public IGameMoveBase TriggeringMove;
 	[SerializeField] public Coord BoardSize { get; private set; }
 	/// <summary>
