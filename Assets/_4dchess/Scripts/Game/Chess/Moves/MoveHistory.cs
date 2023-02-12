@@ -9,7 +9,9 @@ public class MoveHistory : MonoBehaviour {
 	public MoveEventHandler onUndoMove;
 	public ChessGame game;
 	private ChessVisuals chessVis;
+	public MoveCalculator moveCalculator;
 
+	public int NextMoveIndex => currentMoveNode.turnIndex + 1;
 	public MoveNode CurrentMoveNode => currentMoveNode;
 	public IGameMoveBase CurrentMove => CurrentMoveNode != null ? CurrentMoveNode.move : null;
 	private ChessVisuals ChessVisuals => chessVis != null ? chessVis : chessVis = FindObjectOfType<ChessVisuals>();
@@ -18,7 +20,7 @@ public class MoveHistory : MonoBehaviour {
 
 	private void Awake() {
 		if (game == null) { game = FindObjectOfType<ChessGame>(); }
-		currentMoveNode = new MoveNode(0, new StartGame(game.GameBoard), "game begins");
+		currentMoveNode = moveCalculator.GetMoveNode(0, new StartGame(game.GameBoard));
 	}
 
 	public int CountMovesSinceCaptureOrPawnAdvance(Board board) {
@@ -92,8 +94,9 @@ public class MoveHistory : MonoBehaviour {
 		return list;
 	}
 
-	public void MakeMove(IGameMoveBase move, string notes) {
-		DoThis(new MoveNode(currentMoveNode.turnIndex + 1, move, notes));
+	public void MakeMove(IGameMoveBase move) {
+		MoveNode moveNode = moveCalculator.GetMoveNode(NextMoveIndex, move);
+		DoThis(moveNode);
 		ChessVisuals.GenerateHints(currentMoveNode);
 		// TODO check if one of the latest moves is check for either king
 	}

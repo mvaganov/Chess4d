@@ -34,9 +34,9 @@ public class ChessGame : MonoBehaviour {
 	public bool RespectTurnOrder = true;
 	public MoveNode moveNodeBeingProcessed;
 
-	public GameState CurrentGameState => chessMoves.CurrentMoveNode.boardState;
+	public GameState CurrentGameState => chessMoves.CurrentMoveNode.BoardState;
 	public Team TeamWhoseTurnItIs => teams[GetWhosTurnItIs()];
-
+	public int NextMoveIndex => chessMoves.NextMoveIndex;
 	public Board GameBoard {
 		get {
 			StartGameIfNotStartedAlready();

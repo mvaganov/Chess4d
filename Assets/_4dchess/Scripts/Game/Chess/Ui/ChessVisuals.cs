@@ -12,12 +12,14 @@ public class ChessVisuals : MonoBehaviour {
 	public TileVisualization tempDefendArrows;
 	public TileVisualization specialTileAndArrows;
 	public TiledGameObject selected;
+	//public Piece selectedPiece;
 	public bool showKingDefender;
 	public bool showKingInCheck;
 	private Dictionary<System.Type, TileVisualSpecifics> _tileVisualizationSettings = null;
 	public Color threaten = new Color(1, .5f, 1);
 	public Color activeAttack = new Color(1, 0.75f, .5f);
 	private List<GameObject> hints;
+	private MoveNode hintedMove;
 	TileVisualSpecifics _hintSetting;
 	private TileVisualSpecifics HintSetting => _hintSetting.visualizer != null ? _hintSetting
 		: _hintSetting = new TileVisualSpecifics(new Color(.5f, .5f, .5f), hintArrows);
@@ -144,8 +146,12 @@ public class ChessVisuals : MonoBehaviour {
 	}
 
 	public void GenerateHints(MoveNode node) {
+		if (hintedMove == node) { return; }
 		hintArrows.ClearTiles();
-		IList<IGameMoveBase> moves = node.boardState.notableMoves;
+		if (node == null || node.move == null) { return; }
+		//Debug.Log(node.move);
+		GameState state = node.BoardState;
+		IList<IGameMoveBase> moves = state.notableMoves;
 		if (hints == null) { hints = new List<GameObject>(); }
 		for (int i = 0; i < moves.Count; ++i) {
 			TiledGameObject tgo = AddHintVisualFor(moves[i]);
@@ -154,5 +160,6 @@ public class ChessVisuals : MonoBehaviour {
 				tw.Wire.LineRenderer.endWidth /= 4;
 			}
 		}
+		hintedMove = node;
 	}
 }

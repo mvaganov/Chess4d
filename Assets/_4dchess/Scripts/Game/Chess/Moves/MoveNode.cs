@@ -9,9 +9,11 @@ public class MoveNode {
 	public int timestamp;
 	private List<MoveNode> next;
 	private MoveNode prev;
-	public GameState boardState;
+	private GameState _boardState;
 	public Task calculationTask;
 	private string _notes;
+
+	public GameState BoardState => _boardState != null ? _boardState : _boardState = Calculate();
 
 	public string Notes {
 		get => _notes;
@@ -21,7 +23,7 @@ public class MoveNode {
 		get => prev;
 		set {
 			prev = value;
-			boardState.prev = prev != null ? prev.boardState : null;
+			BoardState.prev = prev != null ? prev.BoardState : null;
 		}
 	}
 	public bool IsRoot => prev == null;
@@ -60,21 +62,17 @@ public class MoveNode {
 		timestamp = System.Environment.TickCount;
 		next = new List<MoveNode>();
 		prev = null;
-		Calculate();
 	}
 
-	// TODO make this properly asynchronous
 	private GameState Calculate() {
 		if (move == null) { return null; }
+		Debug.Log($"calculating {turnIndex}:{move}");
 		List<IGameMoveBase> newMoves = new List<IGameMoveBase>();
 		move.Board.game.moveNodeBeingProcessed = this;
-		boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
-		//yield return null;
-		boardState.prev = prev != null ? prev.boardState : null;
+		GameState boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
+		boardState.prev = prev != null ? prev.BoardState : null;
 		newMoves.RemoveAll(move => !move.IsValid);
-		//yield return null;
 		boardState.notableMoves = newMoves;
-		//Debug.Log($"{move} new moves: {string.Join(", ", newMoves.ConvertAll(m => m.ToString()))}");
 		return boardState;
 	}
 
@@ -92,7 +90,7 @@ public class MoveNode {
 		if (move == null) {
 			return Notes;
 		}
-		string stats = boardState != null ? (" " + boardState.CalculateMoveStats().ToString()) : null;
+		string stats = _boardState != null ? (" " + BoardState.CalculateMoveStats().ToString()) : null;
 		return $"{move} {NotesSuffix()}{stats}";
 	}
 

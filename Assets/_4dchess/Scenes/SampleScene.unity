@@ -1659,6 +1659,7 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 3
   currentHovered: {fileID: 0}
+  moveCalculator: {fileID: 1564371135}
 --- !u!1 &488578361
 GameObject:
   m_ObjectHideFlags: 0
@@ -6916,6 +6917,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   game: {fileID: 1564371131}
+  moveCalculator: {fileID: 1564371135}
 --- !u!114 &1564371134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8070,6 +8072,7 @@ MonoBehaviour:
   tempDefendArrows: {fileID: 1355893368}
   specialTileAndArrows: {fileID: 328888930}
   selected: {fileID: 0}
+  selectedPiece: {fileID: 0}
   showKingDefender: 0
   showKingInCheck: 0
   threaten: {r: 1, g: 0.5, b: 1, a: 1}

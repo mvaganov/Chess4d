@@ -10,8 +10,9 @@ public class RaycastInteraction : MonoBehaviour {
 	public Transform rayHitMarker;
 	public Gradient hoveredColor;
 	public TiledGameObject currentHovered;
+	public MoveCalculator moveCalculator;
 
-	public GameState CurrentGameState => game.chessMoves.CurrentMoveNode.boardState;
+	public GameState CurrentGameState => game.chessMoves.CurrentMoveNode.BoardState;
 
 	public Camera RaycastCamera {
 		get => _cam;
@@ -31,34 +32,17 @@ public class RaycastInteraction : MonoBehaviour {
 		}
 		GameState state = CurrentGameState;
 		if (Input.GetMouseButtonUp(0)) {
-			Click();
-			RefreshVisuals(state, currentHovered);
+			Click(state);
 		}
 		Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
 		if (Physics.Raycast(ray, out RaycastHit rh)) {
-			if (Input.GetMouseButton(0)) {
-				PlaceRayHitMarker(rh);
-			}
-			ColorAccentHovered(rh.collider.GetComponent<TiledGameObject>());
-			visuals.DrawSquareDefenders(state, currentHovered);
+			HoverOverBoard(rh, state);
 		} else {
-			ClearHoverAccent();
-			visuals.DrawSquareDefenders(state, null);
+			HoverOffOfBoard(state);
 		}
 	}
 
-	public void RefreshVisuals(GameState state, TiledGameObject tiledGameObjet) {
-		visuals.ClearPreviousSelectionVisuals();
-		visuals.selected = tiledGameObjet;
-		Board currentPiecesBoard = currentHovered != null ? currentHovered.GetBoard() : null;
-		Piece piece = currentPiecesBoard != null ?//currentPiecesBoard.GetPiece(currentHovered.GetCoord())
-			state.GetPieceAt(currentHovered.GetCoord()) : null;
-		//Debug.Log("selecting " + piece);
-		analysis.SetCurrentPiece(state, piece);
-		visuals.ResetPieceSelectionVisuals(analysis);
-	}
-
-	private void Click() {
+	private void Click(GameState state) {
 		if (currentHovered == null) { return; }
 		// handle a click at the hovered coordinate
 		Coord coord = currentHovered.GetCoord();
@@ -66,15 +50,47 @@ public class RaycastInteraction : MonoBehaviour {
 		if (selectedPiece != null) {
 			if (game.RespectTurnOrder && selectedPiece.team != game.TeamWhoseTurnItIs) {
 				Debug.Log($"not {selectedPiece.team}'s turn");
-				return;
+			} else {
+				IGameMoveBase moveSelected = GetMoveAt(selectedPiece, coord);
+				if (moveSelected != null) {
+					game.chessMoves.MakeMove(moveSelected);
+				}
+				//DoMoveAt(selectedPiece, coord);
 			}
-			IGameMoveBase moveSelected = GetMoveAt(selectedPiece, coord);
-			if (moveSelected != null) {
-				game.chessMoves.MakeMove(moveSelected, "");
-			}
-			//DoMoveAt(selectedPiece, coord);
 			currentHovered = null;
 		}
+		RefreshVisuals(state, currentHovered);
+	}
+
+	public void RefreshVisuals(GameState state, TiledGameObject tiledGameObjet) {
+		visuals.ClearPreviousSelectionVisuals();
+		visuals.selected = tiledGameObjet;
+		Board currentPiecesBoard = currentHovered != null ? currentHovered.GetBoard() : null;
+		Piece selectedPiece = currentPiecesBoard != null ?//currentPiecesBoard.GetPiece(currentHovered.GetCoord())
+			state.GetPieceAt(currentHovered.GetCoord()) : null;
+		Debug.Log("selecting " + selectedPiece);
+		analysis.SetCurrentPiece(state, selectedPiece);
+		visuals.ResetPieceSelectionVisuals(analysis);
+	}
+
+	private void HoverOverBoard(RaycastHit rh, GameState state) {
+		if (Input.GetMouseButton(0)) {
+			PlaceRayHitMarker(rh);
+		}
+		ColorAccentHovered(rh.collider.GetComponent<TiledGameObject>());
+		visuals.DrawSquareDefenders(state, currentHovered);
+		if (analysis.SelectedPiece != null) {
+			MoveNode moveNode = moveCalculator.GetMoveNode(game.NextMoveIndex,
+				GetMoveAt(analysis.SelectedPiece, currentHovered.GetCoord()));
+			if (moveNode != null) {
+				visuals.GenerateHints(moveNode);
+			}
+		}
+	}
+
+	private void HoverOffOfBoard(GameState state) {
+		ClearHoverAccent();
+		visuals.DrawSquareDefenders(state, null);
 	}
 
 	public IGameMoveBase GetMoveAt(Piece selectedPiece, Coord coord) {
@@ -92,27 +108,6 @@ public class RaycastInteraction : MonoBehaviour {
 			}
 		}
 		return null;
-	}
-
-	public void DoMoveAt(Piece selectedPiece, Coord coord) {
-		List<IGameMoveBase> moves = analysis.GetMovesAt(coord, MoveIsValid);
-		if (coord != selectedPiece.GetCoord() && moves.Count != 0) {
-			switch (moves.Count) {
-				case 1:
-					game.chessMoves.MakeMove(moves[0], "");
-					break;
-				default:
-					Debug.Log($"TODO must disambiguate between {moves.Count} moves: [{string.Join(", ", moves.ConvertAll(m => m.ToString()+"{"+m.GetType().Name+"}"))}]");
-					for (int i = 0; i < moves.Count; i++) {
-						BasicMove m = moves[i] as BasicMove;
-						Debug.Log($"{m.GetType().Name} {m.pieceMoved} {m.from} {m.to}");
-					}
-					break;
-			}
-			//analysis.RecalculatePieceMoves();
-		//} else {
-		//	Debug.Log("invalid move, unselecting.");
-		}
 	}
 
 	private bool MoveIsValid(IGameMoveBase move) {

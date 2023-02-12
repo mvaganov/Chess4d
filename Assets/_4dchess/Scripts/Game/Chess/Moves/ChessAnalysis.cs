@@ -6,7 +6,7 @@ using UnityEngine;
 public class ChessAnalysis : MonoBehaviour {
 	private List<IGameMoveBase> currentMoves;
 	private List<IGameMoveBase> validMoves;
-	private Piece selectedPiece;
+	private Piece _selectedPiece;
 	[SerializeField] private MoveHistory moves;
 	private List<King> kingsInCheck = new List<King>();
 	private Dictionary<Board,GameState> boardAnalysis = new Dictionary<Board,GameState>();
@@ -16,8 +16,8 @@ public class ChessAnalysis : MonoBehaviour {
 	public List<IGameMoveBase> CurrentPieceValidMoves => validMoves;
 
 	public Piece SelectedPiece {
-		get => selectedPiece;
-		set => selectedPiece = value;
+		get => _selectedPiece;
+		set => _selectedPiece = value;
 	}
 
 	public void Start() {
@@ -33,8 +33,8 @@ public class ChessAnalysis : MonoBehaviour {
 	}
 
 	public void RecalculatePieceMoves() {
-		if (selectedPiece == null) { return; }
-		RecalculatePieceMoves(selectedPiece.board);
+		if (SelectedPiece == null) { return; }
+		RecalculatePieceMoves(SelectedPiece.board);
 	}
 
 	public GameState GetAnalysis(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
@@ -125,8 +125,8 @@ public class ChessAnalysis : MonoBehaviour {
 	public void SetCurrentPiece(GameState currentState, Piece piece) {
 		if (currentMoves == null) { currentMoves = new List<IGameMoveBase>(); } else { currentMoves.Clear(); }
 		if (validMoves == null) { validMoves = new List<IGameMoveBase>(); } else { validMoves.Clear(); }
-		selectedPiece = piece;
-		if (selectedPiece == null) { return; }
+		SelectedPiece = piece;
+		if (SelectedPiece == null) { return; }
 		List<IGameMoveBase> pieceMoves = new List<IGameMoveBase>();
 		piece.GetMoves(currentState, pieceMoves);
 		for (int i = pieceMoves.Count-1; i >= 0; --i) {
