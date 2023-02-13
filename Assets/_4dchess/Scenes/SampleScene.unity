@@ -7446,7 +7446,7 @@ MonoBehaviour:
   _defualtColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 0.5019608}
   markPool:
     unallocatedLocation: {fileID: 1337838620}
-    prefab: {fileID: 3555410402216363709, guid: 00bd2f6434cbdfe41940d1091373d1fe, type: 3}
+    prefab: {fileID: 3555410402216363709, guid: edf543b7a6e50f248aafc70e9a81c0b2, type: 3}
     unallocated: []
   currentMarks: []
 --- !u!1 &1838716274
@@ -8072,10 +8072,10 @@ MonoBehaviour:
   tempDefendArrows: {fileID: 1355893368}
   specialTileAndArrows: {fileID: 328888930}
   selected: {fileID: 0}
-  selectedPiece: {fileID: 0}
   showKingDefender: 0
   showKingInCheck: 0
   threaten: {r: 1, g: 0.5, b: 1, a: 1}
+  check: {r: 1, g: 0, b: 0, a: 1}
   activeAttack: {r: 1, g: 0.75, b: 0.5, a: 1}
 --- !u!1 &1933217763
 GameObject:

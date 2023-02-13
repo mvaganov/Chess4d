@@ -22,6 +22,8 @@ public class GameState {
 	public Dictionary<Coord, Piece[]> piecesOnBoard = new Dictionary<Coord, Piece[]>();
 
 	public string Identity => _identity != null ? _identity : _identity = XFEN.ToString(this);
+	public bool PutsSelfInCheck => TriggeringMove != null && TriggeringMove.Piece != null ?
+		GetCheck(TriggeringMove.Piece.team) != null : false;
 
 	public GameState(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
 		TriggeringMove = moveThatPromptedThisBoardState;
@@ -186,7 +188,28 @@ public class GameState {
 			Piece p = allPieces[i];
 			p.GetMovesForceCalculation(this, p.GetCoord(), moves);
 			UpdateCheckMoves(moveThatPromptedThisBoardState, moves);
-			AddToMapping(BoardSize, movesToLocations, moves);
+			PieceMoveAttack found = null;
+			for (int a = 0; a < moves.Count; ++a) {
+				if (moves[a] is PieceMoveAttack pma && !pma.IsDefend) {
+					found = pma;
+					Debug.Log("capture " + moves[a]+"   "+found.to+" vs "+found.GetRelevantCoordinate());
+				}
+			}
+			AddToMapping(movesToLocations, moves);
+
+			//if (found != null) {
+			//	IGameMoveBase[] doublecheck = movesToLocations[found.to];
+			//	bool foundit = false;
+			//	for (int a = 0; a < doublecheck.Length; ++a) {
+			//		if (doublecheck[a] is PieceMoveAttack pma && !pma.IsDefend) {
+			//			Debug.Log("doublecheck capture " + doublecheck[a]);
+			//			foundit = true;
+			//		}
+			//	}
+			//	if (!foundit) {
+			//		Debug.Log("not here?...");
+			//	}
+			//}
 			moves.Clear();
 		}
 	}
@@ -195,17 +218,22 @@ public class GameState {
 		if (triggeringMove == null) { return 0; }
 		int count = 0;
 		for(int i = 0; i < moves.Count; ++i) {
-			if (moves[i] is ICapture && moves[i] is PieceMoveAttack capture && capture.pieceCaptured != null
-			&& capture.pieceCaptured.code.ToLower() == "k" && !capture.IsDefend) {
-				King.Check check = new King.Check(triggeringMove, capture);
-				moves[i] = check;
-				++count;
-				Debug.Log("CHECK! " + moves[i]);
-				if (checks == null) { checks = new List<King.Check>(); }
-				checks.Add(check);
-			}
+			if (!IsValidKingCheck(moves[i], out PieceMoveAttack capture)) { continue; }
+			King.Check check = new King.Check(triggeringMove, capture);
+			moves[i] = check;
+			++count;
+			//Debug.Log("CHECK! " + moves[i]);
+			if (checks == null) { checks = new List<King.Check>(); }
+			checks.Add(check);
 		}
 		return count;
+	}
+
+	private bool IsValidKingCheck(IGameMoveBase move, out PieceMoveAttack capture) {
+		capture = move as PieceMoveAttack;
+		if (capture == null) { return false; }
+		Piece target = capture.pieceCaptured;
+		return target != null && target.code.ToLower() == "k" && !capture.IsDefend;
 	}
 
 	void GetMovesInvolving(Piece piece, List<IGameMoveBase> sourceMoves, List<IGameMoveBase> out_moves) {
@@ -235,6 +263,8 @@ public class GameState {
 			if (!nextAnalysis.movesToLocations.TryGetValue(kvp.Key, out IGameMoveBase[] newMoves)) {
 				newMoves = new IGameMoveBase[0];
 			}
+// TODO find out why attacks are not being added to newMoves?
+			int a = 0; a = 1 / a;
 			if (CanFullyCollapseNewMovesIntoOriginal(original, ref newMoves)) {
 				nextAnalysis.movesToLocations[kvp.Key] = original;
 			} else {
@@ -303,23 +333,61 @@ public class GameState {
 	//	}
 	//}
 
-	private static void AddToMapping(Coord boardSize, Dictionary<Coord, IGameMoveBase[]> out_ledger, 
+	private static void AddToMapping(Dictionary<Coord, IGameMoveBase[]> out_ledger, 
 	List<IGameMoveBase> moves) {
 		for (int m = 0; m < moves.Count; ++m) {
 			IGameMoveBase mov = moves[m];
 			Coord coord = mov.GetRelevantCoordinate();
 			AddTo(out_ledger, coord, mov);
+//			Debug.Log($"{{{mov.ToString()}}}");
+
+			//if (mov.ToString().StartsWith("Nf6")) {
+			//	IGameMoveBase[] doublecheck = out_ledger[mov.GetRelevantCoordinate()];
+			//	bool foundit = false;
+			//	for (int a = 0; a < doublecheck.Length; ++a) {
+			//		if (doublecheck[a] is PieceMoveAttack pma && !pma.IsDefend) {
+			//			Debug.Log("immediate doublecheck capture " + doublecheck[a]);
+			//			foundit = true;
+			//		}
+			//	}
+			//	if (!foundit) {
+			//		Debug.Log("not here?...");
+			//	}
+			//}
 		}
 	}
 
 	public static void AddTo(Dictionary<Coord, IGameMoveBase[]> map, Coord coord, IGameMoveBase move) {
+		//if (move.ToString().StartsWith("Nf6")) {
+		//	Debug.Log($"oooh, {coord} : {move}");
+		//}
 		if (!map.TryGetValue(coord, out IGameMoveBase[] movesToThisTile)) {
 			map[coord] = new IGameMoveBase[] { move };
+			//if (move.ToString().StartsWith("Nf6")) {
+			//	Debug.Log($"newone {coord} : {move}");
+			//	Debug.Log($"~~{map[coord].Length}~~{map[coord][0]}      {move}");
+
+
+			//	IGameMoveBase[] doublecheck = map[move.GetRelevantCoordinate()];
+			//	bool foundit = false;
+			//	for (int a = 0; a < doublecheck.Length; ++a) {
+			//		if (doublecheck[a] is PieceMoveAttack pma && !pma.IsDefend) {
+			//			Debug.Log("###immediate doublecheck capture " + doublecheck[a]);
+			//			foundit = true;
+			//		}
+			//	}
+			//	if (!foundit) {
+			//		Debug.Log("###not here?...");
+			//	}
+			//}
 		} else {
 			//movesToThisTile.Add(move);
 			System.Array.Resize(ref movesToThisTile, movesToThisTile.Length + 1);
 			movesToThisTile[movesToThisTile.Length - 1] = move;
 			map[coord] = movesToThisTile;
+			//if (move.ToString().StartsWith("Nf6")) {
+			//	Debug.Log($"added {coord} : {move}");
+			//}
 		}
 	}
 

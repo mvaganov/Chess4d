@@ -17,12 +17,13 @@ public class ChessVisuals : MonoBehaviour {
 	public bool showKingInCheck;
 	private Dictionary<System.Type, TileVisualSpecifics> _tileVisualizationSettings = null;
 	public Color threaten = new Color(1, .5f, 1);
+	public Color check = new Color(1, 0, 0);
 	public Color activeAttack = new Color(1, 0.75f, .5f);
 	private List<GameObject> hints;
 	private MoveNode hintedMove;
 	TileVisualSpecifics _hintSetting;
 	private TileVisualSpecifics HintSetting => _hintSetting.visualizer != null ? _hintSetting
-		: _hintSetting = new TileVisualSpecifics(new Color(.5f, .5f, .5f), hintArrows);
+		: _hintSetting = new TileVisualSpecifics(new Color(.5f, 1, 1), hintArrows);
 
 	private struct TileVisualSpecifics {
 		public Color color;
@@ -99,7 +100,7 @@ public class ChessVisuals : MonoBehaviour {
 		TiledGameObject tgo;
 		TileVisualSpecifics setting = HintSetting;
 		tgo = setting.visualizer.AddMark(someKindOfMove, false);
-		tgo.Color = someKindOfMove is King.Check ? threaten : setting.color;
+		tgo.Color = someKindOfMove is King.Check ? check : setting.color;
 		return tgo;
 	}
 
@@ -124,6 +125,7 @@ public class ChessVisuals : MonoBehaviour {
 		for (int i = 0; i < activityAtSquare.Count; i++) {
 			PieceMoveAttack cap = activityAtSquare[i] as PieceMoveAttack;
 			if (cap == null) { continue; }
+			if (cap.pieceMoved == analysis.SelectedPiece) { continue; }
 			if (!showKingDefender && ChessGame.IsMyKing(piece, cap.pieceCaptured)) { continue; }
 			defenders.Add(cap);
 		}
@@ -148,6 +150,7 @@ public class ChessVisuals : MonoBehaviour {
 	public void GenerateHints(MoveNode node) {
 		if (hintedMove == node) { return; }
 		hintArrows.ClearTiles();
+		hintedMove = null;
 		if (node == null || node.move == null) { return; }
 		//Debug.Log(node.move);
 		GameState state = node.BoardState;
@@ -155,10 +158,11 @@ public class ChessVisuals : MonoBehaviour {
 		if (hints == null) { hints = new List<GameObject>(); }
 		for (int i = 0; i < moves.Count; ++i) {
 			TiledGameObject tgo = AddHintVisualFor(moves[i]);
-			if (tgo is TiledWire tw) {
-				tw.Wire.LineRenderer.startWidth /= 4;
-				tw.Wire.LineRenderer.endWidth /= 4;
-			}
+			// TODO make the non-check moves (NonStandard.Wires.LINE_WIDTH / 4)?
+			//if (tgo is TiledWire tw) {
+			//	tw.Wire.LineRenderer.startWidth /= 4;
+			//	tw.Wire.LineRenderer.endWidth /= 4;
+			//}
 		}
 		hintedMove = node;
 	}

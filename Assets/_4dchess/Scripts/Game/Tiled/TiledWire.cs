@@ -3,6 +3,7 @@ using UnityEngine;
 public class TiledWire : TiledGameObject {
 	public NonStandard.Wire Wire;
 	public NonStandard.LineEnd destinationEnd = NonStandard.LineEnd.Arrow;
+	public bool swapStartAndEnd;
 	public override Material Material {
 		get => Wire.LineRenderer.material;
 		set => Wire.LineRenderer.material = value;
@@ -38,8 +39,12 @@ public class TiledWire : TiledGameObject {
 			Wire.transform.Rotate(90, 0, 0);
 		}
 		_destinationCoord = value;
-		Vector3 start = GetBoard().CoordToWorldPosition(startCoord);
-		Vector3 end = GetBoard().CoordToWorldPosition(_destinationCoord);
+		Coord coord0 = startCoord, coord1 = _destinationCoord;
+		if (swapStartAndEnd) {
+			Coord temp = coord0; coord0 = coord1; coord1 = temp;
+		}
+		Vector3 start = GetBoard().CoordToWorldPosition(coord0);
+		Vector3 end = GetBoard().CoordToWorldPosition(coord1);
 
 		Vector3 startAdjust = Vector3.up;
 		Tile tile = GetComponentInParent<Tile>();
@@ -53,7 +58,7 @@ public class TiledWire : TiledGameObject {
 		}
 
 		Vector3 endAdjust = Vector3.up;
-		tile = GetBoard().GetTile(_destinationCoord);
+		tile = GetBoard().GetTile(coord1);
 		p = tile.GetPiece();
 		if (p != null) {
 			Collider collider = p.GetComponent<Collider>();

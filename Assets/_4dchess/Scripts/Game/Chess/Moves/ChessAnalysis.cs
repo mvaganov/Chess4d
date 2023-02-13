@@ -129,18 +129,18 @@ public class ChessAnalysis : MonoBehaviour {
 		if (SelectedPiece == null) { return; }
 		List<IGameMoveBase> pieceMoves = new List<IGameMoveBase>();
 		piece.GetMoves(currentState, pieceMoves);
-		for (int i = pieceMoves.Count-1; i >= 0; --i) {
-			if (!pieceMoves[i].IsValid) { pieceMoves.RemoveAt(i); }
-		}
+		//for (int i = pieceMoves.Count-1; i >= 0; --i) { if (!pieceMoves[i].IsValid) { pieceMoves.RemoveAt(i); } }
+		pieceMoves.RemoveAll(m => !m.IsValid);
 		currentMoves.AddRange(pieceMoves);
 		for (int i = 0; i < pieceMoves.Count; i++) {
-			if (IsValidMove(piece, pieceMoves[i])) {
+			//if (!pieceMoves[i].IsValid) { continue; }
+			//if (IsValidMove(piece, pieceMoves[i])) {
 				if (validMoves.IndexOf(pieceMoves[i]) >= 0) {
 					Debug.Log($"duplicate move? {string.Join(", ", pieceMoves)}");
 				} else {
 					validMoves.Add(pieceMoves[i]);
 				}
-			}
+			//}
 		}
 	}
 

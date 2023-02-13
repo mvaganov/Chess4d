@@ -53,7 +53,14 @@ public class RaycastInteraction : MonoBehaviour {
 			} else {
 				IGameMoveBase moveSelected = GetMoveAt(selectedPiece, coord);
 				if (moveSelected != null) {
-					game.chessMoves.MakeMove(moveSelected);
+					MoveNode moveToMake = moveCalculator.GetMoveNode(game.NextMoveIndex, moveSelected);
+					if (moveToMake.OwnKingInCheck) {
+						Debug.Log("will not put self in check.");
+					} else {
+						game.chessMoves.DoThis(moveToMake);
+						visuals.GenerateHints(moveToMake);
+						//game.chessMoves.MakeMove(moveSelected);
+					}
 				}
 				//DoMoveAt(selectedPiece, coord);
 			}
@@ -68,7 +75,7 @@ public class RaycastInteraction : MonoBehaviour {
 		Board currentPiecesBoard = currentHovered != null ? currentHovered.GetBoard() : null;
 		Piece selectedPiece = currentPiecesBoard != null ?//currentPiecesBoard.GetPiece(currentHovered.GetCoord())
 			state.GetPieceAt(currentHovered.GetCoord()) : null;
-		Debug.Log("selecting " + selectedPiece);
+		//Debug.Log("selecting " + selectedPiece);
 		analysis.SetCurrentPiece(state, selectedPiece);
 		visuals.ResetPieceSelectionVisuals(analysis);
 	}

@@ -12,9 +12,11 @@ public class MoveNode {
 	private GameState _boardState;
 	public Task calculationTask;
 	private string _notes;
+	private bool _ownKingInCheck;
 
 	public GameState BoardState => _boardState != null ? _boardState : _boardState = Calculate();
-
+	public bool OwnKingInCheck => _boardState != null ? _ownKingInCheck :
+		_ownKingInCheck = (_boardState = Calculate()).PutsSelfInCheck;
 	public string Notes {
 		get => _notes;
 		set => _notes = value;
@@ -66,13 +68,14 @@ public class MoveNode {
 
 	private GameState Calculate() {
 		if (move == null) { return null; }
-		Debug.Log($"calculating {turnIndex}:{move}");
+		//Debug.Log($"calculating {turnIndex}:{move}");
 		List<IGameMoveBase> newMoves = new List<IGameMoveBase>();
 		move.Board.game.moveNodeBeingProcessed = this;
 		GameState boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
 		boardState.prev = prev != null ? prev.BoardState : null;
-		newMoves.RemoveAll(move => !move.IsValid);
+		//newMoves.RemoveAll(move => !move.IsValid);
 		boardState.notableMoves = newMoves;
+		_ownKingInCheck = boardState.PutsSelfInCheck;
 		return boardState;
 	}
 

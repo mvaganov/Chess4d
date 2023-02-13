@@ -70,16 +70,23 @@ public class MoveLogic : MonoBehaviour {
 				Piece other = state.GetPieceAt(cursor);//board.GetPiece(cursor);
 				if (other != null) {
 					bool isAllies = self.team.IsAlliedWith(other.team);
-					if (!isAllies) {
-						if (moveKind.HasFlag(MoveKind.Attack)) {
-							PieceMoveAttack capture = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
-							out_moves?.Add(capture);
-						}
-					}
-					if (isAllies) {
-						if (moveKind.HasFlag(MoveKind.Defend)) {
-							PieceMoveAttack defend = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
-							out_moves?.Add(defend);
+					//if (!isAllies) {
+					//	if (moveKind.HasFlag(MoveKind.Attack)) {
+					//		PieceMoveAttack capture = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
+					//		out_moves?.Add(capture);
+					//	}
+					//}
+					//if (isAllies) {
+					//	if (moveKind.HasFlag(MoveKind.Defend)) {
+					//		PieceMoveAttack defend = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other/*, cursor*/);
+					//		out_moves?.Add(defend);
+					//	}
+					//}
+					if ((moveKind.HasFlag(MoveKind.Attack) && !isAllies) || (moveKind.HasFlag(MoveKind.Defend) && isAllies)) {
+						PieceMoveAttack move = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other);
+						out_moves?.Add(move);
+						if (!isAllies) {
+							Debug.Log(move.pieceMoved + " can attack " + move.pieceCaptured);
 						}
 					}
 					break;
