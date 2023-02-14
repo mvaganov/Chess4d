@@ -249,7 +249,39 @@ public class GameState {
 		GameState nextAnalysis = new GameState(move.Board, move); // do entire analysis from scratch
 		nextAnalysis.prev = this;
 		// collapse common memory with previous. also note which moves are new
+		bool passingTheMove = false;
+		if(nextAnalysis.movesToLocations.TryGetValue(new Coord(4,3), out IGameMoveBase[] hittingPawn)) {
+			for(int i = 0; i < hittingPawn.Length; ++i) {
+				PieceMoveAttack attack = hittingPawn[i] as PieceMoveAttack;
+				if (attack != null && !attack.IsDefend) {
+					Debug.Log(hittingPawn[i] + " " + attack + " REAL ATTACK!");
+					passingTheMove = true;
+				} else {
+					Debug.Log(hittingPawn[i] + " " + attack + " defend?");
+				}
+			}
+		}
 		UseMemoryFromOldStateWherePossible(nextAnalysis, this, totalNewMoves);
+		if (passingTheMove) {
+			Debug.Log("ok, checking again.");
+			bool stillhere = false;
+			if (movesToLocations.TryGetValue(new Coord(4, 3), out IGameMoveBase[] secondCheck)) {
+				for (int i = 0; i < secondCheck.Length; ++i) {
+					Debug.Log(secondCheck[i]);
+					if (secondCheck[i] is PieceMoveAttack attack && !attack.IsDefend) {
+						stillhere = true;
+					}
+				}
+				if (!stillhere) {
+					Debug.Log("NOT HERE!");
+				} else {
+					Debug.Log("still here, bug is elsewhere.");
+				}
+			} else {
+				Debug.Log("^^^nothing registering at this square...");
+				int a = 0; a = 1 / a; // TODO UseMemoryFromOldStateWherePossible doesn't accept the move?
+			}
+		}
 		move.UndoWithoutAnimation(); // unmake move, so the state stays as it should be
 		return nextAnalysis;
 	}
@@ -261,13 +293,23 @@ public class GameState {
 		foreach (var kvp in older.movesToLocations) {
 			IGameMoveBase[] original = kvp.Value;
 			if (!nextAnalysis.movesToLocations.TryGetValue(kvp.Key, out IGameMoveBase[] newMoves)) {
-				newMoves = new IGameMoveBase[0];
+				newMoves = System.Array.Empty<IGameMoveBase>();//new IGameMoveBase[0];
 			}
-// TODO find out why attacks are not being added to newMoves?
-			int a = 0; a = 1 / a;
 			if (CanFullyCollapseNewMovesIntoOriginal(original, ref newMoves)) {
 				nextAnalysis.movesToLocations[kvp.Key] = original;
 			} else {
+
+				bool foundit = false;
+				for (int a = 0; a < newMoves.Length; ++a) {
+					if (newMoves[a] is PieceMoveAttack pma && !pma.IsDefend) {
+						Debug.Log("$$$doublecheck capture " + newMoves[a]);
+						foundit = true;
+					}
+				}
+				if (!foundit) {
+					Debug.Log("not here?...");
+				}
+
 				AddToTotalNewMoves(totalNewMoves, original, newMoves);
 			}
 		}

@@ -157,6 +157,9 @@ public class ChessVisuals : MonoBehaviour {
 		IList<IGameMoveBase> moves = state.notableMoves;
 		if (hints == null) { hints = new List<GameObject>(); }
 		for (int i = 0; i < moves.Count; ++i) {
+			if (moves[i] is PieceMoveAttack moveattack && !moveattack.IsDefend) {
+				Debug.Log(moveattack);
+			}
 			TiledGameObject tgo = AddHintVisualFor(moves[i]);
 			// TODO make the non-check moves (NonStandard.Wires.LINE_WIDTH / 4)?
 			//if (tgo is TiledWire tw) {
