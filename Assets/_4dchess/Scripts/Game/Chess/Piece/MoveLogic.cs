@@ -82,12 +82,10 @@ public class MoveLogic : MonoBehaviour {
 					//		out_moves?.Add(defend);
 					//	}
 					//}
-					if ((moveKind.HasFlag(MoveKind.Attack) && !isAllies) || (moveKind.HasFlag(MoveKind.Defend) && isAllies)) {
+					if((moveKind.HasFlag(MoveKind.Attack) && !isAllies)
+					|| (moveKind.HasFlag(MoveKind.Defend) && isAllies)) {
 						PieceMoveAttack move = new PieceMoveAttack(self.board, self, self.GetCoord(), cursor, other);
 						out_moves?.Add(move);
-						if (!isAllies) {
-							Debug.Log(move.pieceMoved + " can attack " + move.pieceCaptured);
-						}
 					}
 					break;
 				} else {

@@ -18,6 +18,7 @@ public class ChessVisuals : MonoBehaviour {
 	private Dictionary<System.Type, TileVisualSpecifics> _tileVisualizationSettings = null;
 	public Color threaten = new Color(1, .5f, 1);
 	public Color check = new Color(1, 0, 0);
+	public Color defendHint = new Color(0.5f, 0.5f, 0.5f, 0.5f);
 	public Color activeAttack = new Color(1, 0.75f, .5f);
 	private List<GameObject> hints;
 	private MoveNode hintedMove;
@@ -157,10 +158,10 @@ public class ChessVisuals : MonoBehaviour {
 		IList<IGameMoveBase> moves = state.notableMoves;
 		if (hints == null) { hints = new List<GameObject>(); }
 		for (int i = 0; i < moves.Count; ++i) {
-			if (moves[i] is PieceMoveAttack moveattack && !moveattack.IsDefend) {
-				Debug.Log(moveattack);
-			}
 			TiledGameObject tgo = AddHintVisualFor(moves[i]);
+			if (moves[i] is PieceMoveAttack moveattack && moveattack.IsDefend) {
+				tgo.Color = defendHint;
+			}
 			// TODO make the non-check moves (NonStandard.Wires.LINE_WIDTH / 4)?
 			//if (tgo is TiledWire tw) {
 			//	tw.Wire.LineRenderer.startWidth /= 4;

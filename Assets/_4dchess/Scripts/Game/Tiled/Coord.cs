@@ -77,4 +77,10 @@ using UnitType = System.Int16;
 	public string ColumnId => Counting.Alpha(col).ToLower();
 	public string RowId => (row + 1).ToString();
 	public override string ToString() => $"{ColumnId}{RowId}";
+	// TODO reimplement so the column is all consecutive alpha characters before the numeric
+	// and row is all consecutive numeric.
+	public static Coord FromString(string str) {
+		int col = (str[0] - 'a'), row = (str[1] - '1');
+		return new Coord(col, row);
+	}
 }
