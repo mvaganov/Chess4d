@@ -4,8 +4,8 @@
 [x] generate XFEN string from board state
 [x] create MoveCalculator service that will manage moves and their calculations
 [x] calculate the next board state on move hover
-[/] do not allow a move that will put your own king into check
-[/] identify if a move will put your own king out of check
+[x] do not allow a move that will put your own king into check
+[x] identify if a move will put your own king out of check
 [ ] identify if there are not moves that can get the king out of check, and show end of game state
 [ ] restart game controls
 -- ship it! --

@@ -48,13 +48,13 @@ public class MoveHistory : MonoBehaviour {
 	/// </summary>
 	public MoveNode FindMoveNode(IGameMoveBase move) {
 		MoveNode n = currentMoveNode;
-		Debug.Log("start "+n);
+		//Debug.Log("start "+n);
 		// if we're at the node we're looking for, return it now. that was easy.
 		if (n.move == move) { return n; }
 		// look for nodes along this node's direct history, until beginning, or a branch in the timeline is found
 		while (n.Prev != null && n.Prev.FutureTimelineCount > 1) {
 			n = n.Prev;
-			Debug.Log("traverse " + n);
+			//Debug.Log("traverse " + n);
 			if (n == null) { return null; }
 			if (n.move == move) { return n; }
 		}
@@ -63,12 +63,12 @@ public class MoveHistory : MonoBehaviour {
 		branchesToIgnore.Add(n);
 		// and do a full check of the future (if it exists). if the node is in the future, get it
 		n = CurrentMoveNode.FindMoveRecursive(move, null);
-		Debug.Log("found recursive future? " + n);
+		//Debug.Log("found recursive future? " + n);
 		if (n != null) { return n; }
 		// then do the exhaustive resursive search starting from the very beginning, ignoring the searched branch
 		n = GetRoot();
 		n = n.FindMoveRecursive(move, branchesToIgnore);
-		Debug.Log("found recursive past? " + n);
+		//Debug.Log("found recursive past? " + n);
 		return n;
 	}
 

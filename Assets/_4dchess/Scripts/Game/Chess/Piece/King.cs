@@ -33,7 +33,8 @@ public class King : MoveLogic {
 				throw new System.Exception($"{nameof(Check)} must target {nameof(King)}, not {threateningMove} (from {triggeringMove})");
 			}
 			if (triggeringMove.Piece.team == pieceCaptured.team) {
-				Debug.Log("ILLEGAL MOVE! cannot put self in check.");
+				string message = "CHECK! " + triggeringMove;
+				pieceCaptured.board.game.message.Text = message;
 			}
 		}
 

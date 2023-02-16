@@ -49,7 +49,8 @@ public class RaycastInteraction : MonoBehaviour {
 		Piece selectedPiece = analysis.SelectedPiece;
 		if (selectedPiece != null) {
 			if (game.RespectTurnOrder && selectedPiece.team != game.TeamWhoseTurnItIs) {
-				Debug.Log($"not {selectedPiece.team}'s turn");
+				string errorMessage = $"not {selectedPiece.team}'s turn";
+				game.message.Text = errorMessage;
 			} else {
 				IGameMoveBase moveSelected = GetMoveAt(selectedPiece, coord);
 				if (moveSelected != null) {

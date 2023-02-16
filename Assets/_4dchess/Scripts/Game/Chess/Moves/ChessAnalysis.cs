@@ -62,7 +62,8 @@ public class ChessAnalysis : MonoBehaviour {
 		//	Debug.Log(xfen);
 		//}
 		if (checks.Count > 0) {
-			Debug.Log("CHECK! " + string.Join(", ", checks));
+			string message = "CHECK! " + string.Join(", ", checks);
+			game.message.Text = message;
 		}
 	}
 
