@@ -170,7 +170,8 @@ public class GameState {
 
 	public void RecalculatePieceMoves(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
 		Init(board);
-		List<Piece> allPieces = board.GetAllPieces();
+		// TODO instead of going through all the board, go through the entire board state, the Dict<Coord,Piece[]> piecesOnBoard
+		List<Piece> allPieces = GetAllPieces();// board.GetAllPieces();
 		List<IGameMoveBase> moves = new List<IGameMoveBase>();
 		if (checks != null) { checks.Clear(); }
 		for (int i = 0; i < allPieces.Count; ++i) {
@@ -180,6 +181,14 @@ public class GameState {
 			AddToMapping(movesToLocations, moves);
 			moves.Clear();
 		}
+	}
+
+	List<Piece> GetAllPieces() {
+		List<Piece> pieces = new List<Piece>();
+		foreach(var kvp in piecesOnBoard) {
+			pieces.AddRange(kvp.Value);
+		}
+		return pieces;
 	}
 
 	int UpdateCheckMoves(IGameMoveBase triggeringMove, List<IGameMoveBase> moves) {

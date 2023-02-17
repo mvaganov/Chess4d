@@ -56,20 +56,45 @@ public class ChessAnalysis : MonoBehaviour {
 		//selectedPiece?.board.RecalculatePieceMoves();
 		GameState analysis = GetAnalysis(board, currentMove);
 		analysis.RecalculatePieceMoves(board, currentMove);
-		List<King.Check> checks = FindChecks(analysis);
+		List<King.Check> checks = FindChecks(analysis, GetAllKings(), game.chessMoves.CurrentMove);
 		//string xfen = XFEN.ToString(board);
 		//if (board.tiles.Count > 0) {
 		//	Debug.Log(xfen);
 		//}
-		if (checks.Count > 0) {
-			string message = "CHECK! " + string.Join(", ", checks);
+		if (checks != null && checks.Count > 0) {
+			HashSet<Team> checkedTeams = checks.Count > 0 ? new HashSet<Team>() : null;
+			HashSet<Team> checkMatedTeams = null;
+			// for each check
+			for (int i = 0; i < checks.Count; ++i) {
+				King.Check check = checks[i];
+				// which team is in check
+				Team team = check.pieceCaptured.team;
+				// if that team has already been processed for checkmate, skip this
+				if (checkedTeams.Contains(team)) { continue; }
+				checkedTeams.Add(team);
+				// determine if that team has even a single move that would not result in check
+				if (!HasMoveThatIsntCheck(analysis, team)) {
+					// if there are no non-check moves, it's check mate
+					check.isMate = true;
+					if (checkMatedTeams == null) { checkMatedTeams = new HashSet<Team> { team }; }
+					else { checkMatedTeams.Add(team); }
+				}
+			}
+			string message = "CHECK"+(checkMatedTeams.Count > 0? "MATE" : "")+"!" + string.Join(", ", checks);
 			game.message.Text = message;
 		}
 	}
 
-	public List<King.Check> FindChecks(GameState analysis) {
+	private bool HasMoveThatIsntCheck(GameState analysis, Team team) {
+		// TODO
+		// for each possible move
+		// if the move is doable by the given team
+		// determine if the move would cause a check by doing analysis on the move
+		return true;
+	}
+
+	public static List<King.Check> FindChecks(GameState analysis, List<Piece> allKings, IGameMoveBase currentMove) {
 		List<King.Check> checks = new List<King.Check>();
-		List<Piece> allKings = GetAllKings();
 		// check each king to see if there are unallied pieces that can capture him
 		for (int i = 0; i < allKings.Count; ++i) {
 			Piece king = allKings[i];
@@ -85,7 +110,7 @@ public class ChessAnalysis : MonoBehaviour {
 					PieceMoveAttack cap = move as PieceMoveAttack;
 					if (cap != null && cap.pieceCaptured == king && !cap.pieceMoved.team.IsAlliedWith(king.team)) {
 						// the current move as enabling such a capture as a Check
-						King.Check check = new King.Check(game.chessMoves.CurrentMove, cap);
+						King.Check check = new King.Check(currentMove, cap);
 						checks.Add(check);
 					}
 				}
