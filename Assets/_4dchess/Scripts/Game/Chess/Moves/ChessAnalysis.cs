@@ -51,6 +51,7 @@ public class ChessAnalysis : MonoBehaviour {
 		}
 	}
 
+	// TODO take in a GameState instead of a board.
 	public void RecalculatePieceMoves(Board board) {
 		IGameMoveBase currentMove = board.game.chessMoves.CurrentMove;
 		//selectedPiece?.board.RecalculatePieceMoves();
@@ -73,7 +74,8 @@ public class ChessAnalysis : MonoBehaviour {
 				if (checkedTeams.Contains(team)) { continue; }
 				checkedTeams.Add(team);
 				// determine if that team has even a single move that would not result in check
-				if (!HasMoveThatIsntCheck(analysis, team)) {
+				List<IGameMoveBase> safeMoveList = HasMoveThatIsntCheck(analysis, team);
+				if (safeMoveList.Count == 0) {
 					// if there are no non-check moves, it's check mate
 					check.isMate = true;
 					if (checkMatedTeams == null) { checkMatedTeams = new HashSet<Team> { team }; }
@@ -85,12 +87,14 @@ public class ChessAnalysis : MonoBehaviour {
 		}
 	}
 
-	private bool HasMoveThatIsntCheck(GameState analysis, Team team) {
+	private List<IGameMoveBase> HasMoveThatIsntCheck(GameState analysis, Team team) {
+		List<IGameMoveBase> safeMoveList = new List<IGameMoveBase>();
 		// TODO
 		// for each possible move
 		// if the move is doable by the given team
 		// determine if the move would cause a check by doing analysis on the move
-		return true;
+		// if it would not cause check, add it to the safe move list
+		return safeMoveList;
 	}
 
 	public static List<King.Check> FindChecks(GameState analysis, List<Piece> allKings, IGameMoveBase currentMove) {
