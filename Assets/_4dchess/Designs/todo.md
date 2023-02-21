@@ -6,6 +6,7 @@
 [x] calculate the next board state on move hover
 [x] do not allow a move that will put your own king into check
 [x] identify if a move will put your own king out of check
+[ ] have the Board reflect the GameState instead of the GameState reflecting the board
 [ ] identify if there are not moves that can get the king out of check, and show end of game state
 [ ] restart game controls
 -- ship it! --
