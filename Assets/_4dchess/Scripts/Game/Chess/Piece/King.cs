@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class King : MoveLogic {
+public class King : PieceLogic {
 	// TODO king-side and queen-side castle, optionally don't even give move-into-check as an option
 	public static readonly Coord[] movePattern = new Coord[] {
 			new Coord(+1, 0),
@@ -29,7 +29,7 @@ public class King : MoveLogic {
 		public Check(IGameMoveBase triggeringMove, PieceMoveAttack threateningMove)
 			: base(threateningMove) {
 			this.triggeringMove = triggeringMove;
-			if (!(threateningMove.pieceCaptured.MoveLogic is King)) {
+			if (!(threateningMove.pieceCaptured.Logic is King)) {
 				throw new System.Exception($"{nameof(Check)} must target {nameof(King)}, not {threateningMove} (from {triggeringMove})");
 			}
 			if (triggeringMove.Piece.team == pieceCaptured.team) {
@@ -78,7 +78,7 @@ public class King : MoveLogic {
 			return base.GetHashCode() ^ partnerMove.GetHashCode();
 		}
 
-		public static List<IGameMoveBase> FindMoves(GameState state, MoveLogic king, Coord[] movePattern, string pieceCode) {
+		public static List<IGameMoveBase> FindMoves(GameState state, PieceLogic king, Coord[] movePattern, string pieceCode) {
 			List<IGameMoveBase> moves = new List<IGameMoveBase>();
 			// look for rooks that have a line to the king using rook movement
 			king.StandardMoves(state, movePattern, 8, moves, MoveKind.Defend);

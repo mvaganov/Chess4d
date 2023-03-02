@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public class Bishop : MoveLogic {
+public class Bishop : PieceLogic {
 	private static readonly Coord[] movePattern = new Coord[] {
 			new Coord(+1,+1),
 			new Coord(-1,+1),

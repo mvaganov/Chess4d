@@ -67,7 +67,7 @@ public class TiledGameObject : MonoBehaviour {
 		return board.GetCoord(tile);
 	}
 
-	public bool TryGetCoord(out Coord coord) {
+	public virtual bool TryGetCoord(out Coord coord) {
 		coord = Coord.negativeOne;
 		Tile tile = GetComponentInParent<Tile>();
 		if (tile == null) { return false; }

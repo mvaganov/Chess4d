@@ -4,20 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Piece : TiledGameObject {
+	/// <summary>
+	/// these are stateless variables: they don't change during the game
+	/// </summary>
 	public Team team;
 	public string code;
 	public Board board;
-	private MoveLogic moveLogic;
+	private PieceLogic _logic;
 	public float jumpHeight = 0;
 	[SerializeField] private List<IGameMoveBase> moves;
 	private Coord movesCalculatedAt;
-	public int moveCount = 0;
 	public SpriteRenderer worldIcon;
 	public bool animating = true;
-
 	public ChessGame Game => board.game;
-
-	public MoveLogic MoveLogic => moveLogic;
+	public PieceLogic Logic => _logic;
+	public int moveCount { get => Logic.MoveCount; }
+	public Coord CurrentCoord => Logic.CurrentCoord;
 
 	public void MarkMovesAsInvalid() {
 		movesCalculatedAt = Coord.negativeOne;
@@ -28,30 +30,40 @@ public class Piece : TiledGameObject {
 		RefreshMoveLogic();
 	}
 
-	public void RefreshMoveLogic() {
-		moveLogic = GetComponent<MoveLogic>();
+	public void SetCurrentCoordTo(Coord coord) {
+		Logic.MoveTo(coord);
 	}
 
-	// TODO can't move into check
-	public virtual void DoMove(BasicMove move) {
-		if (moveLogic != null) {
-			moveLogic.DoMove(move);
-		} else {
-			MoveInternal(move.to);
+	public override bool TryGetCoord(out Coord coord) {
+		if (Logic == null || Logic.state == null) {
+			Debug.LogWarning("piece does not have own coordinate");
+			return base.TryGetCoord(out coord);
 		}
-		++moveCount;
+		coord = Logic.CurrentCoord;
+		return true;
+	}
+
+	public void RefreshMoveLogic() {
+		_logic = GetComponent<PieceLogic>();
+	}
+
+	public virtual void DoMove(BasicMove move) {
+		if (_logic != null) {
+			_logic.DoMove(move);
+		} else {
+			MoveTransform(move.to);
+		}
 	}
 
 	public virtual void UndoMove(BasicMove move) {
-		if (moveLogic != null) {
-			moveLogic.UndoMove(move);
+		if (_logic != null) {
+			_logic.UndoMove(move);
 		} else {
-			MoveInternal(move.from);
+			MoveTransform(move.from);
 		}
-		--moveCount;
 	}
 
-	internal void MoveInternal(Coord coord) {
+	internal void MoveTransform(Coord coord) {
 		SetTile(coord);
 		if (animating) {
 			AnimateMovement();
@@ -79,7 +91,7 @@ public class Piece : TiledGameObject {
 
 	public virtual void LerpToLocalCenter(Vector3 offset) {
 		Vector3[] path = new Vector3[2] { transform.localPosition, offset };
-		MoveLogic.LerpPath(this, path, team.speed, true);
+		PieceLogic.LerpPath(this, path, team.speed, true);
 	}
 
 	public void JumpToLocalCenter() {
@@ -92,11 +104,11 @@ public class Piece : TiledGameObject {
 		Vector3 height = Vector3.up * jumpHeight;
 		Vector3 start = transform.localPosition;
 		Math3d.WriteBezier(bezier, start, start + height, offset + height, offset);
-		MoveLogic.LerpPath(this, bezier, team.speed, true);
+		PieceLogic.LerpPath(this, bezier, team.speed, true);
 	}
 
 	public void GetMoves(GameState state, List<IGameMoveBase> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
-		if (moveLogic == null) { return; }
+		if (_logic == null) { return; }
 		Coord here = GetCoord();
 		if (movesCalculatedAt == here) {
 			out_moves?.AddRange(moves);
@@ -108,7 +120,7 @@ public class Piece : TiledGameObject {
 	public void GetMovesForceCalculation(GameState state, Coord here, List<IGameMoveBase> out_moves, MoveKind moveKind = MoveKind.MoveAttackDefend) {
 		if (moves == null) { moves = new List<IGameMoveBase>(); } else { moves.Clear(); }
 		if (here.col >= 0 && here.row >= 0) {
-			moveLogic.GetMoves(state, moves, moveKind);
+			_logic.GetMoves(state, moves, moveKind);
 		}
 		movesCalculatedAt = here;
 		out_moves?.AddRange(moves);

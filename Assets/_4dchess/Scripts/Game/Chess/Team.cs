@@ -70,7 +70,7 @@ public class Team : MonoBehaviour {
 		Billboard bb = piece.worldIcon.GetComponent<Billboard>();
 		bb._camera = game.orthoMapCamera;
 		Pieces.Add(piece);
-		MoveLogic logic = piece.GetComponent<MoveLogic>();
+		PieceLogic logic = piece.GetComponent<PieceLogic>();
 		if (logic != null) {
 			logic.Initialize();
 		}

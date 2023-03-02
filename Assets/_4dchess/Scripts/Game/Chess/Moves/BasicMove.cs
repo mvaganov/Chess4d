@@ -46,10 +46,21 @@ public class BasicMove : IGameMoveBase {
 		Undo();
 		if (pieceMoved != null) { pieceMoved.animating = true; }
 	}
-
+	// TODO deprecate
 	public virtual void Do() { pieceMoved?.DoMove(this); }
 
+	// TODO deprecate
 	public virtual void Undo() { pieceMoved?.UndoMove(this); }
+
+	// TODO replace deprecated method with this
+	public virtual void Do(GameState state, bool moveGraphic = true) {
+		pieceMoved?.DoMove(this);
+	}
+
+	// TODO replace deprecated method with this
+	public virtual void Undo(GameState state, bool moveGraphic = true) {
+		pieceMoved?.UndoMove(this);
+	}
 
 	public override string ToString() {
 		string identifier = pieceMoved.code;

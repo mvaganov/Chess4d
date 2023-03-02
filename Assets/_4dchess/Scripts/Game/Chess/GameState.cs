@@ -5,21 +5,36 @@ using UnityEngine;
 public class GameState {
 	/// <summary>
 	/// using an Array of Move instead of a more mutable List because there will be many instances,
-	/// (a boardstate per move in the tree) and the vast majority of instances should be immutable,
-	/// which allows previously calculated boardstates to be referenced safely.
+	/// (a state per move in the tree) and all instances should be immutable,
+	/// which allows previously calculated states to be referenced safely.
+	/// TODO replace Coord with a more general Key? or create this specific lookup table with a more generalized algorithm?
 	/// </summary>
 	private Dictionary<Coord, IGameMoveBase[]> movesToLocations = new Dictionary<Coord, IGameMoveBase[]>();
 	private List<King.Check> checks = null;
 	public GameState prev;
+	/// <summary>
+	/// cached identity string, which is calculated by doing analysis on the state (XFEN string)
+	/// </summary>
 	private string _identity;
-	//public string notes;
 	public IGameMoveBase TriggeringMove;
 	[SerializeField] public Coord BoardSize { get; private set; }
 	/// <summary>
 	/// shows particularly notable moves. used to show what new moves are enabled by the new state
 	/// </summary>
 	public IList<IGameMoveBase> notableMoves;
+	// TODO optimize piece coordinate checking with lookup table
+#if HAVE_COORD_LOOKUP_TABLE
+	/// <summary>
+	/// where pieces are on the board.
+	/// uses an array because in the future, multiple pieces will be possible in the same coordinate. not yet.
+	/// TODO generate this lookup table from the <see cref="pieceState"/> list
+	/// </summary>
 	public Dictionary<Coord, Piece[]> piecesOnBoard = new Dictionary<Coord, Piece[]>();
+#endif
+	/// <summary>
+	/// keep track of piece state per turn. master list for each turn's state.
+	/// </summary>
+	public Dictionary<Piece, PieceLogic.State> pieceState = new Dictionary<Piece, PieceLogic.State>();
 
 	public string Identity => _identity != null ? _identity : _identity = XFEN.ToString(this);
 	public bool PutsSelfInCheck => TriggeringMove != null && TriggeringMove.Piece != null ?
@@ -30,15 +45,13 @@ public class GameState {
 		RecalculatePieceMoves(board, moveThatPromptedThisBoardState);
 	}
 
-	//public BoardState(BoardState other) {
-	//	prev = other;
-	//	identity = other.identity;
-	//}
-
 	public GameState(IGameMoveBase moveThatPromptedThisBoardState) {
 		TriggeringMove = moveThatPromptedThisBoardState;
 	}
 
+	/// <summary>
+	/// diff data structure identifying move delta between two states
+	/// </summary>
 	public struct MoveStats {
 		public int count;
 		public int added;
@@ -52,16 +65,78 @@ public class GameState {
 		public List<IGameMoveBase> newMoves;
 	}
 
-	public Piece GetPieceAt(Coord coord) {
-		if (piecesOnBoard.TryGetValue(coord, out Piece[] pieces)) {
-			if (pieces.Length != 1) { throw new System.Exception($"{pieces.Length} pieces at {coord}"); }
-			return pieces[0];
-		}
-		return null;
+	public Piece GetPieceAt(Coord coord) => AssertPieceAt(coord);
+
+	public bool IsExpectedPiece(Piece piece, Coord from) {
+		bool isExpectedPiece = AssertPieceAt(from) == piece;
+		return isExpectedPiece;
 	}
 
+	public Piece AssertPieceAt(Coord coord) {
+#if HAVE_COORD_LOOKUP_TABLE
+		if (!piecesOnBoard.TryGetValue(coord, out Piece[] pieces)) {
+			return null;
+		}
+		if (pieces.Length > 0) {
+			throw new System.Exception($"more than one piece at {coord}?");
+		}
+		if (pieces.Length == 0) {
+			throw new System.Exception($"should not have empty list in {nameof(piecesOnBoard)}");
+		}
+#else
+		List<Piece> pieces = null;
+		foreach (var kvp in pieceState) {
+			if (kvp.Value.coord == coord) {
+				if (pieces == null) { pieces = new List<Piece>(); }
+				pieces.Add(kvp.Key);
+			}
+		}
+#endif
+		Piece piece = pieces[0];
+		if (!pieceState.TryGetValue(piece, out PieceLogic.State pState)) {
+			throw new System.Exception($"{piece} does not have a known state this turn?");
+		} else if (pState.coord != coord) {
+			throw new System.Exception($"{piece} expected to know it is as {coord}, it thinks it's at {pState.coord}");
+		} else if(piece == null) {
+			Debug.LogWarning($"explicitly null piece at {coord}? shouldn't it just be missing?");
+		}
+		return piece;
+	}
+
+	public bool RemoveExpectedPiece(Piece piece, Coord from) {		
+		if (!pieceState.TryGetValue(piece, out PieceLogic.State pState)) { return false; }
+#if HAVE_COORD_LOOKUP_TABLE
+		piecesOnBoard.Remove(from);
+#endif
+		if (!pState.IsOnBoard) { throw new System.Exception("already not on board..."); }
+		pState.IsOnBoard = false;
+		return true;
+	}
+
+	//public bool PlacePiece(Piece piece, Coord to) {
+	//	if (piecesOnBoard.TryGetValue(to, out Piece[] pieceHere)) {
+	//		throw new System.Exception($"already a piece at {to}");
+	//	}
+	//	foreach(var kvp in piecesOnBoard) {
+	//		if (kvp.Value[0] == piece) {
+	//			throw new System.Exception($"piece already at {kvp.Key}, why is it going to {to}?");
+	//		}
+	//	}
+	//	piecesOnBoard[to] = new Piece[] { piece };
+	//	pieceState[piece] = pieceState[piece].MovedTo(to);
+	//	return true;
+	//}
+
+	/// <summary>
+	/// TODO restrict or deprecate?
+	/// </summary>
+	/// <param name="board"></param>
 	private void GeneratePiecesOnBoardTable(Board board) {
+		movesToLocations.Clear();
+		pieceState.Clear();
+#if HAVE_COORD_LOOKUP_TABLE
 		piecesOnBoard.Clear();
+#endif
 		List<Team> teams = board.game.teams;
 		for (int t = 0; t < teams.Count; ++t) {
 			List<Piece> pieces = teams[t].Pieces;
@@ -73,12 +148,18 @@ public class GameState {
 
 	private bool AddPieceToBoardState(Piece piece) {
 		if (!piece.TryGetCoord(out Coord coord)) { return false; }
-		if (piecesOnBoard.TryGetValue(coord, out Piece[] pieces) && pieces.Length > 0) {
-			if (pieces[0] == piece) {
+		Piece atCoord = AssertPieceAt(coord);
+		if (atCoord != null) {
+		//if (piecesOnBoard.TryGetValue(coord, out Piece[] pieces) && pieces.Length > 0) {
+			//if (pieces[0] == piece) {
+			if (atCoord == piece) {
 				Debug.LogWarning($"{piece}@{coord} already");
-			} else throw new System.Exception($"can't place {piece}@{coord}, {pieces[0].MoveLogic} is already there");
+			} else throw new System.Exception($"can't place {piece}@{coord}, {atCoord} is already there");
 		}
+#if HAVE_COORD_LOOKUP_TABLE
 		piecesOnBoard[coord] = new Piece[] { piece };
+#endif
+		pieceState[piece] = pieceState[piece].MovedTo(coord);
 		return true;
 	}
 
@@ -111,9 +192,9 @@ public class GameState {
 				prevMoveLocations.TryGetValue(c, out IGameMoveBase[] older);
 				if (these == older) { continue; }
 				if (these == null && older != null) {
-					moveStats.lost += CountValidMoves(older, moveStats.allMoves);// older.Length;
+					moveStats.lost += CountValidMoves(older, moveStats.allMoves);
 				} else if (older == null && these != null) {
-					moveStats.added += CountValidMoves(these, moveStats.allMoves);// these.Length;
+					moveStats.added += CountValidMoves(these, moveStats.allMoves);
 					CountValidMoves(these, moveStats.newMoves);
 					//Debug.Log(string.Join(", ", System.Array.ConvertAll(these, m => m.ToString())));
 				} else {
@@ -163,15 +244,58 @@ public class GameState {
 	private void Init(Board board) {
 		BoardSize = board.BoardSize;
 		//identity = board.ToXfen();
-		movesToLocations.Clear();
 		GeneratePiecesOnBoardTable(board);
 		//EnsureClearLedger(BoardSize, movesToLocation);
 	}
 
+	//private void Copy(GameState state) {
+	//	BoardSize = state.BoardSize;
+	//	CopyPiecesOnBoard(state);
+	//	CopyMovesByValue(state);
+	//}
+
+	private void CopyState(GameState state) {
+		pieceState.Clear();
+#if HAVE_COORD_LOOKUP_TABLE
+		piecesOnBoard.Clear();
+#endif
+		// copy the single source of truth
+		foreach (var ps in state.pieceState) {
+			pieceState[ps.Key] = ps.Value;
+#if HAVE_COORD_LOOKUP_TABLE
+			if (piecesOnBoard[ps.Value.coord][0] != ps.Key) {
+				throw new System.Exception($"source {nameof(GameState)} not set correctly");
+			}
+#endif
+		}
+#if HAVE_COORD_LOOKUP_TABLE
+		// prefetch the pieces by coordinate table
+		foreach (var pieceGroup in state.piecesOnBoard) {
+			Piece piece = pieceGroup.Value[0];
+			pieceState[piece] = piece.Logic.state;
+			piecesOnBoard[pieceGroup.Key] = pieceGroup.Value;
+		}
+#endif
+	}
+
+	//private void CopyMovesByValue(GameState state) {
+	//	movesToLocations.Clear();
+	//	foreach (var moveGroup in state.movesToLocations) {
+	//		movesToLocations[moveGroup.Key] = Clone(moveGroup.Value);
+	//	}
+	//}
+
+	//private static IGameMoveBase[] Clone(IGameMoveBase[] toCopy) {
+	//	IGameMoveBase[] result = new IGameMoveBase[toCopy.Length];
+	//	for (int i = 0; i < toCopy.Length; ++i) {
+	//		result[i] = toCopy[i];
+	//	}
+	//	return result;
+	//}
+
 	public void RecalculatePieceMoves(Board board, IGameMoveBase moveThatPromptedThisBoardState) {
 		Init(board);
-		// TODO instead of going through all the board, go through the entire board state, the Dict<Coord,Piece[]> piecesOnBoard
-		List<Piece> allPieces = GetAllPieces();// board.GetAllPieces();
+		List<Piece> allPieces = GetAllPieces();
 		List<IGameMoveBase> moves = new List<IGameMoveBase>();
 		if (checks != null) { checks.Clear(); }
 		for (int i = 0; i < allPieces.Count; ++i) {
@@ -183,10 +307,41 @@ public class GameState {
 		}
 	}
 
+	public void RecalculatePieceMoves(GameState state, IGameMoveBase moveChaningState) {
+		//Copy(state);
+		BoardSize = state.BoardSize;
+		CopyState(state);
+		ApplyMove(moveChaningState); // TODO must apply move to GameState, not Board...
+//		moveChaningState.Do();
+		List<Piece> allPieces = GetAllPieces();
+		List<IGameMoveBase> moves = new List<IGameMoveBase>();
+		if (checks != null) { checks.Clear(); }
+		for (int i = 0; i < allPieces.Count; ++i) {
+			Piece p = allPieces[i];
+			p.GetMovesForceCalculation(this, p.GetCoord(), moves);
+			UpdateCheckMoves(moveChaningState, moves);
+			AddToMapping(movesToLocations, moves);
+			moves.Clear();
+		}
+	}
+
+	public void ApplyMove(IGameMoveBase move) {
+		// get the moving piece's possible moves from it's current location
+		// remove those moves from the current board state
+		// remove the piece from it's current location
+		// move the piece to a new location (change it's state data in the master state list)
+		// recalculate all moves
+		// add the new piece
+		// add the new moves
+	}
+
 	List<Piece> GetAllPieces() {
 		List<Piece> pieces = new List<Piece>();
-		foreach(var kvp in piecesOnBoard) {
-			pieces.AddRange(kvp.Value);
+		//foreach(var kvp in piecesOnBoard) {
+		//	pieces.AddRange(kvp.Value);
+		//}
+		foreach(var kvp in pieceState) {
+			pieces.Add(kvp.Key);
 		}
 		return pieces;
 	}

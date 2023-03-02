@@ -71,7 +71,7 @@ public class MoveNode {
 		//Debug.Log($"calculating {turnIndex}:{move}");
 		List<IGameMoveBase> newMoves = new List<IGameMoveBase>();
 		move.Board.game.moveNodeBeingProcessed = this;
-		GameState boardState = move.Board.Analysis.NewAnalysisAfter(move, newMoves);
+		GameState boardState = move.Board.CurentState.NewAnalysisAfter(move, newMoves);
 		boardState.prev = prev != null ? prev.BoardState : null;
 		//newMoves.RemoveAll(move => !move.IsValid);
 		boardState.notableMoves = newMoves;

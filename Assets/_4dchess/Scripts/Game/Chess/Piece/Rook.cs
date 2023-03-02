@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public class Rook : MoveLogic {
+public class Rook : PieceLogic {
 	public static readonly Coord[] movePattern = new Coord[] {
 		new Coord(+1, 0),
 		new Coord(-1, 0),

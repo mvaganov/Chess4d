@@ -54,46 +54,53 @@ public class ChessAnalysis : MonoBehaviour {
 	// TODO take in a GameState instead of a board.
 	public void RecalculatePieceMoves(Board board) {
 		IGameMoveBase currentMove = board.game.chessMoves.CurrentMove;
-		//selectedPiece?.board.RecalculatePieceMoves();
 		GameState analysis = GetAnalysis(board, currentMove);
 		analysis.RecalculatePieceMoves(board, currentMove);
-		List<King.Check> checks = FindChecks(analysis, GetAllKings(), game.chessMoves.CurrentMove);
-		//string xfen = XFEN.ToString(board);
-		//if (board.tiles.Count > 0) {
-		//	Debug.Log(xfen);
-		//}
+		List<Piece> kings = GetAllKings();
+		List<King.Check> checks = FindChecks(analysis, kings, game.chessMoves.CurrentMove);
 		if (checks != null && checks.Count > 0) {
-			HashSet<Team> checkedTeams = checks.Count > 0 ? new HashSet<Team>() : null;
-			HashSet<Team> checkMatedTeams = null;
-			// for each check
-			for (int i = 0; i < checks.Count; ++i) {
-				King.Check check = checks[i];
-				// which team is in check
-				Team team = check.pieceCaptured.team;
-				// if that team has already been processed for checkmate, skip this
-				if (checkedTeams.Contains(team)) { continue; }
-				checkedTeams.Add(team);
-				// determine if that team has even a single move that would not result in check
-				List<IGameMoveBase> safeMoveList = HasMoveThatIsntCheck(analysis, team);
-				if (safeMoveList.Count == 0) {
-					// if there are no non-check moves, it's check mate
-					check.isMate = true;
-					if (checkMatedTeams == null) { checkMatedTeams = new HashSet<Team> { team }; }
-					else { checkMatedTeams.Add(team); }
-				}
-			}
-			string message = "CHECK"+(checkMatedTeams.Count > 0? "MATE" : "")+"!" + string.Join(", ", checks);
+			HashSet<IGameMoveBase> checkMates = CheckMateAnalysis(checks, analysis, kings);
+			string message = "CHECK"+(checkMates.Count > 0? "MATE" : "")+"!" + string.Join(", ", checks);
 			game.message.Text = message;
 		}
 	}
 
-	private List<IGameMoveBase> HasMoveThatIsntCheck(GameState analysis, Team team) {
+	private HashSet<IGameMoveBase> CheckMateAnalysis(List<King.Check> checks, GameState analysis, List<Piece> kings) {
+		HashSet<Team> checkedTeams = checks.Count > 0 ? new HashSet<Team>() : null;
+		HashSet<IGameMoveBase> checkMates = null;
+		// for each check
+		for (int i = 0; i < checks.Count; ++i) {
+			King.Check check = checks[i];
+			// which team is in check
+			Team team = check.pieceCaptured.team;
+			// if that team has already been processed for checkmate, skip this
+			if (checkedTeams.Contains(team)) { continue; }
+			checkedTeams.Add(team);
+			// determine if that team has even a single move that would not result in check
+			List<IGameMoveBase> safeMoveList = HasMoveThatIsntCheck(analysis, team, kings);
+			if (safeMoveList.Count == 0) {
+				// if there are no non-check moves, it's check mate
+				check.isMate = true;
+				if (checkMates == null) { checkMates = new HashSet<IGameMoveBase> { check }; }
+				else { checkMates.Add(check); }
+			}
+		}
+		return checkMates;
+	}
+
+	private List<IGameMoveBase> HasMoveThatIsntCheck(GameState analysis, Team team, List<Piece> kings) {
 		List<IGameMoveBase> safeMoveList = new List<IGameMoveBase>();
 		// TODO
 		// for each possible move
-		// if the move is doable by the given team
-		// determine if the move would cause a check by doing analysis on the move
-		// if it would not cause check, add it to the safe move list
+		GameState.MoveStats moves = analysis.CalculateMoveStats();
+		foreach (IGameMoveBase move in moves.allMoves) {
+			// if the move is doable by the given team
+			if (move.Piece.team != team) { continue; }
+			// determine if the move would cause a check by doing analysis on the move
+//			GameState nextBoardState = GetAnalysis(board, move);
+//			List<King.Check> checks = FindChecks(nextBoardState, kings, game.chessMoves.CurrentMove);
+			// if it would not cause check, add it to the safe move list
+		}
 		return safeMoveList;
 	}
 

@@ -14,13 +14,13 @@ public class Board : MonoBehaviour {
 	private Transform _transform;
 	private GameState _analysis;
 	public int halfMovesSinceCaptureOrPawnMove = 0;
-	// TODO rename CurrentState
-	public GameState Analysis => (_analysis != null) ? _analysis
+
+	public GameState CurentState => (_analysis != null) ? _analysis
 		: _analysis = game.analysis.GetAnalysis(this, game.chessMoves.CurrentMove);
 
 	public void Start() {
 		GenerateTilesIfMissing();
-		RecalculatePieceMoves();
+		//RecalculatePieceMoves();
 		if (game == null) {
 			game = GetComponentInParent<ChessGame>();
 		}
@@ -72,7 +72,7 @@ public class Board : MonoBehaviour {
 	}
 
 	public void RecalculatePieceMoves() {
-		game.analysis.RecalculatePieceMoves(this);
+		//game.analysis.RecalculatePieceMoves(this);
 	}
 
 	private Coord GetMoveLocation(BasicMove m) => m.to;
@@ -85,7 +85,7 @@ public class Board : MonoBehaviour {
 	}
 
 	public IList<IGameMoveBase> GetMovesTo(Coord coord) {
-		return Analysis.GetMovesTo(coord);
+		return CurentState.GetMovesTo(coord);
 	}
 
 	public Coord GetCoord(Tile tile) {

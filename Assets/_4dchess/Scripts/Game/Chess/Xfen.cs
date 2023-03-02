@@ -96,7 +96,7 @@ public static class XFEN {
 
 	public static B ConvertPieceToCode(Piece p) {
 		B team = teamFlags[p.team.TeamIndex];
-		B piece = pieceToBinaryCode[p.MoveLogic.GetType()];
+		B piece = pieceToBinaryCode[p.Logic.GetType()];
 		return team | piece;
 	}
 	public static char ConvertPieceToLetter(Piece p) {
@@ -311,7 +311,8 @@ public static class XFEN {
 	private static void MakePiecesUncastleable(IList<Team> teams, string castleableTypes = "R") {
 		ForEachPiece(teams, p => {
 			if (castleableTypes.IndexOf(p.code) < 0) { return; }
-			p.moveCount = 1;
+			p.TryGetCoord(out Coord coord);
+			p.SetCurrentCoordTo(coord);
 		});
 	}
 
@@ -331,7 +332,7 @@ public static class XFEN {
 			if (castleableTypes.IndexOf(p.code) < 0) { return; }
 			char column = (char)(p.GetCoord().col + 'A');
 			if (columns.IndexOf(column) < 0) { return; }
-			p.moveCount = 0;
+			p.Logic.MoveTo(p.Logic.CurrentCoord, 0);
 		});
 	}
 

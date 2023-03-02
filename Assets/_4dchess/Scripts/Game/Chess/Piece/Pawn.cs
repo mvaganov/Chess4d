@@ -1,9 +1,25 @@
 using System.Collections.Generic;
 using UnityEngine;
-public partial class Pawn : MoveLogic {
+public partial class Pawn : PieceLogic {
 	const int InvalidTurn = -1;
 	private int didDoubleMoveOnTurn = InvalidTurn;
+	/// <summary>
+	/// should never change. if any effect causes it to change, it should be added to PawnState
+	/// </summary>
 	private Coord direction;
+	class PawnState : State {
+		public int didDoubleMoveOnTurn = InvalidTurn;
+		public PawnState(Coord coord) : base(coord, 0, true) { }
+		public PawnState(Coord coord, short moveCount, int doubleMoveOnTurn) : base (coord, moveCount, true) {
+			didDoubleMoveOnTurn = doubleMoveOnTurn;
+		}
+		public override State MovedTo(Coord coord, short newMoveCount = -1) =>
+			new PawnState(coord, (short)(newMoveCount < 0 ? moveCount + 1 : newMoveCount), didDoubleMoveOnTurn);
+		public override bool Equals(object obj) => obj is PawnState ps && base.Equals(ps)
+			&& didDoubleMoveOnTurn == ps.didDoubleMoveOnTurn;
+		public override int GetHashCode() => base.GetHashCode() ^ didDoubleMoveOnTurn;
+	}
+	public void SetState(State state) => base.SetState<PawnState>(state);
 
 	public override void Initialize() {
 		direction = team.pawnDirection;

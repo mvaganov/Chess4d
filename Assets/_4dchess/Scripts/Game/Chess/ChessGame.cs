@@ -102,17 +102,19 @@ public class ChessGame : MonoBehaviour {
 	public void GenerateAllBoards() {
 		DestroyListOfThingsBackwards(boards);
 		for (int i = 0; i < boardsAtStart.Length; ++i) {
-			boards.Add(CreateBoard(boardsAtStart[i]));
+			BoardInfo binfo = boardsAtStart[i];
+			Board board = CreateBoard();
+			boards.Add(board);
+			board.LoadXfen(binfo.xfen, teams);
+			board.transform.localPosition = binfo.BoardOffset;
 		}
 	}
 
-	private Board CreateBoard(BoardInfo binfo) {
+	private Board CreateBoard() {
 		Board board = CreateObject(prefab_board.gameObject).GetComponent<Board>();
 		board.game = this;
 		board.transform.SetParent(transform);
 		board.GenerateTiles();
-		board.LoadXfen(binfo.xfen, teams);
-		board.transform.localPosition = binfo.BoardOffset;
 		return board;
 	}
 

@@ -15,9 +15,47 @@ public enum MoveKind {
 }
 
 [RequireComponent(typeof(Piece))]
-public class MoveLogic : MonoBehaviour {
+public class PieceLogic : MonoBehaviour {
+	protected State _state = new State(Coord.zero, -1, false);
 	public Piece piece => GetComponent<Piece>();
 	public Team team => GetComponent<Piece>().team;
+	public State state => _state;
+	public Coord CurrentCoord { get => state.coord; }
+	public int MoveCount { get => state.moveCount; }
+	public virtual void SetState<STATE>(State state) where STATE : State {
+		if (state is STATE s && !_state.Equals(s)) { _state = state; }
+	}
+	public void MoveTo(Coord coord, short newMoveCount = -1) {
+		_state = _state.MovedTo(coord, newMoveCount);
+	}
+	/// <summary>
+	/// for storing per turn state of this piece: position, move count, special status
+	/// </summary>
+	public class State {
+		readonly public Coord coord;
+		readonly public short moveCount = 0;
+		/// <summary>
+		/// 0: is removed from board
+		/// </summary>
+		public short flags;
+		public bool IsOnBoard {
+			get => (flags & 1) == 0;
+			set => flags = (short)((flags & ~1) | (value?0:1));
+		}
+		public State(Coord coord) : this (coord, 0, true) { }
+		/// <param name="coord"></param>
+		/// <param name="moveCount">a negative value marks a state as invalid</param>
+		/// <param name="isOnBoard"></param>
+		public State(Coord coord, short moveCount, bool isOnBoard) {
+			this.coord = coord; this.moveCount = moveCount; IsOnBoard = isOnBoard;
+		}
+		public State(State s) { coord = s.coord; moveCount = s.moveCount; flags = s.flags; }
+		public virtual State MovedTo(Coord coord, short newMoveCount = -1) =>
+			new State(coord, (short)(newMoveCount < 0 ? moveCount + 1 : newMoveCount), true);
+		public override bool Equals(object obj) => obj is State s
+			&& coord == s.coord && moveCount == s.moveCount;
+		public override int GetHashCode() => coord.GetHashCode() ^ moveCount;
+	}
 
 	public virtual void Awake() {
 		if (!PieceHasCorrectLogic()) {
@@ -30,9 +68,9 @@ public class MoveLogic : MonoBehaviour {
 
 	private bool PieceHasCorrectLogic() {
 		Piece p = piece;
-		if (p.MoveLogic == null) { return false; }
-		if (p.MoveLogic != this) {
-			throw new Exception($"{p.name} has {p.MoveLogic.GetType().Name}, trying to add {GetType().Name}?");
+		if (p.Logic == null) { return false; }
+		if (p.Logic != this) {
+			throw new Exception($"{p.name} has {p.Logic.GetType().Name}, trying to add {GetType().Name}?");
 		}
 		return true;
 	}
@@ -104,11 +142,11 @@ public class MoveLogic : MonoBehaviour {
 	public virtual void GetMoves(GameState state, List<IGameMoveBase> out_moves, MoveKind moveKind) {}
 
 	public virtual void DoMove(BasicMove move) {
-		piece.MoveInternal(move.to);
+		piece.MoveTransform(move.to);
 	}
 
 	public virtual void UndoMove(BasicMove move) {
-		piece.MoveInternal(move.from);
+		piece.MoveTransform(move.from);
 	}
 
 	public static void LerpPath(MonoBehaviour script, Vector3[] path, float speed, bool localPosition = false) {
